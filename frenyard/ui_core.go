@@ -90,6 +90,9 @@ func (web *fyWindowElementBinding) FyRNormalEvent(ev NormalEvent) {
 func (web *fyWindowElementBinding) FyRMouseEvent(ev MouseEvent) {
 	web.element.FyEMouseEvent(ev)
 }
+func (web *fyWindowElementBinding) FyRClose() {
+	web.window.Destroy()
+}
 
 /*
  * Type used by Panel for attached elements.

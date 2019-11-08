@@ -1,0 +1,60 @@
+digraph Dependencies {
+	compound=true;
+	subgraph cluster0 {
+		label = "Core";
+		"core_render";
+		"core_maths";
+		"ext_fonts";
+		"font_img";
+		"font_ttf";
+		"core_render" -> "core_maths";
+		"ext_fonts" -> "core_maths";
+		"go_image_transit" -> "core_render";
+		"font_img" -> "ext_fonts";
+		"font_img" -> "core_render";
+		"font_ttf" -> "ext_fonts";
+		"font_ttf" -> "core_render";
+	}
+	"ext_fonts" -> "core_render" [ltail=cluster1,lhead=cluster0,minlen=3];
+	subgraph cluster2 {
+		label = "Backend";
+		"render_crtc";
+		"sdl";
+		"sdl_r";
+		"sdl" -> "sdl_r";
+		"sdl" -> "render_crtc";
+		"sdl_r" -> "render_crtc";
+	}
+	"sdl" -> "core_render" [ltail=cluster2,lhead=cluster0,minlen=3];
+	subgraph cluster3 {
+		label = "UI";
+		"ui_core";
+		"ui_layout";
+		"ui_lib_simple";
+		"ui_layout" -> "ui_core";
+		"ui_lib_simple" -> "ui_core";
+		"ui_lib_test" -> "ui_core";
+	}
+	"ui_core" -> "core_render" [ltail=cluster3,lhead=cluster0,minlen=3];
+	subgraph cluster4 {
+		label = "Component Diagram";
+		"UIElement";
+		"UIProxy";
+		"UILayoutElement";
+		"LayoutElementNoSubelementsComponent";
+		"UILayoutProxy";
+
+		"UIProxy" -> "UIElement" [label="Emulated"];
+		"UILayoutProxy" -> "UIProxy";
+		"UILayoutProxy" -> "UILayoutElement";
+		"UILayoutProxy" -> "LayoutElementNoSubelementsComponent";
+		"UILayoutElement" -> "UIElement";
+
+		"fyAdaptedLayoutElement" -> "UIProxy";
+		"fyAdaptedLayoutElement" -> "UILayoutElement" [label="Emulated"];
+		"fyAdaptedLayoutElement" -> "LayoutElementNoSubelementsComponent";
+		"UILabel" -> "UILayoutElement";
+		"UILabel" -> "LayoutElementNoSubelementsComponent";
+	}
+	// CLASS
+}

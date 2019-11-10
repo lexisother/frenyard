@@ -26,13 +26,14 @@ The "outer struct" is the struct which embeds an embeddable struct.
 
 Note: `<Variant>` here may be omitted entirely. If present, it describes the 'variant' of constructor, which may be important in cases like UIRect.
 
-In any non-mathematical structure, if a formal initializer is present, it must always be used instead of the zero value, except for `Init<Variant><Struct>`.
+In any non-mathematical structure, if a formal initializer is present, it must always be used instead of the zero value, except for `Init<Variant><Struct>` (see that for details).
 
 There are three kinds of formal initializer:
 
-`New<Variant><Struct>` : Function that returns `Struct`. Makes the structure potentially embeddable.
+`New<Variant><Struct>` : Function that returns `<Struct>`. The structure is potentially embeddable.
+As such, usage of this vs. `Init<Variant><Struct>` is dependent entirely on if the structure will ever require the ability to reference the outer struct. If it will ever require that ability, or you are making a breaking change that adds a reference to the outer struct into the initializer, use `Init<Variant><Struct>` instead.
 
-`New<Variant><Struct>Ptr` : Function that returns `*Struct`. Makes the structure explicitly unembeddable.
+`New<Variant><Struct>Ptr` : Function that returns `*<Struct>`. Makes the structure explicitly unembeddable; in exchange, this will pretty much always work for any given situation (if potentially unpleasantly) and avoids much of the complexity of these conventions.
 
 `Init<Variant><Struct>` : The (explicitly embedded) structure starts with the zero value, and is then initialized in-place using a pointer to the outer struct 'drilling down' using a method implemented by the embedded struct.
 

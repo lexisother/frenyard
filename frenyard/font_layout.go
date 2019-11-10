@@ -4,9 +4,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-/*
- * PLEASE use key-based options when using this!!! IT IS SUBJECT TO CHANGE!
- */
+// TextLayouterOptions contains the options for text layout.
 type TextLayouterOptions struct {
 	Text string
 	Font font.Face
@@ -14,48 +12,50 @@ type TextLayouterOptions struct {
 	Limits Vec2i
 }
 
-/*
- * The results, horrific as they may be.
- */
+// TextLayouterResult The results from text layouting.
 type TextLayouterResult struct {
 	Size Vec2i
-	_fy_TextLayouterResult_formattedText []string
-	_fy_TextLayouterResult_font font.Face
+	_formattedText []string
+	_font font.Face
 }
+
+// TextLayouterRenderable The results in a renderable form.
 type TextLayouterRenderable struct {
 	Size Vec2i
-	_fy_TextLayouterResult_lines []Texture
-	_fy_TextLayouterResult_interline int32
+	_lines []Texture
+	_interline int32
 }
 
 func (tlr *TextLayouterResult) fyAppendLine(line string) {
-	tlr._fy_TextLayouterResult_formattedText = append(tlr._fy_TextLayouterResult_formattedText, line)
+	tlr._formattedText = append(tlr._formattedText, line)
 }
 func (tlr *TextLayouterResult) fyCalcSize() {
 	size := Vec2i{}
-	interLine := FontInterline(tlr._fy_TextLayouterResult_font)
-	for k, v := range tlr._fy_TextLayouterResult_formattedText {
-		size = size.Max(FontSize(tlr._fy_TextLayouterResult_font, v).Add(Vec2i{0, int32(k) * interLine}))
+	interLine := FontInterline(tlr._font)
+	for k, v := range tlr._formattedText {
+		size = size.Max(FontSize(tlr._font, v).Add(Vec2i{0, int32(k) * interLine}))
 	}
 	tlr.Size = size
 }
 
+// Draw draws the laid-out text to textures and creates a TextLayouterRenderable.
 func (tlr *TextLayouterResult) Draw() TextLayouterRenderable {
-	tex := make([]Texture, len(tlr._fy_TextLayouterResult_formattedText))
-	for k, v := range tlr._fy_TextLayouterResult_formattedText {
-		tex[k] = FontDraw(tlr._fy_TextLayouterResult_font, v)
+	tex := make([]Texture, len(tlr._formattedText))
+	for k, v := range tlr._formattedText {
+		tex[k] = FontDraw(tlr._font, v)
 	}
 	rdr := TextLayouterRenderable{
 		Size: tlr.Size,
-		_fy_TextLayouterResult_lines: tex,
-		_fy_TextLayouterResult_interline: FontInterline(tlr._fy_TextLayouterResult_font),
+		_lines: tex,
+		_interline: FontInterline(tlr._font),
 	}
 	return rdr
 }
 
+// Draw actually draws the TextLayouterRenderable to the screen.
 func (tlr *TextLayouterRenderable) Draw(r Renderer, pos Vec2i, colour uint32) {
-	interLine := tlr._fy_TextLayouterResult_interline
-	for _, v := range tlr._fy_TextLayouterResult_lines {
+	interLine := tlr._interline
+	for _, v := range tlr._lines {
 		r.TexRect(v, colour, Area2iOfSize(v.Size()), Area2iFromVecs(pos, v.Size()))
 		pos.Y += interLine
 	}
@@ -63,8 +63,8 @@ func (tlr *TextLayouterRenderable) Draw(r Renderer, pos Vec2i, colour uint32) {
 
 func fyTextLayouterBreakerNormal(text string, fnt font.Face, xLimit int32, wordwrap bool) TextLayouterResult {
 	committedBuffer := TextLayouterResult{
-		_fy_TextLayouterResult_font: fnt,
-		_fy_TextLayouterResult_formattedText: []string{},
+		_font: fnt,
+		_formattedText: []string{},
 	}
 	// To lower the CPU usage, this function has to engage directly with the font drawing interface.
 	lineDrawer := font.Drawer{
@@ -136,9 +136,7 @@ func fyTextLayouterBreakerNormal(text string, fnt font.Face, xLimit int32, wordw
 	return committedBuffer
 }
 
-/*
- * Seven backends to bind them
- */
+// TheOneTextLayouterToRuleThemAll lays out text with wrapping limits and other such constraints.
 func TheOneTextLayouterToRuleThemAll(opts TextLayouterOptions) TextLayouterResult {
 	brokenText := fyTextLayouterBreakerNormal(opts.Text, opts.Font, opts.Limits.X, true)
 	if brokenText.Size.Y >= opts.Limits.Y {

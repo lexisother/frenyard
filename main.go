@@ -59,10 +59,10 @@ func (dialog *upFailureToFindGameDialog) FyETick(seconds float64) {
 }
 
 func upShowFailureToFindGameDialog() {
-	elem := upFailureToFindGameDialog{}
+	elem := &upFailureToFindGameDialog{}
 	elem.remainingToAddToLabel = "Before we begin...\tThe application must be copied into your CrossCode directory.\n\nThis is specifically the directory that contains the 'assets' directory."
-	elem.text = frenyard.NewUILabelPtr("", design.GlobalFont, design.THEME_TEXT, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart})
-	elem.textTitle = frenyard.NewUILabelPtr("", design.PageTitleFont, design.THEME_TEXT, 0, frenyard.Alignment2i{X: frenyard.AlignMiddle, Y: frenyard.AlignStart})
+	elem.text = frenyard.NewUILabelPtr("", design.GlobalFont, design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart})
+	elem.textTitle = frenyard.NewUILabelPtr("", design.PageTitleFont, design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignMiddle, Y: frenyard.AlignStart})
 	
 	testButtonWrapper := frenyard.NewUIButtonPtr(design.ButtonContentOkAction("OK"), func () {
 		frenyard.ExitFlag = true
@@ -84,14 +84,14 @@ func upShowFailureToFindGameDialog() {
 				Element: elem.text,
 				Grow: 1,
 			},
-			frenyard.FlexboxSlot{Basis: design.SIZE_MARGIN_AROUND_EVERYTHING},
+			frenyard.FlexboxSlot{Basis: design.SizeMarginAroundEverything},
 			frenyard.FlexboxSlot{
 				Element: buttonBar,
 			},
 		},
 	})
 	
-	titleWrapper := frenyard.NewUIOverlayContainerPtr(design.BorderTitle(design.THEME_BACKGROUND_TITLE), []frenyard.UILayoutElement{
+	titleWrapper := frenyard.NewUIOverlayContainerPtr(design.BorderTitle(design.ThemeBackgroundTitle), []frenyard.UILayoutElement{
 		elem.textTitle,
 	})
 
@@ -106,15 +106,15 @@ func upShowFailureToFindGameDialog() {
 			},
 			frenyard.FlexboxSlot{
 				Element: titleWrapper,
-				MinBasis: design.SIZE_TITLE_HEIGHT,
+				MinBasis: design.SizeTitleHeight,
 				Order: 0,
 			},
 		},
 	})
 	
-	elem.ProxyTarget = titleAndThenBody
+	frenyard.InitUILayoutProxy(elem, titleAndThenBody)
 	elem.FyEResize(frenyard.Vec2i{X: 320, Y: 200})
-	_, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.THEME_BACKGROUND, &elem)
+	_, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.ThemeBackground, elem)
 	if err != nil {
 		panic(err)
 	}

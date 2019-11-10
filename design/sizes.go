@@ -1,12 +1,17 @@
 package design
 import "github.com/20kdc/CCUpdaterUI/frenyard"
 
-const SIZE_TITLE_HEIGHT = 40
-const SIZE_MARGIN_AROUND_EVERYTHING = 16
-const SIZE_TEXT_NUDGE = 4
+// SizeTitleHeight is the size of the page title bar.
+const SizeTitleHeight = 40
+// SizeMarginAroundEverything is a useful margin around the body, etc.
+const SizeMarginAroundEverything = 16
+// SizeTextNudge is the amount to nudge text vertically downwards to make it seem even.
+const SizeTextNudge = 4
+
+// MarginBody is the amount to push the page body by.
 func MarginBody() frenyard.Area2i {
 	return frenyard.Area2i{
-		X: frenyard.Area1i{Pos: -SIZE_MARGIN_AROUND_EVERYTHING, Size: SIZE_MARGIN_AROUND_EVERYTHING * 2},
-		Y: frenyard.Area1i{Pos: -(SIZE_MARGIN_AROUND_EVERYTHING + SIZE_TEXT_NUDGE), Size: (SIZE_MARGIN_AROUND_EVERYTHING * 2) + SIZE_TEXT_NUDGE},
+		X: frenyard.Area1i{Pos: -SizeMarginAroundEverything, Size: SizeMarginAroundEverything * 2},
+		Y: frenyard.Area1i{Pos: -(SizeMarginAroundEverything + SizeTextNudge), Size: (SizeMarginAroundEverything * 2) + SizeTextNudge},
 	}
 }

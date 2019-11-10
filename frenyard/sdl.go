@@ -24,14 +24,14 @@ func (w *fySDL2Window) SetName(n string) {
 
 func (w *fySDL2Window) Destroy() {
 	{ z := sdl2Os(); defer z.End() }
-	w.base.os_delete()
+	w.base.osDelete()
 	w.window.Destroy()
 }
 
 type fySDL2Backend struct {
 	windows map[uint32]*fySDL2Window
 }
-var _fy_GlobalBackend *fySDL2Backend = &fySDL2Backend{map[uint32]*fySDL2Window{}}
+var fyGlobalBackend *fySDL2Backend = &fySDL2Backend{map[uint32]*fySDL2Window{}}
 
 func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiver WindowReceiver) (Window, error) {
 	{ z := sdl2Os(); defer z.End() }
@@ -59,7 +59,7 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 		window,
 		receiver,
 	}
-	_fy_GlobalBackend.windows[id] = sWindow
+	fyGlobalBackend.windows[id] = sWindow
 	receiver.FyRStart(sWindow)
 	return sWindow, nil
 }
@@ -81,33 +81,33 @@ func (r *fySDL2Backend) CreateTexture(size Vec2i, pixels []uint32) Texture {
 	if (err != nil) {
 		panic(err)
 	}
-	return os_sdl2SurfaceToFyTexture(surface)
+	return osSdl2SurfaceToFyTexture(surface)
 }
 
-func fySDL2MouseButton(button uint8) int8 {
+func fySDL2MouseButton(button uint8) MouseButton {
 	switch (button) {
 		case sdl.BUTTON_LEFT:
-			return MOUSEBUTTON_LEFT
+			return MouseButtonLeft
 		case sdl.BUTTON_MIDDLE:
-			return MOUSEBUTTON_MIDDLE
+			return MouseButtonMiddle
 		case sdl.BUTTON_RIGHT:
-			return MOUSEBUTTON_RIGHT
+			return MouseButtonRight
 		case sdl.BUTTON_X1:
-			return MOUSEBUTTON_X1
+			return MouseButtonX1
 		case sdl.BUTTON_X2:
-			return MOUSEBUTTON_X2
+			return MouseButtonX2
 	}
-	return MOUSEBUTTON_NONE
+	return MouseButtonNone
 }
-func fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, minus int8, plus int8) {
+func fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, minus MouseButton, plus MouseButton) {
 	for (apply < 0) {
-		application.FyRMouseEvent(MouseEvent{cacheMouse, MOUSEEVENT_DOWN, minus})
-		application.FyRMouseEvent(MouseEvent{cacheMouse, MOUSEEVENT_UP, minus})
+		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventDown, minus})
+		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, minus})
 		apply++;
 	}
 	for (apply > 0) {
-		application.FyRMouseEvent(MouseEvent{cacheMouse, MOUSEEVENT_DOWN, plus})
-		application.FyRMouseEvent(MouseEvent{cacheMouse, MOUSEEVENT_UP, plus})
+		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventDown, plus})
+		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, plus})
 		apply--;
 	}
 }
@@ -115,7 +115,7 @@ func fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, appl
 func init() {
 	{ z := sdl2Os(); defer z.End() }
 	sdl.Init(sdl.INIT_EVERYTHING)
-	GlobalBackend = _fy_GlobalBackend
+	GlobalBackend = fyGlobalBackend
 }
 
 func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
@@ -140,10 +140,10 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 		//  the per-function OS thread locks will keep things from going off the rails.
 		runtime.LockOSThread()
 		ticker(frameTime)
-		for _, wnd := range _fy_GlobalBackend.windows {
+		for _, wnd := range fyGlobalBackend.windows {
 			wnd.receiver.FyRTick(frameTime)
 		}
-		_fy_SDL2_crtc_registry.os_flush()
+		fySDL2CRTCRegistry.osFlush()
 		for {
 			event := sdl.PollEvent()
 			if (event == nil) {
@@ -151,30 +151,33 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 			}
 			switch ev := event.(type) {
 				case *sdl.MouseMotionEvent:
-					window := _fy_GlobalBackend.windows[ev.WindowID]
+					window := fyGlobalBackend.windows[ev.WindowID]
 					if (window != nil) {
 						window.cacheMouse = Vec2i{ev.X, ev.Y}
-						window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, MOUSEEVENT_MOVE, MOUSEBUTTON_NONE})
+						window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, MouseEventMove, MouseButtonNone})
 					}
 				case *sdl.MouseButtonEvent:
-					window := _fy_GlobalBackend.windows[ev.WindowID]
+					window := fyGlobalBackend.windows[ev.WindowID]
 					if (window != nil) {
 						window.cacheMouse = Vec2i{ev.X, ev.Y}
-						buttonS := MOUSEEVENT_DOWN
-						if (ev.State == sdl.RELEASED) {
-							buttonS = MOUSEEVENT_UP
+						buttonS := MouseEventDown
+						if ev.State == sdl.RELEASED {
+							buttonS = MouseEventUp
 						}
-						window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, buttonS, fySDL2MouseButton(ev.Button)})
+						btn := fySDL2MouseButton(ev.Button)
+						if btn != MouseButtonNone {
+							window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, buttonS, btn})
+						}
 					}
 				case *sdl.MouseWheelEvent:
-					window := _fy_GlobalBackend.windows[ev.WindowID]
+					window := fyGlobalBackend.windows[ev.WindowID]
 					if (window != nil) {
-						fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.X, MOUSEBUTTON_SCROLL_LEFT, 	MOUSEBUTTON_SCROLL_RIGHT)
-						fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.Y, MOUSEBUTTON_SCROLL_UP, MOUSEBUTTON_SCROLL_DOWN)
+						fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.X, MouseButtonScrollLeft, MouseButtonScrollRight)
+						fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.Y, MouseButtonScrollUp, MouseButtonScrollDown)
 					}
 				case *sdl.WindowEvent:
 					if ev.Event == sdl.WINDOWEVENT_CLOSE {
-						window := _fy_GlobalBackend.windows[ev.WindowID]
+						window := fyGlobalBackend.windows[ev.WindowID]
 						if window != nil {
 							window.receiver.FyRClose()
 						}

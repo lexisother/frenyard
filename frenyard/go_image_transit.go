@@ -7,9 +7,7 @@ import (
 	"strings"
 )
 
-/*
- * Converts a Go colour into an ARGB colour uint32 as losslessly as possible.
- */
+// fyConvertGoImageColour converts a Go colour into an ARGB colour uint32 as losslessly as possible.
 func fyConvertGoImageColour(col color.Color) uint32 {
 	// Actual color appears to be per-pixel. Great. More problems.
 	switch colConv := col.(type) {
@@ -53,9 +51,7 @@ func fyConvertGoImageColour(col color.Color) uint32 {
 	}
 }
 
-/*
- * Imports an image from Go's "image" library to a texture.
- */
+// GoImageToTexture imports an image from Go's "image" library to a texture.
 func GoImageToTexture(img image.Image) Texture {
 	sizePreTranslate := img.Bounds().Size()
 	pixels := make([]uint32, sizePreTranslate.X * sizePreTranslate.Y)
@@ -70,6 +66,7 @@ func GoImageToTexture(img image.Image) Texture {
 	return GlobalBackend.CreateTexture(size, pixels)
 }
 
+// CreateHardcodedPNGImage gets an image.Image from a base64 string.
 func CreateHardcodedPNGImage(pngb64 string) image.Image {
 	bytes, err := base64.StdEncoding.DecodeString(pngb64)
 	decoded, err := png.Decode(strings.NewReader(string(bytes)))
@@ -79,6 +76,8 @@ func CreateHardcodedPNGImage(pngb64 string) image.Image {
 	}
 	return decoded
 }
+
+// CreateHardcodedPNGTexture gets a frenyard.Texture from a base64 string.
 func CreateHardcodedPNGTexture(pngb64 string) Texture {
 	return GoImageToTexture(CreateHardcodedPNGImage(pngb64))
 }

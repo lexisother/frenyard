@@ -1,10 +1,14 @@
 package design
 import "github.com/20kdc/CCUpdaterUI/frenyard"
 
-const THEME_TEXT = 0xFFFFFFFF
-const THEME_BACKGROUND = 0xFF202020
-const THEME_BACKGROUND_TITLE = 0xFF404040
+// ThemeText is the colour for most text.
+const ThemeText = 0xFFFFFFFF
+// ThemeBackground is the colour for most page content.
+const ThemeBackground = 0xFF202020
+// ThemeBackgroundTitle is the colour for the page title background.
+const ThemeBackgroundTitle = 0xFF404040
 
+// ButtonContentOkAction creates a 'OK' button theme for some given text (likely 'OK')
 func ButtonContentOkAction(text string) frenyard.UIButtonThemedContent {
 	textElm := frenyard.NewUILabelPtr(text, ButtonTextFont, 0xFFFFFFFF, 0, frenyard.Alignment2i{})
 	return func (hover bool, down bool) (frenyard.NinePatchPackage, frenyard.UILayoutElement) {

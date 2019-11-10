@@ -5,16 +5,16 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var _fy_SDL2_crtc_registry *crtcRegistry = newCRTCRegistryPtr()
+var fySDL2CRTCRegistry *crtcRegistry = newCRTCRegistryPtr()
 
 // sdl2RendererCore is the crtcContext.
 type sdl2RendererCore struct {
 	base *sdl.Renderer
 	invalid bool
 }
-func (r *sdl2RendererCore) os_delete() {
+func (r *sdl2RendererCore) osDelete() {
 	r.invalid = true
-	_fy_SDL2_crtc_registry.os_removeRenderer(crtcContext(r))
+	fySDL2CRTCRegistry.osRemoveRenderer(crtcContext(r))
 	r.base.Destroy()
 }
 // sdl2Renderer is the Renderer; meaning is dependent on render target.
@@ -39,7 +39,7 @@ func fySDL2AreaToRect(a Area2i) sdl.Rect {
 		H: a.Y.Size,
 	}
 }
-func (r *sdl2Renderer) os_fySDL2DrawColour(colour uint32) {
+func (r *sdl2Renderer) osFySDL2DrawColour(colour uint32) {
 	red := (uint8) ((colour >> 16) & 0xFF)
 	green := (uint8) ((colour >> 8) & 0xFF)
 	blue := (uint8) ((colour >> 0) & 0xFF)
@@ -49,7 +49,7 @@ func (r *sdl2Renderer) os_fySDL2DrawColour(colour uint32) {
 func (r *sdl2Renderer) FillRect(colour uint32, target Area2i) {
 	{ z := sdl2Os(); defer z.End() }
 	rect := fySDL2AreaToRect(target.Translate(r.translate))
-	r.os_fySDL2DrawColour(colour)
+	r.osFySDL2DrawColour(colour)
 	r.base.base.FillRect(&rect)
 }
 func (r *sdl2Renderer) TexRect(sheet Texture, colour uint32, sprite Area2i, target Area2i) {
@@ -61,8 +61,8 @@ func (r *sdl2Renderer) TexRect(sheet Texture, colour uint32, sprite Area2i, targ
 		return
 	}
 	// Explicit cast so you can see what's going on with the contexts
-	sheetLocal := sheetActual.os_getLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
-	sheetLocal.os_fySDL2DrawColour(colour)
+	sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
+	sheetLocal.osFySDL2DrawColour(colour)
 	
 	sRect := fySDL2AreaToRect(sprite)
 	tRect := fySDL2AreaToRect(target.Translate(r.translate))
@@ -97,7 +97,7 @@ func (r *sdl2Renderer) Reset(colour uint32) {
 	{ z := sdl2Os(); defer z.End() }
 	r.translate = Vec2i{}
 	r.SetClip(Area2iOfSize(r.Size()))
-	r.os_fySDL2DrawColour(colour)
+	r.osFySDL2DrawColour(colour)
 	r.base.base.Clear()
 }
 func (r *sdl2Renderer) Present() {
@@ -108,10 +108,10 @@ func (r *sdl2Renderer) Present() {
 type fySDL2LocalTexture struct {
 	base *sdl.Texture
 }
-func (r *fySDL2LocalTexture) os_delete() {
+func (r *fySDL2LocalTexture) osDelete() {
 	r.base.Destroy()
 }
-func (r *fySDL2LocalTexture) os_fySDL2DrawColour(colour uint32) {
+func (r *fySDL2LocalTexture) osFySDL2DrawColour(colour uint32) {
 	red := (uint8) ((colour >> 16) & 0xFF)
 	green := (uint8) ((colour >> 8) & 0xFF)
 	blue := (uint8) ((colour >> 0) & 0xFF)
@@ -123,7 +123,7 @@ func (r *fySDL2LocalTexture) os_fySDL2DrawColour(colour uint32) {
 type fySDL2TextureData struct {
 	base *sdl.Surface
 }
-func (r *fySDL2TextureData) os_makeLocal(render crtcContext) crtcLocalTexture {
+func (r *fySDL2TextureData) osMakeLocal(render crtcContext) crtcLocalTexture {
 	renderActual := render.(*sdl2RendererCore)
 	result, err := renderActual.base.CreateTextureFromSurface(r.base)
 	if (err != nil) {
@@ -138,13 +138,13 @@ func (r *fySDL2TextureData) os_makeLocal(render crtcContext) crtcLocalTexture {
 func (r *fySDL2TextureData) Size() Vec2i {
 	return Vec2i{r.base.W, r.base.H}
 }
-func (r *fySDL2TextureData) os_delete() {
+func (r *fySDL2TextureData) osDelete() {
 	r.base.Free()
 }
 
 // This API is package-local so that sdl_ttf & sdl can get at it
-func os_sdl2SurfaceToFyTexture(surface *sdl.Surface) Texture {
-	return _fy_SDL2_crtc_registry.os_createTexture(&fySDL2TextureData{
+func osSdl2SurfaceToFyTexture(surface *sdl.Surface) Texture {
+	return fySDL2CRTCRegistry.osCreateTexture(&fySDL2TextureData{
 		surface,
 	})
 }

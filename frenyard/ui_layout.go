@@ -89,13 +89,13 @@ func (px *LayoutElementNoSubelementsComponent) FyLSubelementChanged() {
 
 // ContentChanged alerts the UI layouter that the limits of this component changed.
 func (details *UILayoutElementComponentDetails) ContentChanged() {
-	if details._fy_UILayoutElement_parent != nil {
-		details._fy_UILayoutElement_parent.FyLSubelementChanged()
+	if details._parent != nil {
+		details._parent.FyLSubelementChanged()
 	} else {
-		if details._fy_UILayoutElement_self == nil {
+		if details._self == nil {
 			panic("UILayoutElementComponent was not properly initialized. Please use InitUILayoutElementComponent(self) on your structure.")
 		}
-		details._fy_UILayoutElement_self.FyEResize(details._fy_UILayoutElement_self.FyESize())
+		details._self.FyEResize(details._self.FyESize())
 	}
 }
 
@@ -116,20 +116,20 @@ func ConvertElementToLayout(subelement UIElement) UILayoutElement {
 // Attach attaches an element, so that if it changes, the parent will be notified.
 func (details *UILayoutElementComponentDetails) Attach(subelement UILayoutElement) UILayoutElement {
 	otherDetails := subelement._fyGetUILayoutElementComponent()
-	if otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent != nil {
+	if otherDetails.ThisUILayoutElementComponentDetails._parent != nil {
 		panic("Double-attachment is a logical error that will completely blow up the application")
 	}
-	otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent = details._fy_UILayoutElement_self
+	otherDetails.ThisUILayoutElementComponentDetails._parent = details._self
 	return subelement
 }
 
 // Detach detaches a previously attached element.
 func (details *UILayoutElementComponentDetails) Detach(subelement UILayoutElement) {
 	otherDetails := subelement._fyGetUILayoutElementComponent()
-	if otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent != details._fy_UILayoutElement_self {
+	if otherDetails.ThisUILayoutElementComponentDetails._parent != details._self {
 		panic("Tried to detach element that wasn't attached here in the first place")
 	}
-	otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent = nil
+	otherDetails.ThisUILayoutElementComponentDetails._parent = nil
 }
 
 // Used to convert things
@@ -147,6 +147,10 @@ func (ale *fyAdaptedLayoutElement) FyLSizeForLimits(limits Vec2i) Vec2i {
 type UILayoutProxy struct {
 	UIProxy
 	LayoutElementNoSubelementsComponent
+}
+// InitUILayoutProxy initializes a UILayoutProxy, setting the target.
+func InitUILayoutProxy(proxy UIProxyHost, target UILayoutElement) {
+	InitUIProxy(proxy, target)
 }
 
 // _fyGetUILayoutElementComponent implements UILayoutElement._fyGetUILayoutElementComponent

@@ -184,12 +184,12 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 			// Ensure the focus has been notified.
 			focusElement := pan._content[pan._focus]
 			// And we've successfully delivered the MOUSEDOWNs to the *new* element, -1, by default
-			for button := (uint)(0); button < (uint)(MOUSEBUTTON_LENGTH); button++ {
+			for button := (uint)(0); button < (uint)(MouseButtonLength); button++ {
 				if (pan._buttonsDown & (1 << button) != 0) {
 					focusElement.Element.FyEMouseEvent(MouseEvent{
 						Vec2i{0, 0},
-						MOUSEEVENT_UP,
-						(int8)(button),
+						MouseEventUp,
+						(MouseButton)(button),
 					})
 				}
 			}
@@ -235,21 +235,21 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 			break
 		}
 	}
-	switch (ev.Id) {
-		case MOUSEEVENT_MOVE:
+	switch (ev.ID) {
+		case MouseEventMove:
 			// Mouse-move events go everywhere.
 			for _, val := range pan.ThisUIPanelDetails._content {
 				pan._fyUIPanelForwardMouseEvent(val, ev)
 			}
 			invalid = true
-		case MOUSEEVENT_UP:
+		case MouseEventUp:
 			if (pan.ThisUIPanelDetails._buttonsDown & (1 << (uint)(ev.Button)) == 0) {
 				fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button removal on non-existent button")
 				invalid = true
 			} else {
 				pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ (1 << (uint)(ev.Button))
 			}
-		case MOUSEEVENT_DOWN:
+		case MouseEventDown:
 			if pan.ThisUIPanelDetails._buttonsDown == 0 {
 				/*
 				 * FOCUS REASONING DESCRIPTION
@@ -350,15 +350,25 @@ func (pan *UIPanel) FyETick(f float64) {
 	}
 }
 
+// UIProxyHost is used to 'drill down' to the UIProxy within an element.
+type UIProxyHost interface {
+	// Returns the *UIProxy within this element.
+	fyGetUIProxy() *UIProxy
+}
+
 // UIProxy is a "proxy" element. Useful to use another element as a base class without including it via inheritance.
 type UIProxy struct {
 	// This element is semi-private: it may be read by UIProxy and UILayoutProxy but nothing else.
 	fyUIProxyTarget UIElement
 }
 
+func (px *UIProxy) fyGetUIProxy() *UIProxy {
+	return px
+}
+
 // InitUIProxy initializes a UIProxy, setting the target.
-func InitUIProxy(proxy *UIProxy, target UIElement) {
-	proxy.fyUIProxyTarget = target
+func InitUIProxy(proxy UIProxyHost, target UIElement) {
+	proxy.fyGetUIProxy().fyUIProxyTarget = target
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent

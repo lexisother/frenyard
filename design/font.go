@@ -7,9 +7,12 @@ import (
 	"golang.org/x/image/font/gofont/gobold"
 )
 
-var PageTitleFont font.Face = nil
-var GlobalFont font.Face = nil
-var ButtonTextFont font.Face = nil
+// PageTitleFont for a page title
+var PageTitleFont font.Face
+// GlobalFont for most text
+var GlobalFont font.Face
+// ButtonTextFont for buttons
+var ButtonTextFont font.Face
 
 func init() {
 	font, err := freetype.ParseFont(goregular.TTF)

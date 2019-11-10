@@ -61,7 +61,7 @@ func (slot FlexboxSlot) fyCalcBasis(cross int32, vertical bool) int32 {
 	if slot.Basis != 0 {
 		return slot.Basis
 	}
-	return Max(slot.MinBasis, slot.fyMainCrossSizeForMainCrossLimits(Vec2i{SIZE_UNLIMITED, cross}, vertical, false).X)
+	return Max(slot.MinBasis, slot.fyMainCrossSizeForMainCrossLimits(Vec2i{SizeUnlimited, cross}, vertical, false).X)
 }
 func (slot FlexboxSlot) fyGetOrder() int {
 	return slot.Order
@@ -113,7 +113,7 @@ func (slot fyFlexboxRow) fyMainCrossSizeForMainCrossLimits(limits Vec2i, vertica
 	return Vec2i{maximumMain, presentAreaCross}
 }
 func (slot fyFlexboxRow) fyCalcBasis(cross int32, vertical bool) int32 {
-	return slot.fyMainCrossSizeForMainCrossLimits(Vec2i{SIZE_UNLIMITED, cross}, vertical, false).X
+	return slot.fyMainCrossSizeForMainCrossLimits(Vec2i{SizeUnlimited, cross}, vertical, false).X
 }
 func (slot fyFlexboxRow) fyGetOrder() int {
 	return 0
@@ -173,7 +173,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 	shouldWrap := fyFlexboxSolveLine(details, slots, out, mainCrossLimits, false)
 	// One row, so this is simple
 	rows := []fyFlexboxRow{fyFlexboxRow{slots, out, UnionArea2i(out)}}
-	if shouldWrap && details.WrapMode != FLEXBOX_WRAPMODE_NONE {
+	if shouldWrap && details.WrapMode != FlexboxWrapModeNone {
 		// Wrapping has to start. Oh no...
 		// Do note, lines is implicitly limited because of the "one slot cannot wrap" rule.
 		lines := int32(2)
@@ -218,7 +218,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 			lines++
 		}
 	}
-	if details.WrapMode != FLEXBOX_WRAPMODE_NONE {
+	if details.WrapMode != FlexboxWrapModeNone {
 		// Stage 3. Row compression
 		rowAreas := make([]Area2i, len(rows))
 		rowSlots := make([]fyFlexboxSlotlike, len(rows))
@@ -227,14 +227,14 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 		}
 		fyFlexboxSolveLine(FlexboxContainer{
 			DirVertical: !details.DirVertical,
-			WrapMode: FLEXBOX_WRAPMODE_NONE,
+			WrapMode: FlexboxWrapModeNone,
 		}, rowSlots, rowAreas, Vec2i{mainCrossLimits.Y, mainCrossLimits.X}, false)
 		for rk, row := range rows {
 			row.Fill(rowAreas[rk], !details.DirVertical)
 		}
 	} else {
 		// Stage 3. Row setup
-		if mainCrossLimits.Y != SIZE_UNLIMITED {
+		if mainCrossLimits.Y != SizeUnlimited {
 			rows[0].Fill(Area2iOfSize(mainCrossLimits.ConditionalTranspose(details.DirVertical)), !details.DirVertical)
 		}
 	}
@@ -272,7 +272,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 	// Notably, totalMainAccumulator must not change after this point.
 	// It's the 'reference' for if we ought to wrap.
 	// Substage 2. Determine expansion or contraction
-	if mainCrossLimits.X != SIZE_UNLIMITED && totalMainAccumulator != mainCrossLimits.X {
+	if mainCrossLimits.X != SizeUnlimited && totalMainAccumulator != mainCrossLimits.X {
 		additionalSpaceAvailable := mainCrossLimits.X - totalMainAccumulator
 		if debug {
 			fmt.Println("COMPRESSOR II: ", additionalSpaceAvailable)
@@ -297,7 +297,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 				grow, shrink := slot.fyGrowShrink()
 				factor := grow
 				smallestAlloc := int32(0)
-				largestAlloc := SIZE_UNLIMITED
+				largestAlloc := SizeUnlimited
 				// There is no 'largest alloc'; if the element is told to grow, that is what it will do
 				if additionalSpaceAvailable < 0 {
 					factor = shrink

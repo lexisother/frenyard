@@ -7,6 +7,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// FontRectangleConverter converts a fixed.Rectangle26_6 into pixels (rounding outwards)
 func FontRectangleConverter(bounds fixed.Rectangle26_6) Area2i {
 	area := bounds.Max.Sub(bounds.Min)
 	return Area2i{
@@ -15,10 +16,12 @@ func FontRectangleConverter(bounds fixed.Rectangle26_6) Area2i {
 	}
 }
 
+// FontInterline gets the amount of pixels between lines of the font.
 func FontInterline(font font.Face) int32 {
 	return int32(font.Metrics().Height.Ceil())
 }
 
+// FontDraw draws a font image into a texture.
 func FontDraw(fnt font.Face, text string) Texture {
 	drawer := font.Drawer{
 		Face: fnt,
@@ -32,6 +35,8 @@ func FontDraw(fnt font.Face, text string) Texture {
 	drawer.DrawString(text)
 	return GoImageToTexture(img)
 }
+
+// FontSize gets the size of some text in the given font.
 func FontSize(fnt font.Face, text string) Vec2i {
 	drawer := font.Drawer{
 		Face: fnt,
@@ -40,6 +45,7 @@ func FontSize(fnt font.Face, text string) Vec2i {
 	return FontRectangleConverter(bounds).Size()
 }
 
+// CreateTTFFont is a wrapper around truetype.NewFace
 func CreateTTFFont(ft *truetype.Font, dpi float64, size float64) font.Face {
 	return truetype.NewFace(ft, &truetype.Options{
 		Size: size,

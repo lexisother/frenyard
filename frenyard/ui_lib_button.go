@@ -22,7 +22,7 @@ func NewUIButtonPtr(theme UIButtonThemedContent, click func ()) *UIButton {
 		_theme: theme,
 		OnClick: click,
 	}
-	button.ProxyTarget = container
+	InitUILayoutProxy(button, container)
 	button._fyUIButtonUpdateState()
 	return button
 }
@@ -42,13 +42,13 @@ func (btn *UIButton) FyEMouseEvent(me MouseEvent) {
 	lastHover := btn._hover
 	lastDown := btn._down
 	btn._hover = Area2iOfSize(btn.FyESize()).Contains(me.Pos)
-	if me.Button == MOUSEBUTTON_LEFT {
-		if me.Id == MOUSEEVENT_UP {
+	if me.Button == MouseButtonLeft {
+		if me.ID == MouseEventUp {
 			btn._down = false
 			if btn._hover {
 				btn.OnClick()
 			}
-		} else if me.Id == MOUSEEVENT_DOWN {
+		} else if me.ID == MouseEventDown {
 			btn._down = true
 		}
 	}

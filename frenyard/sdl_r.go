@@ -10,13 +10,15 @@ var fySDL2CRTCRegistry *crtcRegistry = newCRTCRegistryPtr()
 // sdl2RendererCore is the crtcContext.
 type sdl2RendererCore struct {
 	base    *sdl.Renderer
-	invalid bool
 }
 
 func (r *sdl2RendererCore) osDelete() {
-	r.invalid = true
+	if r.base == nil {
+		panic("Renderer was already destroyed!")
+	}
 	fySDL2CRTCRegistry.osRemoveRenderer(crtcContext(r))
 	r.base.Destroy()
+	r.base = nil
 }
 
 // sdl2Renderer is the Renderer; meaning is dependent on render target.

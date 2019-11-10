@@ -10,6 +10,7 @@ type fySDL2Window struct {
 	sdl2Renderer
 	cacheMouse Vec2i
 	window     *sdl.Window
+	id         uint32
 	receiver   WindowReceiver
 }
 
@@ -29,12 +30,17 @@ func (w *fySDL2Window) SetName(n string) {
 }
 
 func (w *fySDL2Window) Destroy() {
+	if w.window == nil {
+		panic("Window was destroyed twice.")
+	}
 	{
 		z := sdl2Os()
 		defer z.End()
 	}
 	w.base.osDelete()
 	w.window.Destroy()
+	delete(fyGlobalBackend.windows, w.id)
+	w.window = nil
 }
 
 type fySDL2Backend struct {
@@ -67,9 +73,10 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 	}
 	renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	sWindow := &fySDL2Window{
-		newSDL2Renderer(&sdl2RendererCore{renderer, false}),
+		newSDL2Renderer(&sdl2RendererCore{renderer}),
 		Vec2i{-1, -1},
 		window,
+		id,
 		receiver,
 	}
 	fyGlobalBackend.windows[id] = sWindow
@@ -199,6 +206,7 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 					window := fyGlobalBackend.windows[ev.WindowID]
 					if window != nil {
 						window.receiver.FyRClose()
+						window.Destroy()
 					}
 				}
 			case *sdl.QuitEvent:

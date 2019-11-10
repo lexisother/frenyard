@@ -115,7 +115,6 @@ func (web *fyWindowElementBinding) FyRMouseEvent(ev MouseEvent) {
 
 // FyRClose implements WindowReceiver.FyRClose
 func (web *fyWindowElementBinding) FyRClose() {
-	web.window.Destroy()
 }
 
 // PanelFixedElement describes an element attached to a panel.

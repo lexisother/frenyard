@@ -27,7 +27,7 @@ type WindowReceiver interface {
 	FyRTick(time float64)
 	FyRNormalEvent(n NormalEvent)
 	FyRMouseEvent(m MouseEvent)
-	// Note: "Closed" does not mean "Destroyed".
+	// Note: The window is destroyed after this completes.
 	FyRClose()
 }
 

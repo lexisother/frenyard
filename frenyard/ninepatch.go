@@ -1,5 +1,6 @@
 package frenyard
 
+// A NinePatch is a resizable rectangular border and background to fit a given container.
 type NinePatch struct {
 	// If nil, this NinePatch is disabled.
 	Tex Texture
@@ -9,9 +10,11 @@ type NinePatch struct {
 	Bounds Area2i
 	// The area within that area, absolute, where the nine-patch centre bounds sit.
 	Centre Area2i
-	// Alpha/Colour to modulate by
+	// Alpha/Colour to modulate by.
 	ColourMod uint32
 }
+
+// Draw draws the NinePatch on the given renderer with the given container bounds.
 func (np NinePatch) Draw(r Renderer, where Area2i) {
 	if np.Tex == nil {
 		return

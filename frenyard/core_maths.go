@@ -115,13 +115,13 @@ func (a Area1i) Contract(n Area1i) Area1i { return Area1i{a.Pos - n.Pos, a.Size 
 // Checks if a point is within the area.
 func (a Area1i) Contains(i int32) bool { return (i >= a.Pos) && (i < a.Pos + a.Size) }
 // Aligns an area within another.
-func (a Area1i) Align(content int32, x int8) Area1i {
-	if x == -1 {
+func (a Area1i) Align(content int32, x Alignment1i) Area1i {
+	if x == AlignStart {
 		return Area1i{
 			a.Pos,
 			content,
 		}
-	} else if x == 1 {
+	} else if x == AlignEnd {
 		return Area1i{
 			a.Size - content,
 			content,
@@ -187,10 +187,10 @@ func (a Area2i) Contract(b Area2i) Area2i { return Area2i{a.X.Contract(b.X), a.Y
 // Checks if a point is within the area.
 func (a Area2i) Contains(v Vec2i) bool { return a.X.Contains(v.X) && a.Y.Contains(v.Y) }
 // Aligns an area within another.
-func (a Area2i) Align(content Vec2i, x int8, y int8) Area2i {
+func (a Area2i) Align(content Vec2i, align Alignment2i) Area2i {
 	return Area2i{
-		a.X.Align(content.X, x),
-		a.Y.Align(content.Y, y),
+		a.X.Align(content.X, align.X),
+		a.Y.Align(content.Y, align.Y),
 	}
 }
 
@@ -202,7 +202,20 @@ func UnionArea2i(areas []Area2i) Area2i {
 	return base
 }
 
-// Part III: Even More Utilities
+// Part IV: Alignment Structures (see Align methods of areas)
+
+type Alignment1i int8
+
+const AlignStart Alignment1i = -1
+const AlignMiddle Alignment1i = 0
+const AlignEnd Alignment1i = 1
+
+type Alignment2i struct {
+	X Alignment1i
+	Y Alignment1i
+}
+
+// Part V: Even More Utilities
 
 func ColourFromARGB(a uint8, r uint8, g uint8, b uint8) uint32 { return (uint32(a) << 24) | (uint32(r) << 16) | (uint32(g) << 8) | (uint32(b) << 0) }
 

@@ -7,7 +7,9 @@ package frenyard
 // For warnings
 import "fmt"
 
+// FocusEvent is an event type specific to the UI framework that represents focusing/unfocusing the receiving element.
 type FocusEvent struct {
+	// True if this was a focus, false if this was an unfocus.
 	Focused bool
 }
 
@@ -15,6 +17,8 @@ type FocusEvent struct {
  * This is the core UIElement type without layout capabilities.
  * Simply put, if it's being drawn, it's this type.
  */
+
+// UIElement is the core UI element type (no layout capabilities). An implementation must contain UIElementComponent or UIProxy.
 type UIElement interface {
 	FyENormalEvent(ev NormalEvent)
 	FyEMouseEvent(ev MouseEvent)
@@ -44,18 +48,26 @@ type UIElement interface {
  * A correct implementation of FyEResize & FyESize.
  * Part of core so it can't possibly get broken.
  */
+
+// UIElementComponent implements the resizing logic for UIElement.
 type UIElementComponent struct {
 	// SUPER DUPER PRIVATE! DO NOT ACCESS OUTSIDE OF MEMBER METHODS.
-	_fy_UIElementComponent_size Vec2i
+	_size Vec2i
 }
+
+// NewUIElementComponent creates a new UIElementComponent.
 func NewUIElementComponent(size Vec2i) UIElementComponent {
 	return UIElementComponent{size}
 }
+
+// FyEResize implements UIElement.FyEResize
 func (es *UIElementComponent) FyEResize(size Vec2i) {
-	es._fy_UIElementComponent_size = size
+	es._size = size
 }
+
+// FyESize implements UIElement.FyESize
 func (es *UIElementComponent) FyESize() Vec2i {
-	return es._fy_UIElementComponent_size
+	return es._size
 }
 
 type fyWindowElementBinding struct {
@@ -63,6 +75,8 @@ type fyWindowElementBinding struct {
 	clearColour uint32
 	element UIElement
 }
+
+// CreateBoundWindow creates a window that is bound to an element.
 func CreateBoundWindow(title string, vsync bool, clearColour uint32, e UIElement) (Window, error) {
 	return GlobalBackend.CreateWindow(title, e.FyESize(), vsync, &fyWindowElementBinding{
 		nil,
@@ -70,10 +84,14 @@ func CreateBoundWindow(title string, vsync bool, clearColour uint32, e UIElement
 		e,
 	})
 }
+
+// FyRStart implements WindowReceiver.FyRStart
 func (web *fyWindowElementBinding) FyRStart(w Window) {
 	web.window = w
 	web.element.FyENormalEvent(FocusEvent{true})
 }
+
+// FyRTick implements WindowReceiver.FyRTick
 func (web *fyWindowElementBinding) FyRTick(f float64) {
 	if !web.window.Size().Eq(web.element.FyESize()) {
 		web.element.FyEResize(web.window.Size())
@@ -84,57 +102,59 @@ func (web *fyWindowElementBinding) FyRTick(f float64) {
 	web.element.FyEDraw(web.window, false)
 	web.window.Present()
 }
+
+// FyRNormalEvent implements WindowReceiver.FyRNormalEvent
 func (web *fyWindowElementBinding) FyRNormalEvent(ev NormalEvent) {
 	web.element.FyENormalEvent(ev)
 }
+
+// FyRMouseEvent implements WindowReceiver.FyRMouseEvent
 func (web *fyWindowElementBinding) FyRMouseEvent(ev MouseEvent) {
 	web.element.FyEMouseEvent(ev)
 }
+
+// FyRClose implements WindowReceiver.FyRClose
 func (web *fyWindowElementBinding) FyRClose() {
 	web.window.Destroy()
 }
 
-/*
- * Type used by Panel for attached elements.
- */
+// PanelFixedElement describes an element attached to a panel.
 type PanelFixedElement struct {
 	Pos Vec2i
 	// Setting this to false is useful if you want an element to still tick but want to remove the drawing overhead.
 	Visible bool
 	Element UIElement
 }
-func NewPanelFixedElement(pos Vec2i, elem UIElement) PanelFixedElement {
-	return PanelFixedElement{
-		pos,
-		true,
-		elem,
-	}
-}
 
 /*
  * Basic "set it and forget it" stateful panel that does not transmit or receive layout data.
  * This is part of core because it's responsible for implementing several UI rules.
  */
+
+// UIPanel is a "set it and forget it" stateful panel for placing multiple elements into.
 type UIPanel struct {
 	UIElementComponent
-	// Enables/disables clipping
-	PanelClipping bool
-	_fy_UIPanel fyUIPanelPrivate
-}
-type fyUIPanelPrivate struct {
-	// This is a bitfield
-	buttonsDown uint16
-	// Mouse event receiver. Be aware: Focus outside of Content is not a very good idea, except -1 (None)
-	focus int
-	// Content (As far as I can tell there is no way to change the length of a slice without replacing it.)
-	content []PanelFixedElement
+	ThisUIPanelDetails UIPanelDetails
 }
 
+// UIPanelDetails contains the details of a UIPanel otherwise accessible only by it's owner.
+type UIPanelDetails struct {
+	// Enables/disables clipping
+	Clipping bool
+	// This is a bitfield
+	_buttonsDown uint16
+	// Mouse event receiver. Be aware: Focus outside of Content is not a very good idea, except -1 (None)
+	_focus int
+	// Content (As far as I can tell there is no way to change the length of a slice without replacing it.)
+	_content []PanelFixedElement
+}
+
+// NewPanel creates a UIPanel.
 func NewPanel(size Vec2i) UIPanel {
 	return UIPanel{
 		NewUIElementComponent(size),
-		false,
-		fyUIPanelPrivate{
+		UIPanelDetails{
+			false,
 			0,
 			-1,
 			make([]PanelFixedElement, 0),
@@ -142,62 +162,70 @@ func NewPanel(size Vec2i) UIPanel {
 	}
 }
 
-func (pan *UIPanel) UIPanelSetContent(content []PanelFixedElement) {
+// SetContent sets the contents of the panel.
+func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 	// Is this actually a change we need to worry about?
 	// DO BE WARNED: THIS IS A LOAD-BEARING OPTIMIZATION. DISABLE IT AND BUTTONS DON'T WORK PROPERLY
 	// Reason: Clicking a button changes the button content which causes a layout rebuild.
 	// Layout rebuilds destroying focus also destroys the evidence the button was pressed.
 	changeCanBeIgnored := true
-	if len(content) != len(pan._fy_UIPanel.content) {
+	if len(content) != len(pan._content) {
 		changeCanBeIgnored = false
 	} else {
 		// Lengths are the same; if the elements are the same, we can just roll with it
 		for k, v := range content {
-			if pan._fy_UIPanel.content[k].Element != v.Element {
+			if pan._content[k].Element != v.Element {
 				changeCanBeIgnored = false
 			}
 		}
 	}
 	if !changeCanBeIgnored {
-		if pan._fy_UIPanel.focus != -1 {
+		if pan._focus != -1 {
 			// Ensure the focus has been notified.
-			focusElement := pan._fy_UIPanel.content[pan._fy_UIPanel.focus]
+			focusElement := pan._content[pan._focus]
 			// And we've successfully delivered the MOUSEDOWNs to the *new* element, -1, by default
-			for button := (int8)(0); button < MOUSEBUTTON_LENGTH; button++ {
-				if (pan._fy_UIPanel.buttonsDown & (1 << button) != 0) {
+			for button := (uint)(0); button < (uint)(MOUSEBUTTON_LENGTH); button++ {
+				if (pan._buttonsDown & (1 << button) != 0) {
 					focusElement.Element.FyEMouseEvent(MouseEvent{
 						Vec2i{0, 0},
 						MOUSEEVENT_UP,
-						button,
+						(int8)(button),
 					})
 				}
 			}
 			focusElement.Element.FyENormalEvent(FocusEvent{false})
 		}
-		pan._fy_UIPanel.focus = -1
+		pan._focus = -1
 	}
-	pan._fy_UIPanel.content = content
+	pan._content = content
 }
 
+// FyENormalEvent implements UIElement.FyENormalEvent
 func (pan *UIPanel) FyENormalEvent(ev NormalEvent) {
-	if (pan._fy_UIPanel.focus != -1) {
-		pan._fy_UIPanel.content[pan._fy_UIPanel.focus].Element.FyENormalEvent(ev)
+	if (pan.ThisUIPanelDetails._focus != -1) {
+		pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus].Element.FyENormalEvent(ev)
 	}
 }
 
-func (pan *UIPanel) _fy_Panel_ForwardMouseEvent(target PanelFixedElement, ev MouseEvent) {
+func (pan *UIPanel) _fyUIPanelForwardMouseEvent(target PanelFixedElement, ev MouseEvent) {
 	ev = ev.Offset(target.Pos.Negate())
 	target.Element.FyEMouseEvent(ev)
 }
+
+// FyEMouseEvent implements UIElement.FyEMouseEvent
 func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 	// Useful for debugging if any of the warnings come up
 	//fmt.Printf("ui_core.go/Panel/FyEMouseEvent %v %v (%v, %v)\n", ev.Id, ev.Button, ev.Pos.X, ev.Pos.Y)
 	invalid := false
 	hittest := -1
+	buttonMask := (uint16)(0)
+	if ev.Button != -1 {
+		buttonMask = (uint16)(1 << (uint)(ev.Button))
+	}
 	// Hit-test goes in reverse so that the element drawn last wins.
-	for keyRev := range pan._fy_UIPanel.content {
-		key := len(pan._fy_UIPanel.content) - (keyRev + 1)
-		val := pan._fy_UIPanel.content[key]
+	for keyRev := range pan.ThisUIPanelDetails._content {
+		key := len(pan.ThisUIPanelDetails._content) - (keyRev + 1)
+		val := pan.ThisUIPanelDetails._content[key]
 		if (!val.Visible) {
 			continue;
 		}
@@ -210,19 +238,19 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 	switch (ev.Id) {
 		case MOUSEEVENT_MOVE:
 			// Mouse-move events go everywhere.
-			for _, val := range pan._fy_UIPanel.content {
-				pan._fy_Panel_ForwardMouseEvent(val, ev)
+			for _, val := range pan.ThisUIPanelDetails._content {
+				pan._fyUIPanelForwardMouseEvent(val, ev)
 			}
 			invalid = true
 		case MOUSEEVENT_UP:
-			if (pan._fy_UIPanel.buttonsDown & (1 << ev.Button) == 0) {
+			if (pan.ThisUIPanelDetails._buttonsDown & (1 << (uint)(ev.Button)) == 0) {
 				fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button removal on non-existent button")
-				return
+				invalid = true
 			} else {
-				pan._fy_UIPanel.buttonsDown &= 0xFFFF ^ (1 << ev.Button)
+				pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ (1 << (uint)(ev.Button))
 			}
 		case MOUSEEVENT_DOWN:
-			if pan._fy_UIPanel.buttonsDown == 0 {
+			if pan.ThisUIPanelDetails._buttonsDown == 0 {
 				/*
 				 * FOCUS REASONING DESCRIPTION
 				 * If focusing on a subelement of an unfocused panel
@@ -237,18 +265,18 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 				 * If unfocusing a panel
 				 *  the panel gets & forwards unfocus message to interior focus
 				 */
-				if pan._fy_UIPanel.focus != hittest {
+				if pan.ThisUIPanelDetails._focus != hittest {
 					// Note that this only happens when all other buttons have been released.
 					// This prevents having to create fake release events.
 					// The details of the order here are to do with issues when elements start modifying things in reaction to events.
 					// Hence, the element that is being focused gets to run first so it will always receive an unfocus event after it has been focused.
 					// While the element being unfocused is unlikely to get refocused under sane circumstances.
 					// If worst comes to worst, make this stop sending focus events so nobody has to worry about focus state atomicity.
-					oldFocus := pan._fy_UIPanel.focus
-					pan._fy_UIPanel.focus = hittest
+					oldFocus := pan.ThisUIPanelDetails._focus
+					pan.ThisUIPanelDetails._focus = hittest
 					newFocusFixed := PanelFixedElement{}
-					if pan._fy_UIPanel.focus != -1 {
-						newFocusFixed = pan._fy_UIPanel.content[pan._fy_UIPanel.focus]
+					if pan.ThisUIPanelDetails._focus != -1 {
+						newFocusFixed = pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
 					}
 					// Since a mouse event came in in the first place, we know the panel's focused.
 					// Focus the newly focused element.
@@ -257,25 +285,27 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 					}
 					// Unfocus the existing focused element, if any.
 					if oldFocus != -1 {
-						pan._fy_UIPanel.content[oldFocus].Element.FyENormalEvent(FocusEvent{false})
+						pan.ThisUIPanelDetails._content[oldFocus].Element.FyENormalEvent(FocusEvent{false})
 					}
 				}
 			}
-			if (pan._fy_UIPanel.buttonsDown & (1 << ev.Button) != 0) {
+			if (pan.ThisUIPanelDetails._buttonsDown & buttonMask != 0) {
 				fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button added when it was already added")
-				return
+				invalid = true
 			} else {
-				pan._fy_UIPanel.buttonsDown |= (1 << ev.Button)
+				pan.ThisUIPanelDetails._buttonsDown |= buttonMask
 			}
 	}
 	// Yes, focus gets to receive mouse-move events out of bounds even if there are no buttons.
 	// All the state is updated, forward the event
-	if (!invalid && pan._fy_UIPanel.focus != -1) {
-		pan._fy_Panel_ForwardMouseEvent(pan._fy_UIPanel.content[pan._fy_UIPanel.focus], ev)
+	if (!invalid && pan.ThisUIPanelDetails._focus != -1) {
+		pan._fyUIPanelForwardMouseEvent(pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus], ev)
 	}
 }
+
+// FyEDraw implements UIElement.FyEDraw
 func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
-	if (pan.PanelClipping) {
+	if (pan.ThisUIPanelDetails.Clipping) {
 		// Clipping: everything is inside panel bounds
 		if (under) {
 			return
@@ -288,7 +318,7 @@ func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
 		target.SetClip(newClip)
 		defer target.SetClip(oldClip)
 		for pass := 0; pass < 2; pass++ {
-			for _, val := range pan._fy_UIPanel.content {
+			for _, val := range pan.ThisUIPanelDetails._content {
 				if (!val.Visible) {
 					continue;
 				}
@@ -299,7 +329,7 @@ func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
 		}
 	} else {
 		// Not clipping; this simply arranges a bunch of elements
-		for _, val := range pan._fy_UIPanel.content {
+		for _, val := range pan.ThisUIPanelDetails._content {
 			if (!val.Visible) {
 				continue;
 			}
@@ -309,8 +339,10 @@ func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
 		}
 	}
 }
+
+// FyETick implements UIElement.FyETick
 func (pan *UIPanel) FyETick(f float64) {
-	for _, val := range pan._fy_UIPanel.content {
+	for _, val := range pan.ThisUIPanelDetails._content {
 		if (!val.Visible) {
 			continue;
 		}
@@ -318,27 +350,43 @@ func (pan *UIPanel) FyETick(f float64) {
 	}
 }
 
-/*
- * "Proxy" element.
- */
+// UIProxy is a "proxy" element. Useful to use another element as a base class without including it via inheritance.
 type UIProxy struct {
-	ProxyTarget UIElement
+	// This element is semi-private: it may be read by UIProxy and UILayoutProxy but nothing else.
+	fyUIProxyTarget UIElement
 }
+
+// InitUIProxy initializes a UIProxy, setting the target.
+func InitUIProxy(proxy *UIProxy, target UIElement) {
+	proxy.fyUIProxyTarget = target
+}
+
+// FyENormalEvent implements UIElement.FyENormalEvent
 func (px *UIProxy) FyENormalEvent(ev NormalEvent) {
-	px.ProxyTarget.FyENormalEvent(ev)
+	px.fyUIProxyTarget.FyENormalEvent(ev)
 }
+
+// FyEMouseEvent implements UIElement.FyEMouseEvent
 func (px *UIProxy) FyEMouseEvent(ev MouseEvent) {
-	px.ProxyTarget.FyEMouseEvent(ev)
+	px.fyUIProxyTarget.FyEMouseEvent(ev)
 }
+
+// FyEDraw implements UIElement.FyEDraw
 func (px *UIProxy) FyEDraw(target Renderer, under bool) {
-	px.ProxyTarget.FyEDraw(target, under)
+	px.fyUIProxyTarget.FyEDraw(target, under)
 }
+
+// FyETick implements UIElement.FyETick
 func (px *UIProxy) FyETick(f float64) {
-	px.ProxyTarget.FyETick(f)
+	px.fyUIProxyTarget.FyETick(f)
 }
+
+// FyEResize implements UIElement.FyEResize
 func (px *UIProxy) FyEResize(v Vec2i) {
-	px.ProxyTarget.FyEResize(v)
+	px.fyUIProxyTarget.FyEResize(v)
 }
+
+// FyESize implements UIElement.FyESize
 func (px *UIProxy) FyESize() Vec2i {
-	return px.ProxyTarget.FyESize()
+	return px.fyUIProxyTarget.FyESize()
 }

@@ -26,6 +26,8 @@ package frenyard
  *    The complexity of this is more or less equivalent to the tree depth.
  *    (There is room for optimization here by delaying ContentsChanged in the right way to cause many changes to execute in a single pass, but this requires an ElementHost interface to coordinate properly.)
  */
+
+// UILayoutElement is the base type for all UIElements that support layout. All implementations must use UILayoutElementComponent or UILayoutProxy.
 type UILayoutElement interface {
 	UIElement
 	/*
@@ -34,7 +36,7 @@ type UILayoutElement interface {
 	 * If and only if a proxy is in use, this may actually be the details of the "wrong" element,
 	 *  because the point of proxies is to lower resource usage over a full panel.
 	 */
-	_fy_UILayoutElement_UIDetails() *UILayoutElementComponent
+	_fyGetUILayoutElementComponent() *UILayoutElementComponent
 	/*
 	 * Propagation of subelement limits change.
 	 */
@@ -47,49 +49,57 @@ type UILayoutElement interface {
 	 */
 	FyLSizeForLimits(limits Vec2i) Vec2i
 }
+
 // "Details", not "Private". Only access from the component's user.
 // Additionally, note that the empty struct needs to be just about valid for a second.
+
+// UILayoutElementComponentDetails is a holder for methods meant to be accessed by the owner struct of UILayoutElementComponent.
 type UILayoutElementComponentDetails struct {
-	_fy_UILayoutElement_parent UILayoutElement
-	_fy_UILayoutElement_self UILayoutElement
+	_parent UILayoutElement
+	_self UILayoutElement
 }
+
+// UILayoutElementComponent implements layout notification sending and receiving.
 type UILayoutElementComponent struct {
 	// "This", not "Private". Only access from the component holder.
-	UIThis UILayoutElementComponentDetails
+	ThisUILayoutElementComponentDetails UILayoutElementComponentDetails
 }
-func InitUILayoutElement(self UILayoutElement) {
-	self._fy_UILayoutElement_UIDetails().UIThis._fy_UILayoutElement_self = self
+
+// InitUILayoutElementComponent initializes a UILayoutElementComponent given the containing UILayoutElement. Do not call on UILayoutProxy or feed after midnight.
+func InitUILayoutElementComponent(self UILayoutElement) {
+	ulec := self._fyGetUILayoutElementComponent()
+	if ulec.ThisUILayoutElementComponentDetails._self != nil {
+		panic("UILayoutElementComponent was initialized twice. It should only be initialized by the initializer of the struct that includes it.")
+	} else {
+		ulec.ThisUILayoutElementComponentDetails._self = self
+	}
 }
-func (cmp *UILayoutElementComponent) _fy_UILayoutElement_UIDetails() *UILayoutElementComponent {
+func (cmp *UILayoutElementComponent) _fyGetUILayoutElementComponent() *UILayoutElementComponent {
 	return cmp
 }
 
-/*
- * This component should be used when your element has no subelements.
- */
+// LayoutElementNoSubelementsComponent should be used when your element has no subelements.
 type LayoutElementNoSubelementsComponent struct {
 }
+
+// FyLSubelementChanged implements UILayoutElement.FyLSubelementChanged
 func (px *LayoutElementNoSubelementsComponent) FyLSubelementChanged() {
 	panic("This mustn't actually be called since the element never gets any attachments. If it is called something went very, very wrong.")
 }
 
-/*
- * Used to alert the UI layouter that the limits of this component changed.
- */
+// ContentChanged alerts the UI layouter that the limits of this component changed.
 func (details *UILayoutElementComponentDetails) ContentChanged() {
 	if details._fy_UILayoutElement_parent != nil {
 		details._fy_UILayoutElement_parent.FyLSubelementChanged()
 	} else {
 		if details._fy_UILayoutElement_self == nil {
-			panic("UIDetails was not properly initialized. Please use InitUILayoutElement(&self) on your structure.")
+			panic("UILayoutElementComponent was not properly initialized. Please use InitUILayoutElementComponent(self) on your structure.")
 		}
 		details._fy_UILayoutElement_self.FyEResize(details._fy_UILayoutElement_self.FyESize())
 	}
 }
 
-/*
- * Converts a UIElement to a UILayoutElement.
- */
+// ConvertElementToLayout converts a UIElement to a UILayoutElement.
 func ConvertElementToLayout(subelement UIElement) UILayoutElement {
 	var e UILayoutElement
 	switch e2 := subelement.(type) {
@@ -97,32 +107,29 @@ func ConvertElementToLayout(subelement UIElement) UILayoutElement {
 			e = e2
 		default:
 			ev2 := &fyAdaptedLayoutElement{UILayoutElementComponent{}, LayoutElementNoSubelementsComponent{}, UIProxy{subelement}, subelement.FyESize()}
-			InitUILayoutElement(ev2)
+			InitUILayoutElementComponent(ev2)
 			e = ev2
 	}
 	return e
 }
 
-/*
- * This & Detach are supposed to be basically automatic
- */
+// Attach attaches an element, so that if it changes, the parent will be notified.
 func (details *UILayoutElementComponentDetails) Attach(subelement UILayoutElement) UILayoutElement {
-	otherDetails := subelement._fy_UILayoutElement_UIDetails()
-	if otherDetails.UIThis._fy_UILayoutElement_parent != nil {
+	otherDetails := subelement._fyGetUILayoutElementComponent()
+	if otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent != nil {
 		panic("Double-attachment is a logical error that will completely blow up the application")
 	}
-	otherDetails.UIThis._fy_UILayoutElement_parent = details._fy_UILayoutElement_self
+	otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent = details._fy_UILayoutElement_self
 	return subelement
 }
-/*
- * This function detaches the element.
- */
+
+// Detach detaches a previously attached element.
 func (details *UILayoutElementComponentDetails) Detach(subelement UILayoutElement) {
-	otherDetails := subelement._fy_UILayoutElement_UIDetails()
-	if otherDetails.UIThis._fy_UILayoutElement_parent != details._fy_UILayoutElement_self {
+	otherDetails := subelement._fyGetUILayoutElementComponent()
+	if otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent != details._fy_UILayoutElement_self {
 		panic("Tried to detach element that wasn't attached here in the first place")
 	}
-	otherDetails.UIThis._fy_UILayoutElement_parent = nil
+	otherDetails.ThisUILayoutElementComponentDetails._fy_UILayoutElement_parent = nil
 }
 
 // Used to convert things
@@ -136,17 +143,18 @@ func (ale *fyAdaptedLayoutElement) FyLSizeForLimits(limits Vec2i) Vec2i {
 	return ale.CacheSize
 }
 
-/*
- * UIProxy but with layout support.
- * Notably, DOES NOT use UILayoutElementComponent, instead pulling the details.
- */
+// UILayoutProxy is UIProxy with layout support.
 type UILayoutProxy struct {
 	UIProxy
 	LayoutElementNoSubelementsComponent
 }
-func (px *UILayoutProxy) _fy_UILayoutElement_UIDetails() *UILayoutElementComponent {
-	return px.ProxyTarget.(UILayoutElement)._fy_UILayoutElement_UIDetails()
+
+// _fyGetUILayoutElementComponent implements UILayoutElement._fyGetUILayoutElementComponent
+func (px *UILayoutProxy) _fyGetUILayoutElementComponent() *UILayoutElementComponent {
+	return px.fyUIProxyTarget.(UILayoutElement)._fyGetUILayoutElementComponent()
 }
+
+// FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
 func (px *UILayoutProxy) FyLSizeForLimits(limits Vec2i) Vec2i {
-	return px.ProxyTarget.(UILayoutElement).FyLSizeForLimits(limits)
+	return px.fyUIProxyTarget.(UILayoutElement).FyLSizeForLimits(limits)
 }

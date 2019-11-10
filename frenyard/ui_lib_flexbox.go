@@ -5,17 +5,23 @@ import "sort"
 
 // Implements a highly limited subset of flexbox to be extended to full support as-needed.
 
-// Items do not wrap, all on one line.
-const FLEXBOX_WRAPMODE_NONE uint8 = 0
-// Items wrap between lines.
-const FLEXBOX_WRAPMODE_WRAP uint8 = 1
+// FlexboxWrapMode describes a type of wrapping mode for Flexbox containers.
+type FlexboxWrapMode uint8
 
+// FlexboxWrapModeNone disallows wrapping for items, they are all on one line.
+const FlexboxWrapModeNone FlexboxWrapMode = 0
+// FlexboxWrapModeWrap allows items to wrap between lines.
+const FlexboxWrapModeWrap FlexboxWrapMode = 1
+
+// FlexboxContainer describes a UIFlexboxContainer's contents.
 type FlexboxContainer struct {
 	DirVertical bool
-	WrapMode uint8
+	WrapMode FlexboxWrapMode
 	// Ignored when used by the line solver; it uses fyFlexboxSlotlike instead
 	Slots []FlexboxSlot
 }
+
+// FlexboxSlot describes an element within a Flexbox container.
 type FlexboxSlot struct {
 	// Can be nil.
 	Element UILayoutElement
@@ -355,33 +361,37 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 
 // -- UI element --
 
+// UIFlexboxContainer lays out UILayoutElements using a partial implementation of Flexbox.
 type UIFlexboxContainer struct {
 	UIPanel
 	UILayoutElementComponent
-	_fy_UIFlexboxContainer_State FlexboxContainer
-	_fy_UIFlexboxContainer_PreferredSize Vec2i
+	_state FlexboxContainer
+	_preferredSize Vec2i
 }
 
+// NewUIFlexboxContainerPtr creates a UIFlexboxContainer from the FlexboxContainer details
 func NewUIFlexboxContainerPtr(setup FlexboxContainer) *UIFlexboxContainer {
 	container := &UIFlexboxContainer{
 		UIPanel: NewPanel(Vec2i{}),
 	}
-	InitUILayoutElement(container)
+	InitUILayoutElementComponent(container)
 	container.SetContent(setup)
-	container.FyEResize(container._fy_UIFlexboxContainer_PreferredSize)
+	container.FyEResize(container._preferredSize)
 	return container
 }
 
+// FyLSubelementChanged implements UILayoutElement.FyLSubelementChanged
 func (ufc *UIFlexboxContainer) FyLSubelementChanged() {
-	ufc._fy_UIFlexboxContainer_PreferredSize = fyFlexboxGetPreferredSize(ufc._fy_UIFlexboxContainer_State)
-	ufc.UIThis.ContentChanged()
+	ufc._preferredSize = fyFlexboxGetPreferredSize(ufc._state)
+	ufc.ThisUILayoutElementComponentDetails.ContentChanged()
 }
 
+// FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
 func (ufc *UIFlexboxContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
-	if limits.Ge(ufc._fy_UIFlexboxContainer_PreferredSize) {
-		return ufc._fy_UIFlexboxContainer_PreferredSize
+	if limits.Ge(ufc._preferredSize) {
+		return ufc._preferredSize
 	}
-	solved := fyFlexboxSolveLayout(ufc._fy_UIFlexboxContainer_State, limits)
+	solved := fyFlexboxSolveLayout(ufc._state, limits)
 	max := Vec2i{}
 	for _, v := range solved {
 		max = max.Max(v.Pos().Add(v.Size()))
@@ -389,29 +399,31 @@ func (ufc *UIFlexboxContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
 	return max
 }
 
+// SetContent changes the contents of the UIFlexboxContainer.
 func (ufc *UIFlexboxContainer) SetContent(setup FlexboxContainer) {
-	if ufc._fy_UIFlexboxContainer_State.Slots != nil {
-		for _, v := range ufc._fy_UIFlexboxContainer_State.Slots {
+	if ufc._state.Slots != nil {
+		for _, v := range ufc._state.Slots {
 			if v.Element != nil {
-				ufc.UIThis.Detach(v.Element)
+				ufc.ThisUILayoutElementComponentDetails.Detach(v.Element)
 			}
 		}
 	}
-	ufc._fy_UIFlexboxContainer_State = setup
+	ufc._state = setup
 	for _, v := range setup.Slots {
 		if v.Element != nil {
-			ufc.UIThis.Attach(v.Element)
+			ufc.ThisUILayoutElementComponentDetails.Attach(v.Element)
 		}
 	}
 	ufc.FyLSubelementChanged()
 }
 
+// FyEResize overrides UIPanel.FyEResize
 func (ufc *UIFlexboxContainer) FyEResize(size Vec2i) {
-	ufc.UIElementComponent.FyEResize(size)
-	areas := fyFlexboxSolveLayout(ufc._fy_UIFlexboxContainer_State, size)
+	ufc.UIPanel.FyEResize(size)
+	areas := fyFlexboxSolveLayout(ufc._state, size)
 	fixes := make([]PanelFixedElement, len(areas))
 	fixesCount := 0
-	for idx, slot := range ufc._fy_UIFlexboxContainer_State.Slots {
+	for idx, slot := range ufc._state.Slots {
 		if slot.Element != nil {
 			fixes[fixesCount].Pos = areas[idx].Pos()
 			fixes[fixesCount].Visible = true
@@ -420,5 +432,5 @@ func (ufc *UIFlexboxContainer) FyEResize(size Vec2i) {
 			fixesCount++
 		}
 	}
-	ufc.UIPanel.UIPanelSetContent(fixes[:fixesCount])
+	ufc.ThisUIPanelDetails.SetContent(fixes[:fixesCount])
 }

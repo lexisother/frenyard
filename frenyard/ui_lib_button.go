@@ -1,51 +1,58 @@
 package frenyard
 
+// UIButtonThemedContent is a function to provide the visual components for a given UIButton state.
 type UIButtonThemedContent func (hover bool, down bool) (NinePatchPackage, UILayoutElement)
 
+// UIButton is a themable button.
 type UIButton struct {
 	UILayoutProxy
-	_fy_UIButton_elem UILayoutElement
-	_fy_UIButton_innerOverlay *UIOverlayContainer
-	_fy_UIButton_hover bool
-	_fy_UIButton_down bool
-	_fy_UIButton_theme UIButtonThemedContent
+	_elem UILayoutElement
+	_innerOverlay *UIOverlayContainer
+	_hover bool
+	_down bool
+	_theme UIButtonThemedContent
 	OnClick func ()
 }
+
+// NewUIButtonPtr creates a new UIButton.
 func NewUIButtonPtr(theme UIButtonThemedContent, click func ()) *UIButton {
 	container := NewUIOverlayContainerPtr(NinePatchPackage{}, []UILayoutElement{})
 	button := &UIButton{
-		_fy_UIButton_innerOverlay: container,
-		_fy_UIButton_theme: theme,
+		_innerOverlay: container,
+		_theme: theme,
 		OnClick: click,
 	}
 	button.ProxyTarget = container
-	button._fy_UIButton_UpdateState()
+	button._fyUIButtonUpdateState()
 	return button
 }
-func (btn *UIButton) _fy_UIButton_UpdateState() {
-	npp, elem := btn._fy_UIButton_theme(btn._fy_UIButton_hover, btn._fy_UIButton_down)
+
+func (btn *UIButton) _fyUIButtonUpdateState() {
+	npp, elem := btn._theme(btn._hover, btn._down)
 	if elem != nil {
-		btn._fy_UIButton_innerOverlay.SetContent(npp, []UILayoutElement{elem})
+		btn._innerOverlay.SetContent(npp, []UILayoutElement{elem})
 	} else {
-		btn._fy_UIButton_innerOverlay.SetContent(npp, []UILayoutElement{})
+		btn._innerOverlay.SetContent(npp, []UILayoutElement{})
 	}
-	btn._fy_UIButton_elem = elem
+	btn._elem = elem
 }
+
+// FyEMouseEvent overrides UILayoutProxy.FyEMouseEvent
 func (btn *UIButton) FyEMouseEvent(me MouseEvent) {
-	lastHover := btn._fy_UIButton_hover
-	lastDown := btn._fy_UIButton_down
-	btn._fy_UIButton_hover = Area2iOfSize(btn.FyESize()).Contains(me.Pos)
+	lastHover := btn._hover
+	lastDown := btn._down
+	btn._hover = Area2iOfSize(btn.FyESize()).Contains(me.Pos)
 	if me.Button == MOUSEBUTTON_LEFT {
 		if me.Id == MOUSEEVENT_UP {
-			btn._fy_UIButton_down = false
-			if btn._fy_UIButton_hover {
+			btn._down = false
+			if btn._hover {
 				btn.OnClick()
 			}
 		} else if me.Id == MOUSEEVENT_DOWN {
-			btn._fy_UIButton_down = true
+			btn._down = true
 		}
 	}
-	if lastHover != btn._fy_UIButton_hover || lastDown != btn._fy_UIButton_down {
-		btn._fy_UIButton_UpdateState()
+	if lastHover != btn._hover || lastDown != btn._down {
+		btn._fyUIButtonUpdateState()
 	}
 }

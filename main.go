@@ -34,7 +34,7 @@ func (dialog *upFailureToFindGameDialog) FyETick(seconds float64) {
 			dialog.counter = 0
 			return
 		}
-		for idx, _ := range dialog.remainingToAddToLabel {
+		for idx := range dialog.remainingToAddToLabel {
 			if idx != 0 {
 				cutPoint = idx
 				break
@@ -61,8 +61,8 @@ func (dialog *upFailureToFindGameDialog) FyETick(seconds float64) {
 func upShowFailureToFindGameDialog() {
 	elem := upFailureToFindGameDialog{}
 	elem.remainingToAddToLabel = "Before we begin...\tThe application must be copied into your CrossCode directory.\n\nThis is specifically the directory that contains the 'assets' directory."
-	elem.text = frenyard.NewUILabelPtr("", design.GlobalFont, design.THEME_TEXT, 0, -1, -1)
-	elem.textTitle = frenyard.NewUILabelPtr("", design.PageTitleFont, design.THEME_TEXT, 0, 0, -1)
+	elem.text = frenyard.NewUILabelPtr("", design.GlobalFont, design.THEME_TEXT, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart})
+	elem.textTitle = frenyard.NewUILabelPtr("", design.PageTitleFont, design.THEME_TEXT, 0, frenyard.Alignment2i{X: frenyard.AlignMiddle, Y: frenyard.AlignStart})
 	
 	testButtonWrapper := frenyard.NewUIButtonPtr(design.ButtonContentOkAction("OK"), func () {
 		frenyard.ExitFlag = true

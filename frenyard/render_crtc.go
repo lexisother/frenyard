@@ -26,7 +26,7 @@ func newCRTCRegistryPtr() *crtcRegistry {
 // Cleans up internal textures that are no longer referenced.
 // Run this every so often.
 func (cr *crtcRegistry) osFlush() {
-	if (len(cr.InternalTexturesToDelete) > 0) {
+	if len(cr.InternalTexturesToDelete) > 0 {
 		tex := <-cr.InternalTexturesToDelete
 		tex.osDelete()
 	}
@@ -35,9 +35,9 @@ func (cr *crtcRegistry) osFlush() {
 // Use to notify CRTC that a Renderer is going away.
 // This deletes all local textures for the given renderer.
 func (cr *crtcRegistry) osRemoveRenderer(r crtcContext) {
-	remenant, present := cr._fyCrtcRegistryAllLocalTextures[r]
-	if (present) {
-		for _, v := range remenant {
+	remnant, present := cr._fyCrtcRegistryAllLocalTextures[r]
+	if present {
+		for _, v := range remnant {
 			v.osDelete()
 		}
 		delete(cr._fyCrtcRegistryAllLocalTextures, r)
@@ -89,13 +89,13 @@ func (cte *crtcTextureExternal) Size() Vec2i {
 
 func (cte *crtcTextureExternal) osGetLocalTexture(r crtcContext) crtcLocalTexture {
 	alt, altPresent := cte.Internal.Registry._fyCrtcRegistryAllLocalTextures[r]
-	if (!altPresent) {
+	if !altPresent {
 		alt = map[*crtcTextureInternal]crtcLocalTexture{}
 		cte.Internal.Registry._fyCrtcRegistryAllLocalTextures[r] = alt
 	}
 
 	localTexture := alt[cte.Internal]
-	if (localTexture == nil) {
+	if localTexture == nil {
 		localTexture = cte.Internal.Data.osMakeLocal(r)
 		alt[cte.Internal] = localTexture
 	}

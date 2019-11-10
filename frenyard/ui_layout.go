@@ -56,7 +56,7 @@ type UILayoutElement interface {
 // UILayoutElementComponentDetails is a holder for methods meant to be accessed by the owner struct of UILayoutElementComponent.
 type UILayoutElementComponentDetails struct {
 	_parent UILayoutElement
-	_self UILayoutElement
+	_self   UILayoutElement
 }
 
 // UILayoutElementComponent implements layout notification sending and receiving.
@@ -103,12 +103,12 @@ func (details *UILayoutElementComponentDetails) ContentChanged() {
 func ConvertElementToLayout(subelement UIElement) UILayoutElement {
 	var e UILayoutElement
 	switch e2 := subelement.(type) {
-		case UILayoutElement:
-			e = e2
-		default:
-			ev2 := &fyAdaptedLayoutElement{UILayoutElementComponent{}, LayoutElementNoSubelementsComponent{}, UIProxy{subelement}, subelement.FyESize()}
-			InitUILayoutElementComponent(ev2)
-			e = ev2
+	case UILayoutElement:
+		e = e2
+	default:
+		ev2 := &fyAdaptedLayoutElement{UILayoutElementComponent{}, LayoutElementNoSubelementsComponent{}, UIProxy{subelement}, subelement.FyESize()}
+		InitUILayoutElementComponent(ev2)
+		e = ev2
 	}
 	return e
 }
@@ -139,6 +139,7 @@ type fyAdaptedLayoutElement struct {
 	UIProxy
 	CacheSize Vec2i
 }
+
 func (ale *fyAdaptedLayoutElement) FyLSizeForLimits(limits Vec2i) Vec2i {
 	return ale.CacheSize
 }
@@ -148,6 +149,7 @@ type UILayoutProxy struct {
 	UIProxy
 	LayoutElementNoSubelementsComponent
 }
+
 // InitUILayoutProxy initializes a UILayoutProxy, setting the target.
 func InitUILayoutProxy(proxy UIProxyHost, target UILayoutElement) {
 	InitUIProxy(proxy, target)

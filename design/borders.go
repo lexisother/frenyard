@@ -1,4 +1,5 @@
 package design
+
 import "github.com/20kdc/CCUpdaterUI/frenyard"
 
 const borderButtonImage = "iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAABmJLR0QAYgAAAO5dA1AtAAAACXBIWXMAAA+IAAAPiAEWyKWGAAAAB3RJTUUH4wsHFgcJmDU7hQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAFtSURBVDjLtZW9bsIwFEaPk4ggVFWVOnSreCFm3oIH6ivkJdgRM1uHTkR1F1KgLobboS4yru0wtJasOP45ubrf5xslIsSaUkrR0yRxWIXz18D64GdoAqaCsX9YUnAlIjGg8p4qApVgfAGuEtH5vQgiFuCUAxcZYKm1nlhr5yKyFpG9iKyttXOt9QQog/1JUAFUQK21nkqmaa2nQO32F+EHfGAJDICRMWaRgxpjFsDI7S99cCjEOVIReQFuM07aKKUeAQNYL88XOT3nEhj2AHHrwyC3UaF8u3Q90C5wQFT9C4t0XfecJX6vx3ybjPS0XC6fclC3fopFGlO/Bu6AcdM0s7ZtV8aYrVN827btqmmaGTB2++qc+nhCDYAbJ8YDcO9E+QDegBbYAO/AJ3D0I65ERIK7L8AB2Ll3C7w6q1kH2bl+uObu/9xrnP+OwN6zjbg563nzV16rlFDe00aqlF9QJFmk/7ye/lvl/8t/1BeHUwxkWeldxwAAAABJRU5ErkJggg=="
@@ -19,20 +20,20 @@ func BorderButton(colour uint32) frenyard.NinePatchPackage {
 	addedBorderY := int32(8)
 	return frenyard.NinePatchPackage{
 		Under: frenyard.NinePatch{
-			Tex: borderButtonTexture,
-			Sprite: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 21, Y: 21}),
-			Bounds: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 6, Y: 5}, frenyard.Vec2i{X: 9, Y: 9}),
-			Centre: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 10, Y: 9}, frenyard.Vec2i{X: 1, Y: 1}),
+			Tex:       borderButtonTexture,
+			Sprite:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 21, Y: 21}),
+			Bounds:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 6, Y: 5}, frenyard.Vec2i{X: 9, Y: 9}),
+			Centre:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 10, Y: 9}, frenyard.Vec2i{X: 1, Y: 1}),
 			ColourMod: colour,
 		},
 		Over: frenyard.NinePatch{
-			Tex: borderButtonTexture,
-			Sprite: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 6, Y: 5}, frenyard.Vec2i{X: 9, Y: 9}),
-			Bounds: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 6, Y: 5}, frenyard.Vec2i{X: 9, Y: 9}),
-			Centre: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 10, Y: 9}, frenyard.Vec2i{X: 1, Y: 1}),
+			Tex:       borderButtonTexture,
+			Sprite:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 6, Y: 5}, frenyard.Vec2i{X: 9, Y: 9}),
+			Bounds:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 6, Y: 5}, frenyard.Vec2i{X: 9, Y: 9}),
+			Centre:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 10, Y: 9}, frenyard.Vec2i{X: 1, Y: 1}),
 			ColourMod: colour,
 		},
-		Padding: frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),
+		Padding:  frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),
 		Clipping: true,
 	}
 }
@@ -47,13 +48,13 @@ func BorderTitle(colour uint32) frenyard.NinePatchPackage {
 	addedBorderY := int32(8)
 	return frenyard.NinePatchPackage{
 		Over: frenyard.NinePatch{
-			Tex: borderHeaderTexture,
-			Sprite: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 1, Y: 8}),
-			Bounds: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 1, Y: 1}),
-			Centre: frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 1, Y: 1}),
+			Tex:       borderHeaderTexture,
+			Sprite:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 1, Y: 8}),
+			Bounds:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 1, Y: 1}),
+			Centre:    frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 1, Y: 1}),
 			ColourMod: colour,
 		},
-		Padding: frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),
+		Padding:  frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),
 		Clipping: true,
 	}
 }

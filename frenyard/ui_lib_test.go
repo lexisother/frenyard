@@ -32,14 +32,14 @@ func (cr *UIEventDebugger) FyETick(deltaTime float64) {
 
 // FyEDraw implements UIElement.FyEDraw
 func (cr *UIEventDebugger) FyEDraw(target Renderer, under bool) {
-	if (!under) {
+	if !under {
 		target.FillRect(0xFF3F51B5, Area2iOfSize(cr.FyESize()))
 	} else {
 		target.FillRect(0x40000000, Area2iOfSize(cr.FyESize()).Expand(Area2iFromVecs(Vec2i{-4, -4}, Vec2i{4, 4})))
 		target.FillRect(0x40000000, Area2iOfSize(cr.FyESize()).Expand(Area2iFromVecs(Vec2i{-8, -8}, Vec2i{8, 8})))
 	}
 	var cursorRect Area2i
-	if (!under) {
+	if !under {
 		cursorRect = Area2iOfSize(Vec2i{8, 8}).Translate(Vec2i{-4, -4})
 	} else {
 		cursorRect = Area2iOfSize(Vec2i{16, 16}).Translate(Vec2i{-8, -8})

@@ -4,6 +4,7 @@ package frenyard
 
 // SizeUnlimited is equal to the maximum value an int32 can have, represents an infinite value.
 const SizeUnlimited int32 = 0x7FFFFFFF
+
 // Vec2iUnlimited returns a Vec2i of unlimited size.
 func Vec2iUnlimited() Vec2i { return Vec2i{SizeUnlimited, SizeUnlimited} }
 
@@ -11,14 +12,15 @@ func Vec2iUnlimited() Vec2i { return Vec2i{SizeUnlimited, SizeUnlimited} }
 
 // Max returns the higher of two int32 values.
 func Max(a int32, b int32) int32 {
-	if (a > b) {
+	if a > b {
 		return a
 	}
 	return b
 }
+
 // Min returns the smaller of two int32 values.
 func Min(a int32, b int32) int32 {
-	if (a < b) {
+	if a < b {
 		return a
 	}
 	return b
@@ -40,20 +42,24 @@ func (a Vec2i) Add(b Vec2i) Vec2i {
 func (a Vec2i) Min(b Vec2i) Vec2i {
 	return Vec2i{Min(a.X, b.X), Min(a.Y, b.Y)}
 }
+
 // Max is similar to Min, but uses maximum, not minimum.
 func (a Vec2i) Max(b Vec2i) Vec2i {
 	return Vec2i{Max(a.X, b.X), Max(a.Y, b.Y)}
 }
+
 // Eq compares two Vec2is and returns true for equal.
 func (a Vec2i) Eq(b Vec2i) bool {
 	return a.X == b.X && a.Y == b.Y
 }
+
 // These two are framed in the sense of 'an area of size A could contain an area of size B'.
 
 // Gt checks if an area of size A could hold an area of size B with room to spare.
 func (a Vec2i) Gt(b Vec2i) bool {
 	return a.X > b.X && a.Y > b.Y
 }
+
 // Ge checks if an area of size A could hold an area of size B (with or without spare room).
 func (a Vec2i) Ge(b Vec2i) bool {
 	return a.X >= b.X && a.Y >= b.Y
@@ -76,7 +82,7 @@ func (a Vec2i) ConditionalTranspose(yes bool) Vec2i {
 
 // Area1i is a 1-dimensional axis-aligned area, which is a useful primitive for N-dimensional areas.
 type Area1i struct {
-	Pos int32
+	Pos  int32
 	Size int32
 }
 
@@ -87,9 +93,10 @@ func Area1iOfSize(a int32) Area1i { return Area1i{0, a} }
 func (a Area1i) Empty() bool {
 	return a.Size <= 0
 }
+
 // Normalized replaces empty areas with zeroed areas.
 func (a Area1i) Normalized() Area1i {
-	if (a.Empty()) {
+	if a.Empty() {
 		return Area1i{}
 	}
 	return a
@@ -98,29 +105,35 @@ func (a Area1i) Normalized() Area1i {
 // Union unions two areas.
 func (a Area1i) Union(b Area1i) Area1i {
 	pos := Min(a.Pos, b.Pos)
-	end := Max(a.Pos + a.Size, b.Pos + b.Size)
+	end := Max(a.Pos+a.Size, b.Pos+b.Size)
 	return Area1i{
 		pos,
 		end - pos,
 	}
 }
+
 // Intersect intersects two areas. Always returns a normalized area.
 func (a Area1i) Intersect(b Area1i) Area1i {
 	pos := Max(a.Pos, b.Pos)
-	end := Min(a.Pos + a.Size, b.Pos + b.Size)
+	end := Min(a.Pos+a.Size, b.Pos+b.Size)
 	return Area1i{
 		pos,
 		end - pos,
 	}.Normalized()
 }
+
 // Translate translates an area by an offset.
 func (a Area1i) Translate(i int32) Area1i { return Area1i{a.Pos + i, a.Size} }
+
 // Expand expands an area by a margin, expressed as the area around as if this had zero size.
 func (a Area1i) Expand(n Area1i) Area1i { return Area1i{a.Pos + n.Pos, a.Size + n.Size} }
+
 // Contract contracts an area by a margin; the reverse of Expand.
 func (a Area1i) Contract(n Area1i) Area1i { return Area1i{a.Pos - n.Pos, a.Size - n.Size} }
+
 // Contains checks if a point is within the area.
-func (a Area1i) Contains(i int32) bool { return (i >= a.Pos) && (i < a.Pos + a.Size) }
+func (a Area1i) Contains(i int32) bool { return (i >= a.Pos) && (i < a.Pos+a.Size) }
+
 // Align aligns an area within another.
 func (a Area1i) Align(content int32, x Alignment1i) Area1i {
 	if x == AlignStart {
@@ -158,6 +171,7 @@ type Area2i struct {
 
 // Pos returns a 'position' vector for the area. (see Area2iFromVecs)
 func (a Area2i) Pos() Vec2i { return Vec2i{a.X.Pos, a.Y.Pos} }
+
 // Size returns a 'size' vector for the area (see Area2iFromVecs)
 func (a Area2i) Size() Vec2i { return Vec2i{a.X.Size, a.Y.Size} }
 
@@ -176,9 +190,10 @@ func Area2iOfSize(a Vec2i) Area2i { return Area2i{Area1iOfSize(a.X), Area1iOfSiz
 func (a Area2i) Empty() bool {
 	return a.X.Empty() || a.Y.Empty()
 }
+
 // Normalized replaces empty areas with zeroed areas.
 func (a Area2i) Normalized() Area2i {
-	if (a.Empty()) {
+	if a.Empty() {
 		return Area2i{}
 	}
 	return a
@@ -186,16 +201,24 @@ func (a Area2i) Normalized() Area2i {
 
 // Union unions two areas.
 func (a Area2i) Union(b Area2i) Area2i { return Area2i{a.X.Union(b.X), a.Y.Union(b.Y)} }
+
 // Intersect intersects two areas. Always returns a normalized area.
-func (a Area2i) Intersect(b Area2i) Area2i { return Area2i{a.X.Intersect(b.X), a.Y.Intersect(b.Y)}.Normalized() }
+func (a Area2i) Intersect(b Area2i) Area2i {
+	return Area2i{a.X.Intersect(b.X), a.Y.Intersect(b.Y)}.Normalized()
+}
+
 // Translate translates an area by an offset.
 func (a Area2i) Translate(v Vec2i) Area2i { return Area2i{a.X.Translate(v.X), a.Y.Translate(v.Y)} }
+
 // Expand expands an area by a margin, expressed as the area around as if this had zero size.
 func (a Area2i) Expand(b Area2i) Area2i { return Area2i{a.X.Expand(b.X), a.Y.Expand(b.Y)} }
+
 // Contract contracts an area by a margin; the reverse of Expand.
 func (a Area2i) Contract(b Area2i) Area2i { return Area2i{a.X.Contract(b.X), a.Y.Contract(b.Y)} }
+
 // Contains checks if a point is within the area.
 func (a Area2i) Contains(v Vec2i) bool { return a.X.Contains(v.X) && a.Y.Contains(v.Y) }
+
 // Align aligns an area within another.
 func (a Area2i) Align(content Vec2i, align Alignment2i) Area2i {
 	return Area2i{
@@ -220,8 +243,10 @@ type Alignment1i int8
 
 // AlignStart aligns the element at the start (left/top).
 const AlignStart Alignment1i = -1
+
 // AlignMiddle aligns the element at the centre.
 const AlignMiddle Alignment1i = 0
+
 // AlignEnd aligns the element at the end (right/bottom).
 const AlignEnd Alignment1i = 1
 
@@ -234,7 +259,9 @@ type Alignment2i struct {
 // Part V: Even More Utilities
 
 // ColourFromARGB creates a colour from the separate A/R/G/B quantities.
-func ColourFromARGB(a uint8, r uint8, g uint8, b uint8) uint32 { return (uint32(a) << 24) | (uint32(r) << 16) | (uint32(g) << 8) | (uint32(b) << 0) }
+func ColourFromARGB(a uint8, r uint8, g uint8, b uint8) uint32 {
+	return (uint32(a) << 24) | (uint32(r) << 16) | (uint32(g) << 8) | (uint32(b) << 0)
+}
 
 // Area1iGrid3 is an Area1i split into a left area, the original 'inner' area, and the right area.
 type Area1iGrid3 struct {
@@ -242,6 +269,7 @@ type Area1iGrid3 struct {
 	B Area1i
 	C Area1i
 }
+
 // SplitArea1iGrid3 splits an Area1i into 3 sections using the bounds of an inner Area1i.
 func SplitArea1iGrid3(outer Area1i, inner Area1i) Area1iGrid3 {
 	return Area1iGrid3{
@@ -250,6 +278,7 @@ func SplitArea1iGrid3(outer Area1i, inner Area1i) Area1iGrid3 {
 		Area1i{inner.Pos + inner.Size, (outer.Pos + outer.Size) - (inner.Pos + inner.Size)},
 	}
 }
+
 // AsMargin returns a margin around the centre Area1i for Expand.
 func (a Area1iGrid3) AsMargin() Area1i {
 	return Area1i{-a.A.Size, a.C.Size + a.A.Size}
@@ -257,10 +286,17 @@ func (a Area1iGrid3) AsMargin() Area1i {
 
 // Area2iGrid3x3 is Area1iGrid3 in two dimensions.
 type Area2iGrid3x3 struct {
-	A Area2i ; B Area2i ; C Area2i
-	D Area2i ; E Area2i ; F Area2i
-	G Area2i ; H Area2i ; I Area2i
+	A Area2i
+	B Area2i
+	C Area2i
+	D Area2i
+	E Area2i
+	F Area2i
+	G Area2i
+	H Area2i
+	I Area2i
 }
+
 // SplitArea2iGrid3x3 splits an Area2i into 9 sections using the bounds of an inner Area2i.
 func SplitArea2iGrid3x3(outer Area2i, inner Area2i) Area2iGrid3x3 {
 	xSplit := SplitArea1iGrid3(outer.X, inner.X)
@@ -271,6 +307,7 @@ func SplitArea2iGrid3x3(outer Area2i, inner Area2i) Area2iGrid3x3 {
 		Area2i{xSplit.A, ySplit.C}, Area2i{xSplit.B, ySplit.C}, Area2i{xSplit.C, ySplit.C},
 	}
 }
+
 // AsMargin returns a margin around the centre Area2i for Expand.
 func (a Area2iGrid3x3) AsMargin() Area2i {
 	return Area2iFromVecs(a.A.Size().Negate(), a.I.Size().Add(a.A.Size()))

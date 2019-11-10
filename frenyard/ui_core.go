@@ -71,9 +71,9 @@ func (es *UIElementComponent) FyESize() Vec2i {
 }
 
 type fyWindowElementBinding struct {
-	window Window
+	window      Window
 	clearColour uint32
-	element UIElement
+	element     UIElement
 }
 
 // CreateBoundWindow creates a window that is bound to an element.
@@ -185,7 +185,7 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 			focusElement := pan._content[pan._focus]
 			// And we've successfully delivered the MOUSEDOWNs to the *new* element, -1, by default
 			for button := (uint)(0); button < (uint)(MouseButtonLength); button++ {
-				if (pan._buttonsDown & (1 << button) != 0) {
+				if pan._buttonsDown&(1<<button) != 0 {
 					focusElement.Element.FyEMouseEvent(MouseEvent{
 						Vec2i{0, 0},
 						MouseEventUp,
@@ -202,7 +202,7 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 
 // FyENormalEvent implements UIElement.FyENormalEvent
 func (pan *UIPanel) FyENormalEvent(ev NormalEvent) {
-	if (pan.ThisUIPanelDetails._focus != -1) {
+	if pan.ThisUIPanelDetails._focus != -1 {
 		pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus].Element.FyENormalEvent(ev)
 	}
 }
@@ -226,101 +226,101 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 	for keyRev := range pan.ThisUIPanelDetails._content {
 		key := len(pan.ThisUIPanelDetails._content) - (keyRev + 1)
 		val := pan.ThisUIPanelDetails._content[key]
-		if (!val.Visible) {
-			continue;
+		if !val.Visible {
+			continue
 		}
-		if (Area2iFromVecs(val.Pos, val.Element.FyESize()).Contains(ev.Pos)) {
+		if Area2iFromVecs(val.Pos, val.Element.FyESize()).Contains(ev.Pos) {
 			//fmt.Printf(" Hit index %v\n", key)
 			hittest = key
 			break
 		}
 	}
-	switch (ev.ID) {
-		case MouseEventMove:
-			// Mouse-move events go everywhere.
-			for _, val := range pan.ThisUIPanelDetails._content {
-				pan._fyUIPanelForwardMouseEvent(val, ev)
-			}
+	switch ev.ID {
+	case MouseEventMove:
+		// Mouse-move events go everywhere.
+		for _, val := range pan.ThisUIPanelDetails._content {
+			pan._fyUIPanelForwardMouseEvent(val, ev)
+		}
+		invalid = true
+	case MouseEventUp:
+		if pan.ThisUIPanelDetails._buttonsDown&(1<<(uint)(ev.Button)) == 0 {
+			fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button removal on non-existent button")
 			invalid = true
-		case MouseEventUp:
-			if (pan.ThisUIPanelDetails._buttonsDown & (1 << (uint)(ev.Button)) == 0) {
-				fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button removal on non-existent button")
-				invalid = true
-			} else {
-				pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ (1 << (uint)(ev.Button))
-			}
-		case MouseEventDown:
-			if pan.ThisUIPanelDetails._buttonsDown == 0 {
-				/*
-				 * FOCUS REASONING DESCRIPTION
-				 * If focusing on a subelement of an unfocused panel
-				 *  the parent focuses the panel
-				 *  the panel gets & forwards focus message to old interior focus
-				 *  the panel gets the mouse event
-				 *  the panel creates & forwards unfocus message to old interior focus
-				 *  the panel creates & forwards focus message to new interior focus
-				 * If changing the subelement of a focused panel
-				 *  the panel creates & forwards unfocus message to old interior focus
-				 *  the panel creates & forwards focus message to new interior focus
-				 * If unfocusing a panel
-				 *  the panel gets & forwards unfocus message to interior focus
-				 */
-				if pan.ThisUIPanelDetails._focus != hittest {
-					// Note that this only happens when all other buttons have been released.
-					// This prevents having to create fake release events.
-					// The details of the order here are to do with issues when elements start modifying things in reaction to events.
-					// Hence, the element that is being focused gets to run first so it will always receive an unfocus event after it has been focused.
-					// While the element being unfocused is unlikely to get refocused under sane circumstances.
-					// If worst comes to worst, make this stop sending focus events so nobody has to worry about focus state atomicity.
-					oldFocus := pan.ThisUIPanelDetails._focus
-					pan.ThisUIPanelDetails._focus = hittest
-					newFocusFixed := PanelFixedElement{}
-					if pan.ThisUIPanelDetails._focus != -1 {
-						newFocusFixed = pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
-					}
-					// Since a mouse event came in in the first place, we know the panel's focused.
-					// Focus the newly focused element.
-					if newFocusFixed.Element != nil {
-						newFocusFixed.Element.FyENormalEvent(FocusEvent{true})
-					}
-					// Unfocus the existing focused element, if any.
-					if oldFocus != -1 {
-						pan.ThisUIPanelDetails._content[oldFocus].Element.FyENormalEvent(FocusEvent{false})
-					}
+		} else {
+			pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ (1 << (uint)(ev.Button))
+		}
+	case MouseEventDown:
+		if pan.ThisUIPanelDetails._buttonsDown == 0 {
+			/*
+			 * FOCUS REASONING DESCRIPTION
+			 * If focusing on a subelement of an unfocused panel
+			 *  the parent focuses the panel
+			 *  the panel gets & forwards focus message to old interior focus
+			 *  the panel gets the mouse event
+			 *  the panel creates & forwards unfocus message to old interior focus
+			 *  the panel creates & forwards focus message to new interior focus
+			 * If changing the subelement of a focused panel
+			 *  the panel creates & forwards unfocus message to old interior focus
+			 *  the panel creates & forwards focus message to new interior focus
+			 * If unfocusing a panel
+			 *  the panel gets & forwards unfocus message to interior focus
+			 */
+			if pan.ThisUIPanelDetails._focus != hittest {
+				// Note that this only happens when all other buttons have been released.
+				// This prevents having to create fake release events.
+				// The details of the order here are to do with issues when elements start modifying things in reaction to events.
+				// Hence, the element that is being focused gets to run first so it will always receive an unfocus event after it has been focused.
+				// While the element being unfocused is unlikely to get refocused under sane circumstances.
+				// If worst comes to worst, make this stop sending focus events so nobody has to worry about focus state atomicity.
+				oldFocus := pan.ThisUIPanelDetails._focus
+				pan.ThisUIPanelDetails._focus = hittest
+				newFocusFixed := PanelFixedElement{}
+				if pan.ThisUIPanelDetails._focus != -1 {
+					newFocusFixed = pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
+				}
+				// Since a mouse event came in in the first place, we know the panel's focused.
+				// Focus the newly focused element.
+				if newFocusFixed.Element != nil {
+					newFocusFixed.Element.FyENormalEvent(FocusEvent{true})
+				}
+				// Unfocus the existing focused element, if any.
+				if oldFocus != -1 {
+					pan.ThisUIPanelDetails._content[oldFocus].Element.FyENormalEvent(FocusEvent{false})
 				}
 			}
-			if (pan.ThisUIPanelDetails._buttonsDown & buttonMask != 0) {
-				fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button added when it was already added")
-				invalid = true
-			} else {
-				pan.ThisUIPanelDetails._buttonsDown |= buttonMask
-			}
+		}
+		if pan.ThisUIPanelDetails._buttonsDown&buttonMask != 0 {
+			fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button added when it was already added")
+			invalid = true
+		} else {
+			pan.ThisUIPanelDetails._buttonsDown |= buttonMask
+		}
 	}
 	// Yes, focus gets to receive mouse-move events out of bounds even if there are no buttons.
 	// All the state is updated, forward the event
-	if (!invalid && pan.ThisUIPanelDetails._focus != -1) {
+	if !invalid && pan.ThisUIPanelDetails._focus != -1 {
 		pan._fyUIPanelForwardMouseEvent(pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus], ev)
 	}
 }
 
 // FyEDraw implements UIElement.FyEDraw
 func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
-	if (pan.ThisUIPanelDetails.Clipping) {
+	if pan.ThisUIPanelDetails.Clipping {
 		// Clipping: everything is inside panel bounds
-		if (under) {
+		if under {
 			return
 		}
 		oldClip := target.Clip()
 		newClip := oldClip.Intersect(Area2iOfSize(pan.FyESize()))
-		if (newClip.Empty()) {
+		if newClip.Empty() {
 			return
 		}
 		target.SetClip(newClip)
 		defer target.SetClip(oldClip)
 		for pass := 0; pass < 2; pass++ {
 			for _, val := range pan.ThisUIPanelDetails._content {
-				if (!val.Visible) {
-					continue;
+				if !val.Visible {
+					continue
 				}
 				target.Translate(val.Pos)
 				val.Element.FyEDraw(target, pass == 0)
@@ -330,8 +330,8 @@ func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
 	} else {
 		// Not clipping; this simply arranges a bunch of elements
 		for _, val := range pan.ThisUIPanelDetails._content {
-			if (!val.Visible) {
-				continue;
+			if !val.Visible {
+				continue
 			}
 			target.Translate(val.Pos)
 			val.Element.FyEDraw(target, under)
@@ -343,8 +343,8 @@ func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
 // FyETick implements UIElement.FyETick
 func (pan *UIPanel) FyETick(f float64) {
 	for _, val := range pan.ThisUIPanelDetails._content {
-		if (!val.Visible) {
-			continue;
+		if !val.Visible {
+			continue
 		}
 		val.Element.FyETick(f)
 	}

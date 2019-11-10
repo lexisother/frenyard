@@ -3,8 +3,8 @@ package frenyard
 import (
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
-	"image"
 	"golang.org/x/image/math/fixed"
+	"image"
 )
 
 // FontRectangleConverter converts a fixed.Rectangle26_6 into pixels (rounding outwards)
@@ -48,8 +48,8 @@ func FontSize(fnt font.Face, text string) Vec2i {
 // CreateTTFFont is a wrapper around truetype.NewFace
 func CreateTTFFont(ft *truetype.Font, dpi float64, size float64) font.Face {
 	return truetype.NewFace(ft, &truetype.Options{
-		Size: size,
-		DPI: dpi,
+		Size:    size,
+		DPI:     dpi,
 		Hinting: font.HintingNone,
 	})
 }

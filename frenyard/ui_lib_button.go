@@ -1,26 +1,26 @@
 package frenyard
 
 // UIButtonThemedContent is a function to provide the visual components for a given UIButton state.
-type UIButtonThemedContent func (hover bool, down bool) (NinePatchPackage, UILayoutElement)
+type UIButtonThemedContent func(hover bool, down bool) (NinePatchPackage, UILayoutElement)
 
 // UIButton is a themable button.
 type UIButton struct {
 	UILayoutProxy
-	_elem UILayoutElement
+	_elem         UILayoutElement
 	_innerOverlay *UIOverlayContainer
-	_hover bool
-	_down bool
-	_theme UIButtonThemedContent
-	OnClick func ()
+	_hover        bool
+	_down         bool
+	_theme        UIButtonThemedContent
+	OnClick       func()
 }
 
 // NewUIButtonPtr creates a new UIButton.
-func NewUIButtonPtr(theme UIButtonThemedContent, click func ()) *UIButton {
+func NewUIButtonPtr(theme UIButtonThemedContent, click func()) *UIButton {
 	container := NewUIOverlayContainerPtr(NinePatchPackage{}, []UILayoutElement{})
 	button := &UIButton{
 		_innerOverlay: container,
-		_theme: theme,
-		OnClick: click,
+		_theme:        theme,
+		OnClick:       click,
 	}
 	InitUILayoutProxy(button, container)
 	button._fyUIButtonUpdateState()

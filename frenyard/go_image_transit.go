@@ -1,9 +1,10 @@
 package frenyard
+
 import (
+	"encoding/base64"
 	"image"
 	"image/color"
 	"image/png"
-	"encoding/base64"
 	"strings"
 )
 
@@ -11,26 +12,27 @@ import (
 func fyConvertGoImageColour(col color.Color) uint32 {
 	// Actual color appears to be per-pixel. Great. More problems.
 	switch colConv := col.(type) {
-		case color.NRGBA:
-			return ColourFromARGB(colConv.A, colConv.R, colConv.G, colConv.B)
-		case color.RGBA:
-			// This is still premultiplied and thus NOT GOOD, but let's roll with it
-			a := colConv.A
-			r := colConv.R
-			g := colConv.G
-			b := colConv.B
-			if ((a != 0) && (a != 255)) {
-				// Alpha not 0 (would /0) or a NOP
-				a16 := uint16(a)
-				r = uint8((uint16(colConv.R) * 255) / a16)
-				g = uint8((uint16(colConv.G) * 255) / a16)
-				b = uint8((uint16(colConv.B) * 255) / a16)
-			}
-			return ColourFromARGB(a, r, g, b)
-		default: {
+	case color.NRGBA:
+		return ColourFromARGB(colConv.A, colConv.R, colConv.G, colConv.B)
+	case color.RGBA:
+		// This is still premultiplied and thus NOT GOOD, but let's roll with it
+		a := colConv.A
+		r := colConv.R
+		g := colConv.G
+		b := colConv.B
+		if (a != 0) && (a != 255) {
+			// Alpha not 0 (would /0) or a NOP
+			a16 := uint16(a)
+			r = uint8((uint16(colConv.R) * 255) / a16)
+			g = uint8((uint16(colConv.G) * 255) / a16)
+			b = uint8((uint16(colConv.B) * 255) / a16)
+		}
+		return ColourFromARGB(a, r, g, b)
+	default:
+		{
 			// Give up and work backwards from premultiplied (NOT GOOD!!!)
 			r, g, b, a := col.RGBA()
-			if ((a != 0) && (a != 0xFFFF)) {
+			if (a != 0) && (a != 0xFFFF) {
 				// Scaling, also implicitly does the 8-bit conversion
 				r *= 255
 				g *= 255
@@ -54,7 +56,7 @@ func fyConvertGoImageColour(col color.Color) uint32 {
 // GoImageToTexture imports an image from Go's "image" library to a texture.
 func GoImageToTexture(img image.Image) Texture {
 	sizePreTranslate := img.Bounds().Size()
-	pixels := make([]uint32, sizePreTranslate.X * sizePreTranslate.Y)
+	pixels := make([]uint32, sizePreTranslate.X*sizePreTranslate.Y)
 	size := Vec2i{int32(sizePreTranslate.X), int32(sizePreTranslate.Y)}
 	index := 0
 	for y := 0; y < sizePreTranslate.Y; y++ {
@@ -69,6 +71,10 @@ func GoImageToTexture(img image.Image) Texture {
 // CreateHardcodedPNGImage gets an image.Image from a base64 string.
 func CreateHardcodedPNGImage(pngb64 string) image.Image {
 	bytes, err := base64.StdEncoding.DecodeString(pngb64)
+	if err != nil {
+		// Hard-coded so should always work
+		panic(err)
+	}
 	decoded, err := png.Decode(strings.NewReader(string(bytes)))
 	if err != nil {
 		// Hard-coded so should always work

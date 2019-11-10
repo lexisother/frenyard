@@ -1,10 +1,13 @@
 package design
+
 import "github.com/20kdc/CCUpdaterUI/frenyard"
 
 // SizeTitleHeight is the size of the page title bar.
 const SizeTitleHeight = 40
+
 // SizeMarginAroundEverything is a useful margin around the body, etc.
 const SizeMarginAroundEverything = 16
+
 // SizeTextNudge is the amount to nudge text vertically downwards to make it seem even.
 const SizeTextNudge = 4
 

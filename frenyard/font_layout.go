@@ -1,4 +1,5 @@
 package frenyard
+
 import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -14,15 +15,15 @@ type TextLayouterOptions struct {
 
 // TextLayouterResult The results from text layouting.
 type TextLayouterResult struct {
-	Size Vec2i
+	Size           Vec2i
 	_formattedText []string
-	_font font.Face
+	_font          font.Face
 }
 
 // TextLayouterRenderable The results in a renderable form.
 type TextLayouterRenderable struct {
-	Size Vec2i
-	_lines []Texture
+	Size       Vec2i
+	_lines     []Texture
 	_interline int32
 }
 
@@ -45,8 +46,8 @@ func (tlr *TextLayouterResult) Draw() TextLayouterRenderable {
 		tex[k] = FontDraw(tlr._font, v)
 	}
 	rdr := TextLayouterRenderable{
-		Size: tlr.Size,
-		_lines: tex,
+		Size:       tlr.Size,
+		_lines:     tex,
 		_interline: FontInterline(tlr._font),
 	}
 	return rdr
@@ -63,7 +64,7 @@ func (tlr *TextLayouterRenderable) Draw(r Renderer, pos Vec2i, colour uint32) {
 
 func fyTextLayouterBreakerNormal(text string, fnt font.Face, xLimit int32, wordwrap bool) TextLayouterResult {
 	committedBuffer := TextLayouterResult{
-		_font: fnt,
+		_font:          fnt,
 		_formattedText: []string{},
 	}
 	// To lower the CPU usage, this function has to engage directly with the font drawing interface.

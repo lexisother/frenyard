@@ -1,29 +1,38 @@
 package frenyard
 
 import (
+	"github.com/veandco/go-sdl2/sdl"
 	"runtime"
 	"time"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type fySDL2Window struct {
 	sdl2Renderer
 	cacheMouse Vec2i
-	window *sdl.Window
-	receiver WindowReceiver
+	window     *sdl.Window
+	receiver   WindowReceiver
 }
 
 func (w *fySDL2Window) Name() string {
-	{ z := sdl2Os(); defer z.End() }
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
 	return w.window.GetTitle()
 }
 func (w *fySDL2Window) SetName(n string) {
-	{ z := sdl2Os(); defer z.End() }
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
 	w.window.SetTitle(n)
 }
 
 func (w *fySDL2Window) Destroy() {
-	{ z := sdl2Os(); defer z.End() }
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
 	w.base.osDelete()
 	w.window.Destroy()
 }
@@ -31,12 +40,16 @@ func (w *fySDL2Window) Destroy() {
 type fySDL2Backend struct {
 	windows map[uint32]*fySDL2Window
 }
+
 var fyGlobalBackend *fySDL2Backend = &fySDL2Backend{map[uint32]*fySDL2Window{}}
 
 func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiver WindowReceiver) (Window, error) {
-	{ z := sdl2Os(); defer z.End() }
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
 	// Don't enable hidpi in SDL2. Pixels stop having a coherent meaning.
-	if (vsync) {
+	if vsync {
 		sdl.SetHint("SDL_HINT_RENDER_VSYNC", "1")
 	} else {
 		sdl.SetHint("SDL_HINT_RENDER_VSYNC", "0")
@@ -65,55 +78,61 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 }
 
 func (r *fySDL2Backend) CreateTexture(size Vec2i, pixels []uint32) Texture {
-	{ z := sdl2Os(); defer z.End() }
-	if (len(pixels) != int(size.X) * int(size.Y)) {
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
+	if len(pixels) != int(size.X)*int(size.Y) {
 		panic("invalid input to CreateTexture (size != pixels slice size)")
 	}
 	surface, err := sdl.CreateRGBSurfaceWithFormat(0, size.X, size.Y,
- 32, uint32(sdl.PIXELFORMAT_ARGB32))
+		32, uint32(sdl.PIXELFORMAT_ARGB32))
 	pixelsArray := surface.Pixels()
 	for k, v := range pixels {
-		pixelsArray[(k * 4) + 0] = byte((v & 0xFF000000) >> 24)
-		pixelsArray[(k * 4) + 1] = byte((v & 0xFF0000) >> 16)
-		pixelsArray[(k * 4) + 2] = byte((v & 0xFF00) >> 8)
-		pixelsArray[(k * 4) + 3] = byte((v & 0xFF) >> 0)
+		pixelsArray[(k*4)+0] = byte((v & 0xFF000000) >> 24)
+		pixelsArray[(k*4)+1] = byte((v & 0xFF0000) >> 16)
+		pixelsArray[(k*4)+2] = byte((v & 0xFF00) >> 8)
+		pixelsArray[(k*4)+3] = byte((v & 0xFF) >> 0)
 	}
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
 	return osSdl2SurfaceToFyTexture(surface)
 }
 
 func fySDL2MouseButton(button uint8) MouseButton {
-	switch (button) {
-		case sdl.BUTTON_LEFT:
-			return MouseButtonLeft
-		case sdl.BUTTON_MIDDLE:
-			return MouseButtonMiddle
-		case sdl.BUTTON_RIGHT:
-			return MouseButtonRight
-		case sdl.BUTTON_X1:
-			return MouseButtonX1
-		case sdl.BUTTON_X2:
-			return MouseButtonX2
+	switch button {
+	case sdl.BUTTON_LEFT:
+		return MouseButtonLeft
+	case sdl.BUTTON_MIDDLE:
+		return MouseButtonMiddle
+	case sdl.BUTTON_RIGHT:
+		return MouseButtonRight
+	case sdl.BUTTON_X1:
+		return MouseButtonX1
+	case sdl.BUTTON_X2:
+		return MouseButtonX2
 	}
 	return MouseButtonNone
 }
 func fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, minus MouseButton, plus MouseButton) {
-	for (apply < 0) {
+	for apply < 0 {
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventDown, minus})
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, minus})
-		apply++;
+		apply++
 	}
-	for (apply > 0) {
+	for apply > 0 {
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventDown, plus})
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, plus})
-		apply--;
+		apply--
 	}
 }
 
 func init() {
-	{ z := sdl2Os(); defer z.End() }
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
 	sdl.Init(sdl.INIT_EVERYTHING)
 	GlobalBackend = fyGlobalBackend
 }
@@ -146,45 +165,45 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 		fySDL2CRTCRegistry.osFlush()
 		for {
 			event := sdl.PollEvent()
-			if (event == nil) {
+			if event == nil {
 				break
 			}
 			switch ev := event.(type) {
-				case *sdl.MouseMotionEvent:
+			case *sdl.MouseMotionEvent:
+				window := fyGlobalBackend.windows[ev.WindowID]
+				if window != nil {
+					window.cacheMouse = Vec2i{ev.X, ev.Y}
+					window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, MouseEventMove, MouseButtonNone})
+				}
+			case *sdl.MouseButtonEvent:
+				window := fyGlobalBackend.windows[ev.WindowID]
+				if window != nil {
+					window.cacheMouse = Vec2i{ev.X, ev.Y}
+					buttonS := MouseEventDown
+					if ev.State == sdl.RELEASED {
+						buttonS = MouseEventUp
+					}
+					btn := fySDL2MouseButton(ev.Button)
+					if btn != MouseButtonNone {
+						window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, buttonS, btn})
+					}
+				}
+			case *sdl.MouseWheelEvent:
+				window := fyGlobalBackend.windows[ev.WindowID]
+				if window != nil {
+					fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.X, MouseButtonScrollLeft, MouseButtonScrollRight)
+					fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.Y, MouseButtonScrollUp, MouseButtonScrollDown)
+				}
+			case *sdl.WindowEvent:
+				if ev.Event == sdl.WINDOWEVENT_CLOSE {
 					window := fyGlobalBackend.windows[ev.WindowID]
-					if (window != nil) {
-						window.cacheMouse = Vec2i{ev.X, ev.Y}
-						window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, MouseEventMove, MouseButtonNone})
+					if window != nil {
+						window.receiver.FyRClose()
 					}
-				case *sdl.MouseButtonEvent:
-					window := fyGlobalBackend.windows[ev.WindowID]
-					if (window != nil) {
-						window.cacheMouse = Vec2i{ev.X, ev.Y}
-						buttonS := MouseEventDown
-						if ev.State == sdl.RELEASED {
-							buttonS = MouseEventUp
-						}
-						btn := fySDL2MouseButton(ev.Button)
-						if btn != MouseButtonNone {
-							window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, buttonS, btn})
-						}
-					}
-				case *sdl.MouseWheelEvent:
-					window := fyGlobalBackend.windows[ev.WindowID]
-					if (window != nil) {
-						fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.X, MouseButtonScrollLeft, MouseButtonScrollRight)
-						fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.Y, MouseButtonScrollUp, MouseButtonScrollDown)
-					}
-				case *sdl.WindowEvent:
-					if ev.Event == sdl.WINDOWEVENT_CLOSE {
-						window := fyGlobalBackend.windows[ev.WindowID]
-						if window != nil {
-							window.receiver.FyRClose()
-						}
-					}
-				case *sdl.QuitEvent:
-					// No way to determine cause, so for now won't even bother...
-					ExitFlag = true
+				}
+			case *sdl.QuitEvent:
+				// No way to determine cause, so for now won't even bother...
+				ExitFlag = true
 			}
 		}
 		runtime.UnlockOSThread()

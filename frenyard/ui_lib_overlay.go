@@ -6,9 +6,9 @@ package frenyard
 
 // NinePatchPackage packages several NinePatches into a set that can be drawn in a UI context.
 type NinePatchPackage struct {
-	Over NinePatch
-	Under NinePatch
-	Padding Area2i
+	Over     NinePatch
+	Under    NinePatch
+	Padding  Area2i
 	Clipping bool
 }
 
@@ -16,8 +16,8 @@ type NinePatchPackage struct {
 type UIOverlayContainer struct {
 	UIPanel
 	UILayoutElementComponent
-	_ninePatch NinePatchPackage
-	_state []UILayoutElement
+	_ninePatch     NinePatchPackage
+	_state         []UILayoutElement
 	_preferredSize Vec2i
 }
 
@@ -77,7 +77,7 @@ func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
 	fixes := make([]PanelFixedElement, len(ufc._state))
 	for idx, slot := range ufc._state {
 		fixes[idx] = PanelFixedElement{
-			Pos: area.Pos(),
+			Pos:     area.Pos(),
 			Visible: true,
 			Element: slot,
 		}

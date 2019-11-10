@@ -41,25 +41,25 @@ type Window interface {
 }
 
 // Renderer is an abstract rendering interface.
-type Renderer interface {	
+type Renderer interface {
 	/* Draw */
 
 	// Fills a rectangle.
 	FillRect(colour uint32, target Area2i)
 	// Stretches a texture.
 	TexRect(sheet Texture, colour uint32, sprite Area2i, target Area2i)
-	
+
 	/* Control */
-	
+
 	// Translates the renderer's target. Use with defer to undo later.
 	Translate(vec Vec2i)
 	// Sets the clip area, relative to the current translation.
 	SetClip(clip Area2i)
 	// Gets the clip area, relative to the current translation.
 	Clip() Area2i
-	
+
 	/* Outer Control */
-	
+
 	// Gets the size of the drawing area.
 	Size() Vec2i
 	// Clears & resets clip/translate/etc. You should do this at the start of  frame.
@@ -73,7 +73,7 @@ type Texture interface {
 
 /*
  * There are two kinds of event: Normal (focus-target) events and Mouse Events.
- * Mouse Events get lots of special treatment as they bypass focus targetting, need offset logic, etc.
+ * Mouse Events get lots of special treatment as they bypass focus targeting, need offset logic, etc.
  * Normal Events have the same handling no matter what, so they don't even need to be considered in core.
  * There's some UI special handling for Focus/Unfocus events, but that's defined out of core anyway
  */
@@ -87,8 +87,10 @@ type MouseEventID uint8
 
 // MouseEventMove indicates that the event is because the mouse was moved.
 const MouseEventMove MouseEventID = 0
+
 // MouseEventDown indicates that the event is because a mouse button was pressed
 const MouseEventDown MouseEventID = 1
+
 // MouseEventUp indicates that the event is because a mouse button was released
 const MouseEventUp MouseEventID = 2
 
@@ -103,25 +105,33 @@ const MouseButtonNone MouseButton = -1
 
 // MouseButtonLeft is the left mouse button.
 const MouseButtonLeft MouseButton = 0
+
 // MouseButtonMiddle is the middle mouse button (Do be warned: Laptop users do not get this in any 'easy to understand' form.)
 const MouseButtonMiddle MouseButton = 1
+
 // MouseButtonRight is the right mouse button
 const MouseButtonRight MouseButton = 2
-// MouseButtonX1 is a fancy auxillary mouse button that not all people have
+
+// MouseButtonX1 is a fancy auxiliary mouse button that not all people have
 const MouseButtonX1 MouseButton = 3
-// MouseButtonX2 is a fancy auxillary mouse button that not all people have
+
+// MouseButtonX2 is a fancy auxiliary mouse button that not all people have
 const MouseButtonX2 MouseButton = 4
 
 // These are a form of button because it simplifies the implementation massively at no real cost.
 
 // MouseButtonScrollUp is a virtual scroll
 const MouseButtonScrollUp MouseButton = 5
+
 // MouseButtonScrollDown is a virtual scroll
-const MouseButtonScrollDown MouseButton = 6 
+const MouseButtonScrollDown MouseButton = 6
+
 // MouseButtonScrollLeft is a virtual scroll
 const MouseButtonScrollLeft MouseButton = 7
+
 // MouseButtonScrollRight is a virtual scroll
 const MouseButtonScrollRight MouseButton = 8
+
 // MouseButtonLength is not a real button. You may need to use (int8)(0) in for loops.
 const MouseButtonLength MouseButton = 9
 
@@ -138,8 +148,8 @@ type MouseEvent struct {
 // Offset offsets the mouse event by a given amount.
 func (ev MouseEvent) Offset(offset Vec2i) MouseEvent {
 	return MouseEvent{
-		Pos: ev.Pos.Add(offset),
-		ID: ev.ID,
+		Pos:    ev.Pos.Add(offset),
+		ID:     ev.ID,
 		Button: ev.Button,
 	}
 }

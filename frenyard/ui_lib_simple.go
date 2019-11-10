@@ -1,4 +1,5 @@
 package frenyard
+
 import "golang.org/x/image/font"
 
 // UIRect is a 'filler' background element.
@@ -11,27 +12,33 @@ type UIRect struct {
 	// Colour (either modulates Texture if present, or is filled as-is)
 	Colour uint32
 }
+
 // NewColouredRectPtr creates a UIRect given a colour and size.
 func NewColouredRectPtr(colour uint32, size Vec2i) *UIRect {
 	return &UIRect{NewUIElementComponent(size), nil, Area2i{}, colour}
 }
+
 // NewTextureRectPtr creates a UIRect given a colour, texture, sprite area, and size.
 func NewTextureRectPtr(colour uint32, tex Texture, sprite Area2i, size Vec2i) *UIRect {
 	return &UIRect{NewUIElementComponent(size), tex, sprite, colour}
 }
+
 // FyENormalEvent implements UIElement.FyENormalEvent
 func (cr *UIRect) FyENormalEvent(ev NormalEvent) {
 }
+
 // FyEMouseEvent implements UIElement.FyEMouseEvent
 func (cr *UIRect) FyEMouseEvent(ev MouseEvent) {
 }
+
 // FyETick implements UIElement.FyETick
 func (cr *UIRect) FyETick(deltaTime float64) {
 }
+
 // FyEDraw implements UIElement.FyEDraw
 func (cr *UIRect) FyEDraw(target Renderer, under bool) {
-	if (!under) {
-		if (cr.Texture != nil) {
+	if !under {
+		if cr.Texture != nil {
 			target.TexRect(cr.Texture, cr.Colour, cr.Sprite, Area2iOfSize(cr.FyESize()))
 		} else {
 			target.FillRect(cr.Colour, Area2iOfSize(cr.FyESize()))
@@ -40,10 +47,11 @@ func (cr *UIRect) FyEDraw(target Renderer, under bool) {
 }
 
 type fyTextLayoutCacheEntry struct {
-	Layout TextLayouterResult
+	Layout    TextLayouterResult
 	LimitsMin Vec2i
 	LimitsMax Vec2i
 }
+
 func (cacheEntry fyTextLayoutCacheEntry) Matches(limits Vec2i) bool {
 	return limits.Ge(cacheEntry.LimitsMin) && cacheEntry.LimitsMax.Ge(limits)
 }
@@ -53,17 +61,18 @@ type UILabel struct {
 	UIElementComponent
 	UILayoutElementComponent
 	LayoutElementNoSubelementsComponent
-	_text string
-	_font font.Face
-	_colour uint32
-	_background uint32 // very useful for debugging
-	_alignment Alignment2i
-	_didInit bool
-	_texture TextLayouterRenderable // Changes based on size!
+	_text          string
+	_font          font.Face
+	_colour        uint32
+	_background    uint32 // very useful for debugging
+	_alignment     Alignment2i
+	_didInit       bool
+	_texture       TextLayouterRenderable // Changes based on size!
 	_textureLimits fyTextLayoutCacheEntry
-	_layoutCache []fyTextLayoutCacheEntry
+	_layoutCache   []fyTextLayoutCacheEntry
 	_preferredSize Vec2i
 }
+
 // NewUILabelPtr creates a new UILabel from the various visual details about it.
 func NewUILabelPtr(text string, font font.Face, colour uint32, back uint32, align Alignment2i) *UILabel {
 	base := &UILabel{}
@@ -136,8 +145,8 @@ func (cr *UILabel) fyLayoutCacheGet(limits Vec2i) fyTextLayoutCacheEntry {
 	}
 	entry := fyTextLayoutCacheEntry{}
 	entry.Layout = TheOneTextLayouterToRuleThemAll(TextLayouterOptions{
-		Text: cr._text,
-		Font: cr._font,
+		Text:   cr._text,
+		Font:   cr._font,
 		Limits: limits,
 	})
 	entry.LimitsMin = limits.Min(entry.Layout.Size)
@@ -190,7 +199,7 @@ func (cr *UILabel) FyETick(deltaTime float64) {
 
 // FyEDraw implements UIElement.FyEDraw
 func (cr *UILabel) FyEDraw(target Renderer, under bool) {
-	if (!under) {
+	if !under {
 		labelArea := Area2iOfSize(cr.FyESize())
 		if cr._background != 0 {
 			target.FillRect(cr._background, labelArea)

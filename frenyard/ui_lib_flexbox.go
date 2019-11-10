@@ -10,13 +10,14 @@ type FlexboxWrapMode uint8
 
 // FlexboxWrapModeNone disallows wrapping for items, they are all on one line.
 const FlexboxWrapModeNone FlexboxWrapMode = 0
+
 // FlexboxWrapModeWrap allows items to wrap between lines.
 const FlexboxWrapModeWrap FlexboxWrapMode = 1
 
 // FlexboxContainer describes a UIFlexboxContainer's contents.
 type FlexboxContainer struct {
 	DirVertical bool
-	WrapMode FlexboxWrapMode
+	WrapMode    FlexboxWrapMode
 	// Ignored when used by the line solver; it uses fyFlexboxSlotlike instead
 	Slots []FlexboxSlot
 }
@@ -81,13 +82,15 @@ func fyFlexboxGetPreferredSize(details FlexboxContainer) Vec2i {
 }
 
 type fyFlexboxRow struct {
-	elem []fyFlexboxSlotlike
-	area []Area2i
+	elem     []fyFlexboxSlotlike
+	area     []Area2i
 	fullArea Area2i
 }
+
 func (slot fyFlexboxRow) fyGrowShrink() (int32, int32) {
 	return 1, 1
 }
+
 // Critical to the whole thing and it's full of guesswork due to the vertical flags and axis juggling.
 func (slot fyFlexboxRow) fyMainCrossSizeForMainCrossLimits(limits Vec2i, vertical bool, debug bool) Vec2i {
 	if debug {
@@ -118,6 +121,7 @@ func (slot fyFlexboxRow) fyCalcBasis(cross int32, vertical bool) int32 {
 func (slot fyFlexboxRow) fyGetOrder() int {
 	return 0
 }
+
 // Do be aware, this only handles the one relevant axis.
 func (slot *fyFlexboxRow) Fill(area Area2i, vertical bool) {
 	for k := range slot.area {
@@ -138,6 +142,7 @@ type fyFlexboxSortingCollection struct {
 	// Given a SOURCE slot index, what is the RESULTING slot index?
 	originalToDisplayIndices []int
 }
+
 func (sc fyFlexboxSortingCollection) Len() int {
 	return len(sc.slots)
 }
@@ -147,7 +152,7 @@ func (sc fyFlexboxSortingCollection) Less(i int, j int) bool {
 func (sc fyFlexboxSortingCollection) Swap(i int, j int) {
 	backup := sc.slots[i]
 	backup2 := sc.originalToDisplayIndices[i]
-	
+
 	sc.slots[i] = sc.slots[j]
 	sc.originalToDisplayIndices[i] = sc.originalToDisplayIndices[j]
 
@@ -164,7 +169,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 		slots[k] = v
 	}
 	sort.Stable(fyFlexboxSortingCollection{
-		slots: slots,
+		slots:                    slots,
 		originalToDisplayIndices: originalToDisplayIndices,
 	})
 	// Stage 2. Wrapping (if relevant)
@@ -172,7 +177,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 	mainCrossLimits := limits.ConditionalTranspose(details.DirVertical)
 	shouldWrap := fyFlexboxSolveLine(details, slots, out, mainCrossLimits, false)
 	// One row, so this is simple
-	rows := []fyFlexboxRow{fyFlexboxRow{slots, out, UnionArea2i(out)}}
+	rows := []fyFlexboxRow{{slots, out, UnionArea2i(out)}}
 	if shouldWrap && details.WrapMode != FlexboxWrapModeNone {
 		// Wrapping has to start. Oh no...
 		// Do note, lines is implicitly limited because of the "one slot cannot wrap" rule.
@@ -181,11 +186,11 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 			rows = make([]fyFlexboxRow, lines)
 			lineStartSlot := 0
 			consumedSlots := 0
-		
+
 			currentLine := int32(0)
 			for consumedSlots < len(slots) {
 				// If it wraps...
-				if fyFlexboxSolveLine(details, slots[lineStartSlot:consumedSlots + 1], out[lineStartSlot:consumedSlots + 1], mainCrossLimits, false) {
+				if fyFlexboxSolveLine(details, slots[lineStartSlot:consumedSlots+1], out[lineStartSlot:consumedSlots+1], mainCrossLimits, false) {
 					// Revert it & finish the line.
 					rows[currentLine] = fyFlexboxRow{
 						slots[lineStartSlot:consumedSlots],
@@ -227,7 +232,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 		}
 		fyFlexboxSolveLine(FlexboxContainer{
 			DirVertical: !details.DirVertical,
-			WrapMode: FlexboxWrapModeNone,
+			WrapMode:    FlexboxWrapModeNone,
 		}, rowSlots, rowAreas, Vec2i{mainCrossLimits.Y, mainCrossLimits.X}, false)
 		for rk, row := range rows {
 			row.Fill(rowAreas[rk], !details.DirVertical)
@@ -245,6 +250,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 	}
 	return realOutput
 }
+
 // Returns true if should wrap. Will not return true ever for only one slot as this cannot wrap.
 func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out []Area2i, mainCrossLimits Vec2i, debug bool) bool {
 	if len(slots) == 0 {
@@ -365,7 +371,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 type UIFlexboxContainer struct {
 	UIPanel
 	UILayoutElementComponent
-	_state FlexboxContainer
+	_state         FlexboxContainer
 	_preferredSize Vec2i
 }
 

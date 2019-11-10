@@ -52,7 +52,7 @@ type UIElement interface {
 // UIElementComponent implements the resizing logic for UIElement.
 type UIElementComponent struct {
 	// SUPER DUPER PRIVATE! DO NOT ACCESS OUTSIDE OF MEMBER METHODS.
-	_size Vec2i
+	_fyUIElementComponentSize Vec2i
 }
 
 // NewUIElementComponent creates a new UIElementComponent.
@@ -62,12 +62,12 @@ func NewUIElementComponent(size Vec2i) UIElementComponent {
 
 // FyEResize implements UIElement.FyEResize
 func (es *UIElementComponent) FyEResize(size Vec2i) {
-	es._size = size
+	es._fyUIElementComponentSize = size
 }
 
 // FyESize implements UIElement.FyESize
 func (es *UIElementComponent) FyESize() Vec2i {
-	return es._size
+	return es._fyUIElementComponentSize
 }
 
 type fyWindowElementBinding struct {
@@ -122,6 +122,8 @@ type PanelFixedElement struct {
 	Pos Vec2i
 	// Setting this to false is useful if you want an element to still tick but want to remove the drawing overhead.
 	Visible bool
+	// Setting this to true 'locks' the element. The element still participates in hit-tests but fails to focus and events are NOT forwarded.
+	Locked bool
 	Element UIElement
 }
 
@@ -182,6 +184,8 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 		if pan._focus != -1 {
 			// Ensure the focus has been notified.
 			focusElement := pan._content[pan._focus]
+			// Has to occur before the buttons get removed or ordering issues occur.
+			pan._focus = -1
 			// And we've successfully delivered the MOUSEDOWNs to the *new* element, -1, by default
 			for button := (uint)(0); button < (uint)(MouseButtonLength); button++ {
 				if pan._buttonsDown&(1<<button) != 0 {
@@ -194,7 +198,6 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 			}
 			focusElement.Element.FyENormalEvent(FocusEvent{false})
 		}
-		pan._focus = -1
 	}
 	pan._content = content
 }
@@ -202,19 +205,24 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 // FyENormalEvent implements UIElement.FyENormalEvent
 func (pan *UIPanel) FyENormalEvent(ev NormalEvent) {
 	if pan.ThisUIPanelDetails._focus != -1 {
-		pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus].Element.FyENormalEvent(ev)
+		elem := pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
+		if elem.Visible && !elem.Locked {
+			elem.Element.FyENormalEvent(ev)
+		}
 	}
 }
 
 func (pan *UIPanel) _fyUIPanelForwardMouseEvent(target PanelFixedElement, ev MouseEvent) {
 	ev = ev.Offset(target.Pos.Negate())
+	// Problematic mouse events are prevented from reaching locked targets via the hit-test logic.
 	target.Element.FyEMouseEvent(ev)
 }
 
 // FyEMouseEvent implements UIElement.FyEMouseEvent
 func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 	// Useful for debugging if any of the warnings come up
-	//fmt.Printf("ui_core.go/Panel/FyEMouseEvent %v %v (%v, %v)\n", ev.Id, ev.Button, ev.Pos.X, ev.Pos.Y)
+	// if ev.ID != MouseEventMove { fmt.Printf("ui_core.go/Panel (%p)/FyEMouseEvent %v %v (%v, %v)\n", pan, ev.ID, ev.Button, ev.Pos.X, ev.Pos.Y) }
+	
 	invalid := false
 	hittest := -1
 	buttonMask := (uint16)(0)
@@ -231,6 +239,9 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 		if Area2iFromVecs(val.Pos, val.Element.FyESize()).Contains(ev.Pos) {
 			//fmt.Printf(" Hit index %v\n", key)
 			hittest = key
+			if val.Locked {
+				hittest = -1
+			}
 			break
 		}
 	}
@@ -242,11 +253,11 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 		}
 		invalid = true
 	case MouseEventUp:
-		if pan.ThisUIPanelDetails._buttonsDown&(1<<(uint)(ev.Button)) == 0 {
-			fmt.Println("ui_core.go/Panel/FyEMouseEvent warning: Button removal on non-existent button")
+		if pan.ThisUIPanelDetails._buttonsDown & buttonMask == 0 {
+			fmt.Printf("ui_core.go/Panel (%p)/FyEMouseEvent warning: Button removal on non-existent button %v\n", pan, ev.Button)
 			invalid = true
 		} else {
-			pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ (1 << (uint)(ev.Button))
+			pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ buttonMask
 		}
 	case MouseEventDown:
 		if pan.ThisUIPanelDetails._buttonsDown == 0 {

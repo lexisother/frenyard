@@ -312,3 +312,20 @@ func SplitArea2iGrid3x3(outer Area2i, inner Area2i) Area2iGrid3x3 {
 func (a Area2iGrid3x3) AsMargin() Area2i {
 	return Area2iFromVecs(a.A.Size().Negate(), a.I.Size().Add(a.A.Size()))
 }
+
+// Part VI: Easings
+
+// EasingQuadraticIn is a quadratic ease-in function, which in practice means it just squares the input value.
+func EasingQuadraticIn(point float64) float64 {
+	return point * point
+}
+
+// EasingInOut currys a function. Given an ease-in function, returns an ease in-out function.
+func EasingInOut(easeIn func (float64) float64) func(float64) float64 {
+	return func (point float64) float64 {
+		if point < 0.5 {
+			return easeIn(point * 2.0) / 2.0
+		}
+		return 1.0 - (easeIn(2.0 - (point * 2.0)) / 2.0)
+	}
+}

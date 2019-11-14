@@ -61,47 +61,48 @@ type UILabel struct {
 	UIElementComponent
 	UILayoutElementComponent
 	LayoutElementNoSubelementsComponent
-	_text          string
+	_text          TypeChunk
 	_font          font.Face
 	_colour        uint32
 	_background    uint32 // very useful for debugging
 	_alignment     Alignment2i
 	_didInit       bool
-	_texture       TextLayouterRenderable // Changes based on size!
+	_texture       Texture // Changes based on size!
 	_textureLimits fyTextLayoutCacheEntry
 	_layoutCache   []fyTextLayoutCacheEntry
 	_preferredSize Vec2i
 }
 
 // NewUILabelPtr creates a new UILabel from the various visual details about it.
-func NewUILabelPtr(text string, font font.Face, colour uint32, back uint32, align Alignment2i) *UILabel {
+func NewUILabelPtr(text TypeChunk, colour uint32, back uint32, align Alignment2i) *UILabel {
 	base := &UILabel{}
 	InitUILayoutElementComponent(base)
-	base.SetTextAndFont(text, font)
+	base.SetText(text)
 	base._colour = colour
 	base._background = back
 	base._alignment = align
 	return base
 }
 
-// Text gets the text.
-func (cr *UILabel) Text() string {
+// Text gets the document.
+func (cr *UILabel) Text() TypeChunk {
 	return cr._text
 }
 
-// SetText sets the text.
-func (cr *UILabel) SetText(text string) {
-	cr.SetTextAndFont(text, cr.Font())
-}
-
-// Font gets the font.
-func (cr *UILabel) Font() font.Face {
-	return cr._font
-}
-
-// SetFont sets the font.
-func (cr *UILabel) SetFont(font font.Face) {
-	cr.SetTextAndFont(cr.Text(), font)
+// SetText sets the document.
+func (cr *UILabel) SetText(text TypeChunk) {
+	cr._text = text
+	cr._layoutCache = []fyTextLayoutCacheEntry{}
+	baseLayout := cr.fyLayoutCacheGet(Vec2iUnlimited())
+	cr._texture = baseLayout.Layout.Draw()
+	cr._textureLimits = baseLayout
+	cr._preferredSize = cr._texture.Size()
+	if !cr._didInit {
+		cr._didInit = true
+		cr.FyEResize(cr._preferredSize)
+	} else {
+		cr.ThisUILayoutElementComponentDetails.ContentChanged()
+	}
 }
 
 // Colour gets the colour.
@@ -146,30 +147,13 @@ func (cr *UILabel) fyLayoutCacheGet(limits Vec2i) fyTextLayoutCacheEntry {
 	entry := fyTextLayoutCacheEntry{}
 	entry.Layout = TheOneTextLayouterToRuleThemAll(TextLayouterOptions{
 		Text:   cr._text,
-		Font:   cr._font,
 		Limits: limits,
 	})
-	entry.LimitsMin = limits.Min(entry.Layout.Size)
-	entry.LimitsMax = limits.Max(entry.Layout.Size)
+	areaSize := entry.Layout.Area.Size()
+	entry.LimitsMin = limits.Min(areaSize)
+	entry.LimitsMax = limits.Max(areaSize)
 	cr._layoutCache = append(cr._layoutCache, entry)
 	return entry
-}
-
-// SetTextAndFont sets the layout-affecting content of the label atomically, which helps with performance over individual changes.
-func (cr *UILabel) SetTextAndFont(text string, font font.Face) {
-	cr._text = text
-	cr._font = font
-	cr._layoutCache = []fyTextLayoutCacheEntry{}
-	baseLayout := cr.fyLayoutCacheGet(Vec2iUnlimited())
-	cr._texture = baseLayout.Layout.Draw()
-	cr._textureLimits = baseLayout
-	cr._preferredSize = cr._texture.Size
-	if !cr._didInit {
-		cr._didInit = true
-		cr.FyEResize(cr._preferredSize)
-	} else {
-		cr.ThisUILayoutElementComponentDetails.ContentChanged()
-	}
 }
 
 // FyEResize overrides UIElementComponent.FyEResize
@@ -204,7 +188,8 @@ func (cr *UILabel) FyEDraw(target Renderer, under bool) {
 		if cr._background != 0 {
 			target.FillRect(cr._background, labelArea)
 		}
-		cr._texture.Draw(target, labelArea.Align(cr._texture.Size, cr._alignment).Pos(), cr._colour)
+		texSize := cr._texture.Size()
+		target.TexRect(cr._texture, cr._colour, Area2iOfSize(texSize), labelArea.Align(texSize, cr._alignment))
 	}
 }
 
@@ -213,5 +198,5 @@ func (cr *UILabel) FyLSizeForLimits(limits Vec2i) Vec2i {
 	if limits.Ge(cr._preferredSize) {
 		return cr._preferredSize
 	}
-	return cr.fyLayoutCacheGet(limits).Layout.Size
+	return cr.fyLayoutCacheGet(limits).Layout.Area.Size()
 }

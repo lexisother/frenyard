@@ -17,7 +17,7 @@ var GlobalFont font.Face
 // ButtonTextFont for buttons
 var ButtonTextFont font.Face
 
-func init() {
+func deSetupFonts() {
 	font, err := freetype.ParseFont(goregular.TTF)
 	if err != nil {
 		panic(err)
@@ -26,7 +26,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	PageTitleFont = frenyard.CreateTTFFont(font, 72, 24)
-	GlobalFont = frenyard.CreateTTFFont(font, 72, 16)
-	ButtonTextFont = frenyard.CreateTTFFont(fontB, 72, 14)
+	PageTitleFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(DesignScale.Scale(24, frenyard.ScaleRMCeil)))
+	GlobalFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(DesignScale.Scale(16, frenyard.ScaleRMCeil)))
+	ButtonTextFont = frenyard.CreateTTFFont(fontB, frenyard.DPIPixels, float64(DesignScale.Scale(14, frenyard.ScaleRMCeil)))
 }

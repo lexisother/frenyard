@@ -38,6 +38,8 @@ type Window interface {
 	SetName(name string)
 	Present()
 	Destroy()
+	// Gets the DPI of the window. This can change. Oh well.
+	GetLocalDPI() float64
 }
 
 // Renderer is an abstract rendering interface.

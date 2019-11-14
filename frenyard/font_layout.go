@@ -1,147 +1,149 @@
 package frenyard
 
 import (
-	"golang.org/x/image/font"
+	"image"
 	"golang.org/x/image/math/fixed"
 )
 
+// "The Annoyance" is stupid things like characters going behind their own start points.
+// "Accounts for the Annoyance" is, essentially, awful workarounds HERE to keep the REST of the system sane.
+
 // TextLayouterOptions contains the options for text layout.
 type TextLayouterOptions struct {
-	Text string
-	Font font.Face
-	// SIZE_UNLIMITED should be used if an axis should be unbounded.
+	Text TypeChunk
+	// SizeUnlimited should be used if an axis should be unbounded.
 	Limits Vec2i
 }
 
-// TextLayouterResult The results from text layouting.
+// TextLayouterResult contains the results from text layouting.
 type TextLayouterResult struct {
-	Size           Vec2i
-	_formattedText []string
-	_font          font.Face
+	Area  Area2i
+	Lines []TypeChunk
 }
 
-// TextLayouterRenderable The results in a renderable form.
-type TextLayouterRenderable struct {
-	Size       Vec2i
-	_lines     []Texture
-	_interline int32
-}
-
-func (tlr *TextLayouterResult) fyAppendLine(line string) {
-	tlr._formattedText = append(tlr._formattedText, line)
-}
-func (tlr *TextLayouterResult) fyCalcSize() {
-	size := Vec2i{}
-	interLine := FontInterline(tlr._font)
-	for k, v := range tlr._formattedText {
-		size = size.Max(FontSize(tlr._font, v).Add(Vec2i{0, int32(k) * interLine}))
+// Calculates the Area.
+func (tlr *TextLayouterResult) fyCalcSize(xLimit int32) {
+	bounds := fixed.Rectangle26_6{}
+	dot := fixed.Point26_6{}
+	for _, v := range tlr.Lines {
+		_, lineBounds := v.FyCBounds(dot)
+		if bounds.Empty() {
+			bounds = lineBounds
+		} else {
+			bounds = bounds.Union(lineBounds)
+		}
+		dot = dot.Add(fixed.P(0, v.FyCHeight()))
 	}
-	tlr.Size = size
+	tlr.Area = FontRectangleConverter(bounds)
+	// Accounts for the Annoyance {
+	if tlr.Area.X.Pos > -1 {
+		// This tries to keep the X.Pos reasonably constant, which stops the text shifting left/right.
+		tlr.Area.X.Size += tlr.Area.X.Pos + 1
+		tlr.Area.X.Pos = -1
+	}
+	tlr.Area.X.Size++
+	if tlr.Area.X.Size > xLimit {
+		// This is an "at any cost" solution to FORCE things to be met.
+		tlr.Area.X.Size = xLimit
+	}
+	// }
 }
 
-// Draw draws the laid-out text to textures and creates a TextLayouterRenderable.
-func (tlr *TextLayouterResult) Draw() TextLayouterRenderable {
-	tex := make([]Texture, len(tlr._formattedText))
-	for k, v := range tlr._formattedText {
-		tex[k] = FontDraw(tlr._font, v)
+// Draw draws the laid-out text to a texture.
+func (tlr *TextLayouterResult) Draw() Texture {
+	img := image.NewNRGBA(image.Rect(0, 0, int(tlr.Area.X.Size), int(tlr.Area.Y.Size)))
+	dotFy := tlr.Area.Pos().Negate()
+	dot := fixed.P(int(dotFy.X), int(dotFy.Y))
+	for _, v := range tlr.Lines {
+		v.FyCDraw(img, dot)
+		dot = dot.Add(fixed.P(0, v.FyCHeight()))
 	}
-	rdr := TextLayouterRenderable{
-		Size:       tlr.Size,
-		_lines:     tex,
-		_interline: FontInterline(tlr._font),
-	}
-	return rdr
+	return GoImageToTexture(img)
 }
 
-// Draw actually draws the TextLayouterRenderable to the screen.
-func (tlr *TextLayouterRenderable) Draw(r Renderer, pos Vec2i, colour uint32) {
-	interLine := tlr._interline
-	for _, v := range tlr._lines {
-		r.TexRect(v, colour, Area2iOfSize(v.Size()), Area2iFromVecs(pos, v.Size()))
-		pos.Y += interLine
-	}
-}
-
-func fyTextLayouterBreakerNormal(text string, fnt font.Face, xLimit int32, wordwrap bool) TextLayouterResult {
+func fyTextLayouterBreakerNormal(text TypeChunk, xLimit int32, wordwrap bool) TextLayouterResult {
+	// Accounts for the Annoyance {
+	xLimit--
+	// }
 	committedBuffer := TextLayouterResult{
-		_font:          fnt,
-		_formattedText: []string{},
+		Lines: []TypeChunk{},
 	}
-	// To lower the CPU usage, this function has to engage directly with the font drawing interface.
-	lineDrawer := font.Drawer{
-		Face: fnt,
-	}
-	lineBuffer := ""
-	positionAfterLastSpace := -1
+	lineBufferStart := 0
+	textCursor := 0
+	// End of line buffer is text cursor
+	lineBufferDot := fixed.Point26_6{}
+	lastSpaceComponent := -1
 	// Do be alerted! This retrieves runes, but slices use byte indexes.
-	// Used to get the start of the iterator to reset lineDrawer
 	carriageReturn := false
-	for len(text) > 0 {
-		currentBody := text
-		text = ""
-		for charStart, char := range currentBody {
-			if char == '\n' {
-				// Newline, commit buffer
-				committedBuffer.fyAppendLine(lineBuffer)
-				lineBuffer = ""
-				positionAfterLastSpace = -1
+	textLength := text.FyCComponentCount()
+	for textCursor < textLength {
+		breakStatus := text.FyCComponentBreakStatus(textCursor)
+		if breakStatus == TypeChunkComponentBreakStatusNewline {
+			// Newline, commit buffer
+			committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(lineBufferStart, textCursor))
+			textCursor++
+			lineBufferStart = textCursor
+			lastSpaceComponent = -1
+			carriageReturn = true
+			continue
+		}
+		if carriageReturn {
+			lineBufferDot = fixed.Point26_6{}
+			advance, _ := text.FyCSection(lineBufferStart, textCursor).FyCBounds(lineBufferDot)
+			lineBufferDot = lineBufferDot.Add(advance)
+		}
+		// Insert character
+		advance := text.FyCComponentAdvance(textCursor, textCursor != lineBufferStart)
+		lineBufferDot = lineBufferDot.Add(fixed.Point26_6{X: advance})
+		if int32(lineBufferDot.X.Ceil()) >= xLimit {
+			// Check for cut position. Disabling wordwrap prevents these from ever being found.
+			if lastSpaceComponent >= 0 {
+				// Append the confirmed text.
+				committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(lineBufferStart, lastSpaceComponent))
+				// Reset the line buffer to being at the " "
+				lineBufferStart = lastSpaceComponent
+				textCursor = lastSpaceComponent + 1
 				carriageReturn = true
-				continue
-			}
-			if carriageReturn {
-				lineDrawer.Dot = fixed.Point26_6{}
-				_, advance := lineDrawer.BoundString(lineBuffer)
-				lineDrawer.Dot = lineDrawer.Dot.Add(fixed.Point26_6{X: advance})
-			}
-			// Insert character
-			bound, advance := lineDrawer.BoundString(string(char))
-			lineDrawer.Dot = lineDrawer.Dot.Add(fixed.Point26_6{X: advance})
-			if int32(bound.Max.X.Ceil()) >= xLimit {
-				// Check for cut position. Disabling wordwrap prevents these from ever being found.
-				// Notably if the cut position is 0, that means it's probably a wordwrap start space.
-				if positionAfterLastSpace > 0 {
-					// Stitch together things. This gets very complicated because of the range iterator.
-					text = lineBuffer[positionAfterLastSpace:] + currentBody[charStart:]
-					committedBuffer.fyAppendLine(lineBuffer[:positionAfterLastSpace])
-					lineBuffer = " "
-					carriageReturn = true
-					positionAfterLastSpace = -1
-					// So with that done, use a break to reset the iterator.
-					break
-				} else {
-					// Character break. Much simpler, doesn't even require interrupting the stream.
-					// If the character actually failed here we'd be doomed anyway, so place it now, too.
-					if lineBuffer == " " {
-						committedBuffer.fyAppendLine(string(char))
-						lineBuffer = ""
-						carriageReturn = true
-					} else {
-						committedBuffer.fyAppendLine(lineBuffer)
-						lineBuffer = string(char)
-						carriageReturn = true
-					}
-				}
+				lastSpaceComponent = -1
 			} else {
-				lineBuffer += string(char)
-				if char == ' ' && wordwrap {
-					// Successfully inserting space, let's note that
-					positionAfterLastSpace = len(lineBuffer)
+				// Character break. Much simpler, doesn't even require interrupting the stream.
+				// If the character actually failed here we'd be doomed anyway, so place it now, too.
+				if lineBufferStart == textCursor - 1 && text.FyCComponentBreakStatus(lineBufferStart) == TypeChunkComponentBreakStatusSpace {
+					// The line buffer just contains a space.
+					// Draw this char and then CR immediately since it's clear there's pretty much no room.
+					committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(textCursor, textCursor + 1))
+					textCursor++
+					lineBufferStart = textCursor
+					carriageReturn = true
+					// Line buffer is now empty.
+				} else {
+					committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(lineBufferStart, textCursor))
+					// This includes the character in the new line buffer.
+					lineBufferStart = textCursor
+					textCursor++
+					carriageReturn = true
 				}
 			}
+		} else {
+			if breakStatus == TypeChunkComponentBreakStatusSpace && wordwrap {
+				// Successfully inserting space, let's note that
+				lastSpaceComponent = textCursor
+			}
+			textCursor++
 		}
 	}
-	if lineBuffer != "" {
-		committedBuffer.fyAppendLine(lineBuffer)
+	if lineBufferStart != textCursor {
+		committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(lineBufferStart, textCursor))
 	}
-	committedBuffer.fyCalcSize()
+	committedBuffer.fyCalcSize(xLimit)
 	return committedBuffer
 }
 
 // TheOneTextLayouterToRuleThemAll lays out text with wrapping limits and other such constraints.
 func TheOneTextLayouterToRuleThemAll(opts TextLayouterOptions) TextLayouterResult {
-	brokenText := fyTextLayouterBreakerNormal(opts.Text, opts.Font, opts.Limits.X, true)
-	if brokenText.Size.Y >= opts.Limits.Y {
-		brokenText = fyTextLayouterBreakerNormal(opts.Text, opts.Font, opts.Limits.X, false)
+	brokenText := fyTextLayouterBreakerNormal(opts.Text, opts.Limits.X, true)
+	if brokenText.Area.Y.Size >= opts.Limits.Y {
+		brokenText = fyTextLayouterBreakerNormal(opts.Text, opts.Limits.X, false)
 	}
 	return brokenText
 }

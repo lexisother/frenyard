@@ -15,15 +15,15 @@ type NinePatch struct {
 }
 
 // Draw draws the NinePatch on the given renderer with the given container bounds.
-func (np NinePatch) Draw(r Renderer, where Area2i) {
+func (np NinePatch) Draw(r Renderer, where Area2i, scale Scale) {
 	if np.Tex == nil {
 		return
 	}
 	expansionAreas := SplitArea2iGrid3x3(np.Sprite, np.Bounds)
 	spriteAreas := SplitArea2iGrid3x3(np.Sprite, np.Centre)
 	intrusionAreas := SplitArea2iGrid3x3(np.Bounds, np.Centre)
-	expansionMargin := expansionAreas.AsMargin()
-	intrusionMargin := intrusionAreas.AsMargin()
+	expansionMargin := scale.Margin2(expansionAreas.AsMargin(), ScaleRMNinePatch)
+	intrusionMargin := scale.Margin2(intrusionAreas.AsMargin(), ScaleRMNinePatch)
 
 	whereOuter := where.Expand(expansionMargin)
 	whereInner := where.Contract(intrusionMargin)

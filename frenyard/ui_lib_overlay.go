@@ -9,7 +9,14 @@ type NinePatchPackage struct {
 	Over     NinePatch
 	Under    NinePatch
 	Padding  Area2i
+	// Scales everything (including padding!)
+	Scale    Scale
 	Clipping bool
+}
+
+// GetEffectivePadding scales Padding by the scale, which provides the padding as it is used in practice.
+func (npp NinePatchPackage) GetEffectivePadding() Area2i {
+	return npp.Scale.Margin2(npp.Padding, ScaleRMNinePatch)
 }
 
 // UIOverlayContainer overlays elements on top of each other, and this itself on top of a potentially padded NinePatchPackage.
@@ -38,7 +45,7 @@ func (ufc *UIOverlayContainer) FyLSubelementChanged() {
 	for _, v := range ufc._state {
 		size = size.Max(v.FyLSizeForLimits(Vec2iUnlimited()))
 	}
-	ufc._preferredSize = size.Add(ufc._ninePatch.Padding.Size())
+	ufc._preferredSize = size.Add(ufc._ninePatch.GetEffectivePadding().Size())
 	ufc.ThisUILayoutElementComponentDetails.ContentChanged()
 }
 
@@ -48,10 +55,11 @@ func (ufc *UIOverlayContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
 		return ufc._preferredSize
 	}
 	max := Vec2i{}
+	paddingSize := ufc._ninePatch.GetEffectivePadding().Size()
 	for _, v := range ufc._state {
-		max = max.Max(v.FyLSizeForLimits(limits.Add(ufc._ninePatch.Padding.Size().Negate())))
+		max = max.Max(v.FyLSizeForLimits(limits.Add(paddingSize.Negate())))
 	}
-	return max.Add(ufc._ninePatch.Padding.Size())
+	return max.Add(paddingSize)
 }
 
 // SetContent changes the content of the UIOverlayContainer.
@@ -73,7 +81,7 @@ func (ufc *UIOverlayContainer) SetContent(npp NinePatchPackage, setup []UILayout
 // FyEResize overrides UIPanel.FyEResize
 func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
 	ufc.UIPanel.FyEResize(size)
-	area := Area2iOfSize(size).Contract(ufc._ninePatch.Padding)
+	area := Area2iOfSize(size).Contract(ufc._ninePatch.GetEffectivePadding())
 	fixes := make([]PanelFixedElement, len(ufc._state))
 	for idx, slot := range ufc._state {
 		fixes[idx] = PanelFixedElement{
@@ -89,9 +97,9 @@ func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
 // FyEDraw overrides UIPanel.FyEDraw
 func (ufc *UIOverlayContainer) FyEDraw(r Renderer, under bool) {
 	if under {
-		ufc._ninePatch.Under.Draw(r, Area2iOfSize(ufc.FyESize()))
+		ufc._ninePatch.Under.Draw(r, Area2iOfSize(ufc.FyESize()), ufc._ninePatch.Scale)
 	} else {
-		ufc._ninePatch.Over.Draw(r, Area2iOfSize(ufc.FyESize()))
+		ufc._ninePatch.Over.Draw(r, Area2iOfSize(ufc.FyESize()), ufc._ninePatch.Scale)
 	}
 	ufc.UIPanel.FyEDraw(r, under)
 }

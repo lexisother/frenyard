@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	design.Setup(frenyard.ScaleFromFloat64(2))
+	fmt.Printf("%v\n", design.DesignScale)
 	frenyard.TargetFrameTime = 0.016
 	// Ok, now start...
 	upShowFailureToFindGameDialog()
@@ -19,7 +21,9 @@ func main() {
 type upTextPanel struct {
 	frenyard.UILayoutProxy
 	textTitle             *frenyard.UILabel
+	textTitleText         string
 	text                  *frenyard.UILabel
+	textText              string
 	bodyMode              bool
 	remainingToAddToLabel string
 	counter               float64
@@ -28,8 +32,8 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 	elem := &upTextPanel{
 		remainingToAddToLabel: text,
 	}
-	elem.text = frenyard.NewUILabelPtr("", design.GlobalFont, design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart})
-	elem.textTitle = frenyard.NewUILabelPtr("", design.PageTitleFont, design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignMiddle, Y: frenyard.AlignStart})
+	elem.text = frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart})
+	elem.textTitle = frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("", design.PageTitleFont), design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignMiddle, Y: frenyard.AlignStart})
 
 	testButtonWrapper := frenyard.NewUIButtonPtr(design.ButtonContentOkAction("OK"), ok)
 
@@ -71,7 +75,6 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 			},
 			{
 				Element:  titleWrapper,
-				MinBasis: design.SizeTitleHeight,
 				Order:    0,
 			},
 		},
@@ -100,15 +103,13 @@ func (dialog *upTextPanel) FyETick(seconds float64) {
 		dialog.remainingToAddToLabel = dialog.remainingToAddToLabel[cutPoint:]
 		if piece == "\t" {
 			dialog.bodyMode = !dialog.bodyMode
-			if !dialog.bodyMode {
-				dialog.textTitle.SetText("")
-				dialog.text.SetText("")
-			}
 		} else {
 			if !dialog.bodyMode {
-				dialog.textTitle.SetText(dialog.textTitle.Text() + piece)
+				dialog.textTitleText += piece
+				dialog.textTitle.SetText(frenyard.NewTextTypeChunk(dialog.textTitleText, design.PageTitleFont))
 			} else {
-				dialog.text.SetText(dialog.text.Text() + piece)
+				dialog.textText += piece
+				dialog.text.SetText(frenyard.NewTextTypeChunk(dialog.textText, design.GlobalFont))
 			}
 		}
 	}
@@ -122,8 +123,9 @@ func upShowFailureToFindGameDialog() {
 		elem.TransitionTo(newUpTextPanelPtr(fmt.Sprintf("Slide %v\tHello from slide %v\nIt's nice here", slideNum, slideNum), slideFn), 1.0, slideNum & 2 == 0, slideNum & 1 == 0)
 		slideNum++
 	}
-	elem = frenyard.NewUISlideTransitionContainerPtr(newUpTextPanelPtr("Test\tMeep", slideFn))
-	_, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.ThemeBackground, elem)
+	elem = frenyard.NewUISlideTransitionContainerPtr(newUpTextPanelPtr("Test yup YUP a test\tMeep", slideFn))
+	wnd, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.ThemeBackground, elem)
+	fmt.Printf("%v\n", wnd.GetLocalDPI())
 	if err != nil {
 		panic(err)
 	}

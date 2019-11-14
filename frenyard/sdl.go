@@ -42,6 +42,18 @@ func (w *fySDL2Window) Destroy() {
 	delete(fyGlobalBackend.windows, w.id)
 	w.window = nil
 }
+func (w *fySDL2Window) GetLocalDPI() float64 {
+	errorDPI := 72.0
+	dIndex, err := w.window.GetDisplayIndex()
+	if err != nil {
+		return errorDPI
+	}
+	ddpi, _, _, err := sdl.GetDisplayDPI(dIndex)
+	if err != nil {
+		return errorDPI
+	}
+	return float64(ddpi)
+}
 
 type fySDL2Backend struct {
 	windows map[uint32]*fySDL2Window

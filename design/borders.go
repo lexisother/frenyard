@@ -34,6 +34,7 @@ func BorderButton(colour uint32) frenyard.NinePatchPackage {
 			ColourMod: colour,
 		},
 		Padding:  frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),
+		Scale: DesignScale,
 		Clipping: true,
 	}
 }
@@ -55,6 +56,7 @@ func BorderTitle(colour uint32) frenyard.NinePatchPackage {
 			ColourMod: colour,
 		},
 		Padding:  frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),
+		Scale: DesignScale,
 		Clipping: true,
 	}
 }

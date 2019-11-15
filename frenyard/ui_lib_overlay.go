@@ -6,17 +6,17 @@ package frenyard
 
 // NinePatchPackage packages several NinePatches into a set that can be drawn in a UI context.
 type NinePatchPackage struct {
-	Over     NinePatch
-	Under    NinePatch
-	Padding  Area2i
+	Over      NinePatch
+	Under     NinePatch
+	Padding   Area2i
 	// Scales everything (including padding!)
-	Scale    float64
-	Clipping bool
+	Scale     float64
+	Clipping  bool
 }
 
 // GetEffectivePadding scales Padding by the scale, which provides the padding as it is used in practice.
 func (npp NinePatchPackage) GetEffectivePadding() Area2i {
-	return ScaleMargin2(npp.Scale, npp.Padding, ScaleRMNinePatch)
+	return ScaleMargin2(npp.Scale, npp.Padding)
 }
 
 // UIOverlayContainer overlays elements on top of each other, and this itself on top of a potentially padded NinePatchPackage.

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	design.Setup(0.5)
+	design.Setup(frenyard.InferScale())
 	fmt.Printf("%v\n", design.DesignScale)
 	frenyard.TargetFrameTime = 0.016
 	// Ok, now start...
@@ -81,7 +81,7 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 	})
 
 	frenyard.InitUILayoutProxy(elem, titleAndThenBody)
-	elem.FyEResize(frenyard.Vec2i{X: 320, Y: 200})
+	elem.FyEResize(design.SizeWindow)
 	return elem
 }
 func (dialog *upTextPanel) FyETick(seconds float64) {

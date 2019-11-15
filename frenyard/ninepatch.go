@@ -22,8 +22,8 @@ func (np NinePatch) Draw(r Renderer, where Area2i, scale float64) {
 	expansionAreas := SplitArea2iGrid3x3(np.Sprite, np.Bounds)
 	spriteAreas := SplitArea2iGrid3x3(np.Sprite, np.Centre)
 	intrusionAreas := SplitArea2iGrid3x3(np.Bounds, np.Centre)
-	expansionMargin := ScaleMargin2(scale, expansionAreas.AsMargin(), ScaleRMNinePatch)
-	intrusionMargin := ScaleMargin2(scale, intrusionAreas.AsMargin(), ScaleRMNinePatch)
+	expansionMargin := ScaleMargin2(scale, expansionAreas.AsMargin())
+	intrusionMargin := ScaleMargin2(scale, intrusionAreas.AsMargin())
 
 	whereOuter := where.Expand(expansionMargin)
 	whereInner := where.Contract(intrusionMargin)

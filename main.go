@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	design.Setup(frenyard.ScaleFromFloat64(2))
+	design.Setup(0.5)
 	fmt.Printf("%v\n", design.DesignScale)
 	frenyard.TargetFrameTime = 0.016
 	// Ok, now start...

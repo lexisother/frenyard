@@ -1,68 +1,68 @@
 package frenyard
-
-// Scale is a fixed-point value measured by /16 used for scaling, with 0 being 'no change'. It is done this way to make +/- 1 "make sense".
-type Scale int32
+import maths "math"
 
 // ScaleRM describes a rounding mode for scaling values.
 type ScaleRM uint8
 // ScaleRMCeil is ceil(target * scale)
 const ScaleRMCeil ScaleRM = 1
-// ScaleRMInteger is (target * ceil(scale))
+// ScaleRMInteger is (target * ceil(scale)) - this is a safe method for pixel art but cannot handle scales under 1.
 const ScaleRMInteger ScaleRM = 2
-// ScaleRMBinary for Scale >= 0 is ScaleRMInteger, and otherwise accepts the lowest of -8, -12, -14, and -15.
+// ScaleRMBinary uses the highest binary fraction. If given images scaled up using the method in imaging.go by another binary fraction, it's the highest-quality method, but it ignores a wide range of input values. ScaleRMBinInt may be more suitable.
 const ScaleRMBinary ScaleRM = 3
+// ScaleRMBinInt for scale >= 1 is ScaleRMInteger, and otherwise ScaleRMBinary.
+const ScaleRMBinInt ScaleRM = 4
+// ScaleRMIntBin for scale >= 1 is ScaleRMBinary, and otherwise ScaleRMInteger.
+const ScaleRMIntBin ScaleRM = 5
 
 // ScaleRMNinePatch is the scaling method used for NinePatches.
-const ScaleRMNinePatch = ScaleRMBinary
-
-// ScaleFromFloat64 approximately converts a floating-point number to a scale.
-func ScaleFromFloat64(v float64) Scale {
-	return Scale(v * 16) - 16
-}
+const ScaleRMNinePatch = ScaleRMBinInt
 
 // Scale returns a scaled value as an integer.
-func (s Scale) Scale(target int32, rm ScaleRM) int32 {
-	ints := int32(s) + 16
-	if rm == ScaleRMBinary {
-		if ints < 16 {
-			if ints <= 1 {
-				ints = 1
-			} else if ints <= 2 {
-				ints = 2
-			} else if ints <= 4 {
-				ints = 4
-			} else if ints <= 8 {
-				ints = 8
-			} else {
-				ints = 16
-			}
+func Scale(scale float64, target int32, rm ScaleRM) int32 {
+	if rm == ScaleRMBinInt {
+		if scale >= 1 {
+			rm = ScaleRMInteger
+		} else {
+			rm = ScaleRMBinary
+		}
+	}
+	if rm == ScaleRMIntBin {
+		if scale >= 1 {
+			rm = ScaleRMBinary
 		} else {
 			rm = ScaleRMInteger
 		}
 	}
-	if rm == ScaleRMInteger {
-		ints = (ints + 15) & 0x7FFFFFF0
+	if rm == ScaleRMBinary {
+		// 2^math.log(X, 2) == X
+		// the inner ceil creates the 'to highest binary fraction' effect
+		scale = maths.Pow(2, maths.Ceil(maths.Log2(scale)))
+		rm = ScaleRMCeil
 	}
-	// ScaleRMCeil
-	return ((ints * target) + 15) >> 4
+	if rm == ScaleRMInteger {
+		scale = maths.Ceil(scale)
+		rm = ScaleRMCeil
+	}
+	// ScaleRMCeil (default, used by other types)
+	return int32(maths.Ceil(float64(target) * scale))
 }
 
-// Margin1 scales a margin.
-func (s Scale) Margin1(target Area1i, rm ScaleRM) Area1i {
+// ScaleMargin1 scales a margin.
+func ScaleMargin1(scale float64, target Area1i, rm ScaleRM) Area1i {
 	left := target.Pos
 	right := target.Pos + target.Size
-	left = -s.Scale(-left, rm)
-	right = s.Scale(right, rm)
+	left = -Scale(scale, -left, rm)
+	right = Scale(scale, right, rm)
 	return Area1i{
 		Pos: left,
 		Size: right - left,
 	}
 }
 
-// Margin2 scales a margin.
-func (s Scale) Margin2(target Area2i, rm ScaleRM) Area2i {
+// ScaleMargin2 scales a margin.
+func ScaleMargin2(scale float64, target Area2i, rm ScaleRM) Area2i {
 	return Area2i{
-		X: s.Margin1(target.X, rm),
-		Y: s.Margin1(target.Y, rm),
+		X: ScaleMargin1(scale, target.X, rm),
+		Y: ScaleMargin1(scale, target.Y, rm),
 	}
 }

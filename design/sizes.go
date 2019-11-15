@@ -9,8 +9,8 @@ var SizeMarginAroundEverything int32
 var SizeTextNudge int32
 
 func deSetupSizes() {
-	SizeMarginAroundEverything = DesignScale.Scale(16, frenyard.ScaleRMCeil)
-	SizeTextNudge = DesignScale.Scale(4, frenyard.ScaleRMCeil)
+	SizeMarginAroundEverything = frenyard.Scale(DesignScale, 16, frenyard.ScaleRMCeil)
+	SizeTextNudge = frenyard.Scale(DesignScale, 4, frenyard.ScaleRMCeil)
 }
 
 // MarginBody is the amount to push the page body by.

@@ -26,7 +26,7 @@ func deSetupFonts() {
 	if err != nil {
 		panic(err)
 	}
-	PageTitleFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(DesignScale.Scale(24, frenyard.ScaleRMCeil)))
-	GlobalFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(DesignScale.Scale(16, frenyard.ScaleRMCeil)))
-	ButtonTextFont = frenyard.CreateTTFFont(fontB, frenyard.DPIPixels, float64(DesignScale.Scale(14, frenyard.ScaleRMCeil)))
+	PageTitleFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 24, frenyard.ScaleRMCeil)))
+	GlobalFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 16, frenyard.ScaleRMCeil)))
+	ButtonTextFont = frenyard.CreateTTFFont(fontB, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 14, frenyard.ScaleRMCeil)))
 }

@@ -10,13 +10,13 @@ type NinePatchPackage struct {
 	Under    NinePatch
 	Padding  Area2i
 	// Scales everything (including padding!)
-	Scale    Scale
+	Scale    float64
 	Clipping bool
 }
 
 // GetEffectivePadding scales Padding by the scale, which provides the padding as it is used in practice.
 func (npp NinePatchPackage) GetEffectivePadding() Area2i {
-	return npp.Scale.Margin2(npp.Padding, ScaleRMNinePatch)
+	return ScaleMargin2(npp.Scale, npp.Padding, ScaleRMNinePatch)
 }
 
 // UIOverlayContainer overlays elements on top of each other, and this itself on top of a potentially padded NinePatchPackage.

@@ -119,7 +119,7 @@ func (r *fySDL2Backend) CreateTexture(size Vec2i, pixels []uint32) Texture {
 	return osSdl2SurfaceToFyTexture(surface)
 }
 
-func fySDL2MouseButton(button uint8) MouseButton {
+func _fySDL2MouseButton(button uint8) MouseButton {
 	switch button {
 	case sdl.BUTTON_LEFT:
 		return MouseButtonLeft
@@ -134,7 +134,7 @@ func fySDL2MouseButton(button uint8) MouseButton {
 	}
 	return MouseButtonNone
 }
-func fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, minus MouseButton, plus MouseButton) {
+func _fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, minus MouseButton, plus MouseButton) {
 	for apply < 0 {
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventDown, minus})
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, minus})
@@ -145,6 +145,12 @@ func fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, appl
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, plus})
 		apply--
 	}
+}
+
+func _fySDL2MousePositionAdjuster(window *fySDL2Window, x int32, y int32) Vec2i {
+	realSize := window.Size()
+	intX, intY := window.window.GetSize()
+	return Vec2i{(x * realSize.X) / intX, (y * realSize.Y) / intY}
 }
 
 func init() {
@@ -191,18 +197,18 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 			case *sdl.MouseMotionEvent:
 				window := fyGlobalBackend.windows[ev.WindowID]
 				if window != nil {
-					window.cacheMouse = Vec2i{ev.X, ev.Y}
+					window.cacheMouse = _fySDL2MousePositionAdjuster(window, ev.X, ev.Y)
 					window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, MouseEventMove, MouseButtonNone})
 				}
 			case *sdl.MouseButtonEvent:
 				window := fyGlobalBackend.windows[ev.WindowID]
 				if window != nil {
-					window.cacheMouse = Vec2i{ev.X, ev.Y}
+					window.cacheMouse = _fySDL2MousePositionAdjuster(window, ev.X, ev.Y)
 					buttonS := MouseEventDown
 					if ev.State == sdl.RELEASED {
 						buttonS = MouseEventUp
 					}
-					btn := fySDL2MouseButton(ev.Button)
+					btn := _fySDL2MouseButton(ev.Button)
 					if btn != MouseButtonNone {
 						window.receiver.FyRMouseEvent(MouseEvent{window.cacheMouse, buttonS, btn})
 					}
@@ -210,8 +216,8 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 			case *sdl.MouseWheelEvent:
 				window := fyGlobalBackend.windows[ev.WindowID]
 				if window != nil {
-					fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.X, MouseButtonScrollLeft, MouseButtonScrollRight)
-					fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.Y, MouseButtonScrollUp, MouseButtonScrollDown)
+					_fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.X, MouseButtonScrollLeft, MouseButtonScrollRight)
+					_fySDL2MouseWheelAdjuster(window.receiver, window.cacheMouse, ev.Y, MouseButtonScrollUp, MouseButtonScrollDown)
 				}
 			case *sdl.WindowEvent:
 				if ev.Event == sdl.WINDOWEVENT_CLOSE {

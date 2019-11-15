@@ -4,6 +4,7 @@ package frenyard
 func NewUIMarginContainerPtr(innards UILayoutElement, margin Area2i) UILayoutElement {
 	return NewUIOverlayContainerPtr(NinePatchPackage{
 		Padding: margin,
+		Scale: 1,
 	}, []UILayoutElement{
 		innards,
 	})

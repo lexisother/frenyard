@@ -9,7 +9,6 @@ import (
 
 func main() {
 	design.Setup(frenyard.InferScale())
-	fmt.Printf("%v\n", design.DesignScale)
 	frenyard.TargetFrameTime = 0.016
 	// Ok, now start...
 	upShowFailureToFindGameDialog()
@@ -124,8 +123,7 @@ func upShowFailureToFindGameDialog() {
 		slideNum++
 	}
 	elem = frenyard.NewUISlideTransitionContainerPtr(newUpTextPanelPtr("Test yup YUP a test\tMeep", slideFn))
-	wnd, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.ThemeBackground, elem)
-	fmt.Printf("%v\n", wnd.GetLocalDPI())
+	_, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.ThemeBackground, elem)
 	if err != nil {
 		panic(err)
 	}

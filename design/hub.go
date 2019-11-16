@@ -1,5 +1,8 @@
 package design
 
+// "go generate ./..." to regenerate bindata!
+//go:generate go run ./data-compiler borderButtonX1 borderHeaderX2
+
 // DesignScale is the current scale for the Design.
 var DesignScale float64
 

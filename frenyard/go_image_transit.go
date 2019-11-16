@@ -11,6 +11,7 @@ import (
 // fyConvertGoImageColour converts a Go colour into an ARGB colour uint32 as losslessly as possible.
 func fyConvertGoImageColour(col color.Color) uint32 {
 	// Actual color appears to be per-pixel. Great. More problems.
+	
 	switch colConv := col.(type) {
 	case color.NRGBA:
 		return ColourFromARGB(colConv.A, colConv.R, colConv.G, colConv.B)
@@ -28,29 +29,26 @@ func fyConvertGoImageColour(col color.Color) uint32 {
 			b = uint8((uint16(colConv.B) * 255) / a16)
 		}
 		return ColourFromARGB(a, r, g, b)
-	default:
-		{
-			// Give up and work backwards from premultiplied (NOT GOOD!!!)
-			r, g, b, a := col.RGBA()
-			if (a != 0) && (a != 0xFFFF) {
-				// Scaling, also implicitly does the 8-bit conversion
-				r *= 255
-				g *= 255
-				b *= 255
-				r /= a
-				g /= a
-				b /= a
-			} else {
-				// Convert to 8-bit
-				r >>= 8
-				g >>= 8
-				b >>= 8
-			}
-			// Convert alpha to 8-bit
-			a >>= 8
-			return ColourFromARGB(uint8(a), uint8(r), uint8(g), uint8(b))
-		}
 	}
+	// Give up and work backwards from premultiplied (NOT GOOD!!!)
+	r, g, b, a := col.RGBA()
+	if (a != 0) && (a != 0xFFFF) {
+		// Scaling, also implicitly does the 8-bit conversion
+		r *= 255
+		g *= 255
+		b *= 255
+		r /= a
+		g /= a
+		b /= a
+	} else {
+		// Convert to 8-bit
+		r >>= 8
+		g >>= 8
+		b >>= 8
+	}
+	// Convert alpha to 8-bit
+	a >>= 8
+	return ColourFromARGB(uint8(a), uint8(r), uint8(g), uint8(b))
 }
 
 // GoImageToTexture imports an image from Go's "image" library to a texture.

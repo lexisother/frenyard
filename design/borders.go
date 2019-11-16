@@ -97,6 +97,7 @@ func BorderTitle(colour uint32) frenyard.Frame {
 			NinePatch: _borderStandardBorderNinepatch(frenyard.NinePatch{
 				Tex:       borderHeaderTexture,
 			}, 4),
+			Scale: borderEffectiveScale,
 			ColourMod: colour,
 		},
 		Padding:  frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2}),

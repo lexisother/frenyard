@@ -14,7 +14,7 @@ type deUIDesignButton struct {
 // FyETick overrides UILayoutProxy.FyETick
 func (de *deUIDesignButton) FyETick(time float64) {
 	de.UILayoutProxy.FyETick(time)
-	if de.button.Hover || de.button.Down {
+	if de.button.Hover || de.button.Down || de.button.Focused {
 		de.focusState += time * 4
 		if de.focusState >= 1 {
 			de.focusState = 1
@@ -49,7 +49,7 @@ func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pa
 		primaryColour := uint32(0xFF2040FF)
 		if de.button.Down {
 			primaryColour = 0xFF102080
-		} else if de.button.Hover {
+		} else if de.button.Hover || de.button.Focused {
 			primaryColour = 0xFF4060FF
 		}
 		borderButton.Draw(r, frenyard.Area2iOfSize(size), borderEffectiveScale, frenyard.DrawRectCommand{

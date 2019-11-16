@@ -6,7 +6,7 @@ import "golang.org/x/image/font"
 type UIRect struct {
 	UIElementComponent
 	// May be nil.
-	Texture Texture
+	Tex Texture
 	// If Texture is nil, this is ignored.
 	Sprite Area2i
 	// Colour (either modulates Texture if present, or is filled as-is)
@@ -38,11 +38,12 @@ func (cr *UIRect) FyETick(deltaTime float64) {
 // FyEDraw implements UIElement.FyEDraw
 func (cr *UIRect) FyEDraw(target Renderer, under bool) {
 	if !under {
-		if cr.Texture != nil {
-			target.TexRect(cr.Texture, cr.Colour, cr.Sprite, Area2iOfSize(cr.FyESize()))
-		} else {
-			target.FillRect(cr.Colour, Area2iOfSize(cr.FyESize()))
-		}
+		target.DrawRect(DrawRectCommand{
+			Tex: cr.Tex,
+			Colour: cr.Colour,
+			TexSprite: cr.Sprite,
+			Target: Area2iOfSize(cr.FyESize()),
+		})
 	}
 }
 
@@ -186,10 +187,18 @@ func (cr *UILabel) FyEDraw(target Renderer, under bool) {
 	if !under {
 		labelArea := Area2iOfSize(cr.FyESize())
 		if cr._background != 0 {
-			target.FillRect(cr._background, labelArea)
+			target.DrawRect(DrawRectCommand{
+				Colour: cr._background,
+				Target: labelArea,
+			})
 		}
 		texSize := cr._texture.Size()
-		target.TexRect(cr._texture, cr._colour, Area2iOfSize(texSize), labelArea.Align(texSize, cr._alignment))
+		target.DrawRect(DrawRectCommand{
+			Tex: cr._texture,
+			TexSprite: Area2iOfSize(texSize),
+			Colour: cr._colour,
+			Target: labelArea.Align(texSize, cr._alignment),
+		})
 	}
 }
 

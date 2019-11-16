@@ -4,16 +4,20 @@ digraph Dependencies {
 		label = "Core";
 		"core_render";
 		"core_maths";
+		"core_wsi";
 		"ext_fonts";
 		"font_img";
 		"font_ttf";
 		"core_render" -> "core_maths";
-		"ext_fonts" -> "core_maths";
-		"go_image_transit" -> "core_render";
-		"font_img" -> "ext_fonts";
-		"font_img" -> "core_render";
-		"font_ttf" -> "ext_fonts";
-		"font_ttf" -> "core_render";
+		"core_wsi" -> "core_maths";
+		"core_wsi" -> "core_render";
+		"font_base" -> "core_maths";
+		"font_base" -> "core_render";
+		"font_base" -> "imaging";
+		"font_layout" -> "core_maths";
+		"font_layout" -> "core_render";
+		"font_layout" -> "imaging";
+		"imaging" -> "core_render";
 	}
 	"ext_fonts" -> "core_render" [ltail=cluster1,lhead=cluster0,minlen=3];
 	subgraph cluster2 {
@@ -34,6 +38,11 @@ digraph Dependencies {
 		"ui_layout" -> "ui_core";
 		"ui_lib_simple" -> "ui_core";
 		"ui_lib_test" -> "ui_core";
+		"ui_lib_overlay" -> "ui_core";
+		"ui_lib_overlay" -> "ui_layout";
+		"ninepatch";
+		"ninepatch_frame" -> "ninepatch";
+		"ninepatch_frame" -> "ui_lib_overlay";
 	}
 	"ui_core" -> "core_render" [ltail=cluster3,lhead=cluster0,minlen=3];
 	subgraph cluster4 {
@@ -55,6 +64,9 @@ digraph Dependencies {
 		"fyAdaptedLayoutElement" -> "LayoutElementNoSubelementsComponent";
 		"UILabel" -> "UILayoutElement";
 		"UILabel" -> "LayoutElementNoSubelementsComponent";
+
+		"OverlayFrame";
+		"OverlayFrame" -> "OverlayFrameProxy";
 	}
 	// CLASS
 }

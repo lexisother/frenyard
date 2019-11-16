@@ -1,35 +1,48 @@
 package frenyard
 
+/*
+ * Details on this:
+ * Frames are safe to share between containers if the frame itself is allowed to be shared between containers.
+ * This becomes important for NinePatchFrames, introduced in ninepatch_frames.
+ */
+
+// FramePass is a draw pass for a Frame.
+type FramePass uint8
+
+// FramePassUnderBefore is Under, before the interior has been drawn.
+const FramePassUnderBefore FramePass = 0
+// FramePassUnderAfter is Under, after the interior has been drawn.
+const FramePassUnderAfter FramePass = 1
+// FramePassOverBefore is Over, before the interior has been drawn.
+const FramePassOverBefore FramePass = 2
+// FramePassOverAfter is Over, after the interior has been drawn.
+const FramePassOverAfter FramePass = 3
+
+// Frame represents a frame around the stacked elements in a UIOverlayContainer. It is, in a way, a simplified version of a single-element-container suitable for writing theme-related code.
+type Frame interface {
+	// FyFDraw draws a pass of the frame.
+	FyFDraw(r Renderer, size Vec2i, pass FramePass)
+	// FyFPadding returns the padding. This is expected to not change without a notification - given by either resetting the holding container's frame or by doing something else that causes that to occur.
+	FyFPadding() Area2i
+	// FyFClipping returns the requested PanelClipping value for when using this framing.
+	FyFClipping() bool
+}
+
 // 'Overlay': Overlays elements over each other.
-// Can also install a nine-patch-alike.
+// Also an attachment point for a Frame.
 // Useful for backgrounds.
-
-// NinePatchPackage packages several NinePatches into a set that can be drawn in a UI context.
-type NinePatchPackage struct {
-	Over      NinePatch
-	Under     NinePatch
-	Padding   Area2i
-	// Scales everything (including padding!)
-	Scale     float64
-	Clipping  bool
-}
-
-// GetEffectivePadding scales Padding by the scale, which provides the padding as it is used in practice.
-func (npp NinePatchPackage) GetEffectivePadding() Area2i {
-	return ScaleMargin2(npp.Scale, npp.Padding)
-}
 
 // UIOverlayContainer overlays elements on top of each other, and this itself on top of a potentially padded NinePatchPackage.
 type UIOverlayContainer struct {
 	UIPanel
 	UILayoutElementComponent
-	_ninePatch     NinePatchPackage
+	_framing       Frame
 	_state         []UILayoutElement
 	_preferredSize Vec2i
 }
 
 // NewUIOverlayContainerPtr creates a UIOverlayContainer
-func NewUIOverlayContainerPtr(npp NinePatchPackage, setup []UILayoutElement) *UIOverlayContainer {
+func NewUIOverlayContainerPtr(npp Frame, setup []UILayoutElement) *UIOverlayContainer {
 	container := &UIOverlayContainer{
 		UIPanel: NewPanel(Vec2i{}),
 	}
@@ -45,7 +58,7 @@ func (ufc *UIOverlayContainer) FyLSubelementChanged() {
 	for _, v := range ufc._state {
 		size = size.Max(v.FyLSizeForLimits(Vec2iUnlimited()))
 	}
-	ufc._preferredSize = size.Add(ufc._ninePatch.GetEffectivePadding().Size())
+	ufc._preferredSize = size.Add(ufc._framing.FyFPadding().Size())
 	ufc.ThisUILayoutElementComponentDetails.ContentChanged()
 }
 
@@ -55,7 +68,7 @@ func (ufc *UIOverlayContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
 		return ufc._preferredSize
 	}
 	max := Vec2i{}
-	paddingSize := ufc._ninePatch.GetEffectivePadding().Size()
+	paddingSize := ufc._framing.FyFPadding().Size()
 	for _, v := range ufc._state {
 		max = max.Max(v.FyLSizeForLimits(limits.Add(paddingSize.Negate())))
 	}
@@ -63,15 +76,15 @@ func (ufc *UIOverlayContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
 }
 
 // SetContent changes the content of the UIOverlayContainer.
-func (ufc *UIOverlayContainer) SetContent(npp NinePatchPackage, setup []UILayoutElement) {
+func (ufc *UIOverlayContainer) SetContent(npp Frame, setup []UILayoutElement) {
 	if ufc._state != nil {
 		for _, v := range ufc._state {
 			ufc.ThisUILayoutElementComponentDetails.Detach(v)
 		}
 	}
 	ufc._state = setup
-	ufc._ninePatch = npp
-	ufc.ThisUIPanelDetails.Clipping = npp.Clipping
+	ufc._framing = npp
+	ufc.ThisUIPanelDetails.Clipping = npp.FyFClipping()
 	for _, v := range setup {
 		ufc.ThisUILayoutElementComponentDetails.Attach(v)
 	}
@@ -81,7 +94,7 @@ func (ufc *UIOverlayContainer) SetContent(npp NinePatchPackage, setup []UILayout
 // FyEResize overrides UIPanel.FyEResize
 func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
 	ufc.UIPanel.FyEResize(size)
-	area := Area2iOfSize(size).Contract(ufc._ninePatch.GetEffectivePadding())
+	area := Area2iOfSize(size).Contract(ufc._framing.FyFPadding())
 	fixes := make([]PanelFixedElement, len(ufc._state))
 	for idx, slot := range ufc._state {
 		fixes[idx] = PanelFixedElement{
@@ -91,15 +104,20 @@ func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
 		}
 		slot.FyEResize(area.Size())
 	}
+
 	ufc.ThisUIPanelDetails.SetContent(fixes)
 }
 
 // FyEDraw overrides UIPanel.FyEDraw
 func (ufc *UIOverlayContainer) FyEDraw(r Renderer, under bool) {
+	areaSize := ufc.FyESize()
+	beforePass := FramePassOverBefore
+	afterPass := FramePassOverAfter
 	if under {
-		ufc._ninePatch.Under.Draw(r, Area2iOfSize(ufc.FyESize()), ufc._ninePatch.Scale)
-	} else {
-		ufc._ninePatch.Over.Draw(r, Area2iOfSize(ufc.FyESize()), ufc._ninePatch.Scale)
+		beforePass = FramePassUnderBefore
+		afterPass = FramePassUnderAfter
 	}
+	ufc._framing.FyFDraw(r, areaSize, beforePass)
 	ufc.UIPanel.FyEDraw(r, under)
+	ufc._framing.FyFDraw(r, areaSize, afterPass)
 }

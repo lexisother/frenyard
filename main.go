@@ -34,7 +34,7 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 	elem.text = frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart})
 	elem.textTitle = frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("", design.PageTitleFont), design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignMiddle, Y: frenyard.AlignStart})
 
-	testButtonWrapper := frenyard.NewUIButtonPtr(design.ButtonContentOkAction("OK"), ok)
+	testButtonWrapper := design.ButtonOkAction("OK", ok)
 
 	buttonBar := frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
 		Slots: []frenyard.FlexboxSlot{
@@ -85,6 +85,7 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 	return elem
 }
 func (dialog *upTextPanel) FyETick(seconds float64) {
+	dialog.UILayoutProxy.FyETick(seconds)
 	dialog.counter += seconds
 	for dialog.counter > 0.05 {
 		dialog.counter -= 0.05

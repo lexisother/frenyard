@@ -11,9 +11,14 @@ var SizeTextNudge int32
 // SizeWindow is the size of the main window.
 var SizeWindow frenyard.Vec2i
 
+// sizeScale scales an integer size.
+func sizeScale(size int32) int32 {
+	return frenyard.Scale(DesignScale, size)
+}
+
 func deSetupSizes() {
-	SizeMarginAroundEverything = frenyard.Scale(DesignScale, 16)
-	SizeTextNudge = frenyard.Scale(DesignScale, 4)
+	SizeMarginAroundEverything = sizeScale(16)
+	SizeTextNudge = sizeScale(4)
 	SizeWindow = frenyard.ScaleVec2i(DesignScale, frenyard.Vec2i{X: 320, Y: 200})
 }
 

@@ -10,12 +10,10 @@ type NinePatch struct {
 	Bounds Area2i
 	// The area within that area, absolute, where the nine-patch centre bounds sit.
 	Centre Area2i
-	// Alpha/Colour to modulate by.
-	ColourMod uint32
 }
 
 // Draw draws the NinePatch on the given renderer with the given container bounds.
-func (np NinePatch) Draw(r Renderer, where Area2i, scale float64) {
+func (np NinePatch) Draw(r Renderer, where Area2i, scale float64, drawBase DrawRectCommand) {
 	if np.Tex == nil {
 		return
 	}
@@ -28,13 +26,24 @@ func (np NinePatch) Draw(r Renderer, where Area2i, scale float64) {
 	whereOuter := where.Expand(expansionMargin)
 	whereInner := where.Contract(intrusionMargin)
 	drawAreas := SplitArea2iGrid3x3(whereOuter, whereInner)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.A, drawAreas.A)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.B, drawAreas.B)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.C, drawAreas.C)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.D, drawAreas.D)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.E, drawAreas.E)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.F, drawAreas.F)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.G, drawAreas.G)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.H, drawAreas.H)
-	r.TexRect(np.Tex, np.ColourMod, spriteAreas.I, drawAreas.I)
+	drawBase.Tex = np.Tex
+
+	drawBase.TexSprite = spriteAreas.A; drawBase.Target = drawAreas.A
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.B; drawBase.Target = drawAreas.B
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.C; drawBase.Target = drawAreas.C
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.D; drawBase.Target = drawAreas.D
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.E; drawBase.Target = drawAreas.E
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.F; drawBase.Target = drawAreas.F
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.G; drawBase.Target = drawAreas.G
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.H; drawBase.Target = drawAreas.H
+	r.DrawRect(drawBase)
+	drawBase.TexSprite = spriteAreas.I; drawBase.Target = drawAreas.I
+	r.DrawRect(drawBase)
 }

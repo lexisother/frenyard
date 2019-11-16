@@ -51,34 +51,45 @@ func (r *sdl2Renderer) osFySDL2DrawColour(colour uint32) {
 	alpha := (uint8)((colour >> 24) & 0xFF)
 	r.base.base.SetDrawColor(red, green, blue, alpha)
 }
-func (r *sdl2Renderer) FillRect(colour uint32, target Area2i) {
+func (r *sdl2Renderer) DrawRect(drc DrawRectCommand) {
 	{
 		z := sdl2Os()
 		defer z.End()
 	}
-	rect := fySDL2AreaToRect(target.Translate(r.translate))
-	r.osFySDL2DrawColour(colour)
-	r.base.base.FillRect(&rect)
-}
-func (r *sdl2Renderer) TexRect(sheet Texture, colour uint32, sprite Area2i, target Area2i) {
-	{
-		z := sdl2Os()
-		defer z.End()
+	sRect := fySDL2AreaToRect(drc.TexSprite)
+	tRect := fySDL2AreaToRect(drc.Target.Translate(r.translate))
+	
+	blendMode := sdl.BlendMode(sdl.BLENDMODE_BLEND)
+	if drc.Mode == DrawModeNoBlending {
+		blendMode = sdl.BlendMode(sdl.BLENDMODE_NONE)
+	} else if drc.Mode == DrawModeAdd {
+		blendMode = sdl.BlendMode(sdl.BLENDMODE_ADD)
+	} else if drc.Mode == DrawModeModulate {
+		blendMode = sdl.BlendMode(sdl.BLENDMODE_MOD)
 	}
-	sheetActual := sheet.(*crtcTextureExternal)
-	// If the image has zero size, it doesn't exist. Anyway, os_getLocalTexture will crash
-	size := sheet.Size()
-	if size.X == 0 || size.Y == 0 {
-		return
+	
+	if drc.Tex != nil {
+		sheetActual := drc.Tex.(*crtcTextureExternal)
+		// If the image has zero size, it doesn't exist. Anyway, osGetLocalTexture will crash
+		size := drc.Tex.Size()
+		if size.X == 0 || size.Y == 0 {
+			return
+		}
+		// Explicit cast so you can see what's going on with the contexts
+		sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
+		red := (uint8)((drc.Colour >> 16) & 0xFF)
+		green := (uint8)((drc.Colour >> 8) & 0xFF)
+		blue := (uint8)((drc.Colour >> 0) & 0xFF)
+		alpha := (uint8)((drc.Colour >> 24) & 0xFF)
+		sheetLocal.base.SetColorMod(red, green, blue)
+		sheetLocal.base.SetAlphaMod(alpha)
+		sheetLocal.base.SetBlendMode(blendMode)
+		r.base.base.Copy(sheetLocal.base, &sRect, &tRect)
+	} else {
+		r.osFySDL2DrawColour(drc.Colour)
+		r.base.base.SetDrawBlendMode(blendMode)
+		r.base.base.FillRect(&tRect)
 	}
-	// Explicit cast so you can see what's going on with the contexts
-	sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
-	sheetLocal.osFySDL2DrawColour(colour)
-
-	sRect := fySDL2AreaToRect(sprite)
-	tRect := fySDL2AreaToRect(target.Translate(r.translate))
-
-	r.base.base.Copy(sheetLocal.base, &sRect, &tRect)
 }
 func (r *sdl2Renderer) Clip() Area2i {
 	{
@@ -124,6 +135,7 @@ func (r *sdl2Renderer) Reset(colour uint32) {
 	r.translate = Vec2i{}
 	r.SetClip(Area2iOfSize(r.Size()))
 	r.osFySDL2DrawColour(colour)
+	r.base.base.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.base.base.Clear()
 }
 func (r *sdl2Renderer) Present() {
@@ -141,14 +153,6 @@ type fySDL2LocalTexture struct {
 func (r *fySDL2LocalTexture) osDelete() {
 	r.base.Destroy()
 }
-func (r *fySDL2LocalTexture) osFySDL2DrawColour(colour uint32) {
-	red := (uint8)((colour >> 16) & 0xFF)
-	green := (uint8)((colour >> 8) & 0xFF)
-	blue := (uint8)((colour >> 0) & 0xFF)
-	alpha := (uint8)((colour >> 24) & 0xFF)
-	r.base.SetColorMod(red, green, blue)
-	r.base.SetAlphaMod(alpha)
-}
 
 type fySDL2TextureData struct {
 	base *sdl.Surface
@@ -160,7 +164,6 @@ func (r *fySDL2TextureData) osMakeLocal(render crtcContext) crtcLocalTexture {
 	if err != nil {
 		panic(err)
 	}
-	result.SetBlendMode(sdl.BLENDMODE_BLEND)
 	return &fySDL2LocalTexture{
 		result,
 	}

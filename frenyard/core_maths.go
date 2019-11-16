@@ -258,11 +258,6 @@ type Alignment2i struct {
 
 // Part V: Even More Utilities
 
-// ColourFromARGB creates a colour from the separate A/R/G/B quantities.
-func ColourFromARGB(a uint8, r uint8, g uint8, b uint8) uint32 {
-	return (uint32(a) << 24) | (uint32(r) << 16) | (uint32(g) << 8) | (uint32(b) << 0)
-}
-
 // Area1iGrid3 is an Area1i split into a left area, the original 'inner' area, and the right area.
 type Area1iGrid3 struct {
 	A Area1i

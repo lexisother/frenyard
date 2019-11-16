@@ -141,36 +141,57 @@ type fyFlexboxSortingCollection struct {
 	slots []fyFlexboxSlotlike
 	// Given a SOURCE slot index, what is the RESULTING slot index?
 	originalToDisplayIndices []int
+	// Given a RESULTING slot index, what is the SOURCE slot index?
+	displayToOriginalIndices []int
 }
 
 func (sc fyFlexboxSortingCollection) Len() int {
 	return len(sc.slots)
 }
 func (sc fyFlexboxSortingCollection) Less(i int, j int) bool {
-	return sc.slots[i].fyGetOrder() < sc.slots[j].fyGetOrder()
+	order1 := sc.slots[i].fyGetOrder()
+	order2 := sc.slots[j].fyGetOrder()
+	// Order1 != order2?
+	if order1 < order2 {
+		return true
+	}
+	if order1 > order2 {
+		return false
+	}
+	// No, they're equal. Sort by original index.
+	if sc.displayToOriginalIndices[i] < sc.displayToOriginalIndices[j] {
+		return true
+	}
+	return false
 }
 func (sc fyFlexboxSortingCollection) Swap(i int, j int) {
 	backup := sc.slots[i]
 	backup2 := sc.originalToDisplayIndices[i]
+	backup3 := sc.displayToOriginalIndices[i]
 
 	sc.slots[i] = sc.slots[j]
 	sc.originalToDisplayIndices[i] = sc.originalToDisplayIndices[j]
+	sc.displayToOriginalIndices[i] = sc.displayToOriginalIndices[j]
 
 	sc.slots[j] = backup
 	sc.originalToDisplayIndices[j] = backup2
+	sc.displayToOriginalIndices[j] = backup3
 }
 
 func fyFlexboxSolveLayout(details FlexboxContainer, limits Vec2i) []Area2i {
 	// Stage 1. Element order pre-processing (DirReverse)
 	slots := make([]fyFlexboxSlotlike, len(details.Slots))
 	originalToDisplayIndices := make([]int, len(details.Slots))
+	displayToOriginalIndices := make([]int, len(details.Slots))
 	for k, v := range details.Slots {
 		originalToDisplayIndices[k] = k
+		displayToOriginalIndices[k] = k
 		slots[k] = v
 	}
-	sort.Stable(fyFlexboxSortingCollection{
+	sort.Sort(fyFlexboxSortingCollection{
 		slots:                    slots,
 		originalToDisplayIndices: originalToDisplayIndices,
+		displayToOriginalIndices: displayToOriginalIndices,
 	})
 	// Stage 2. Wrapping (if relevant)
 	out := make([]Area2i, len(slots))

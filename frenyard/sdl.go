@@ -42,6 +42,7 @@ func (w *fySDL2Window) Destroy() {
 	delete(fyGlobalBackend.windows, w.id)
 	w.window = nil
 }
+
 func (w *fySDL2Window) GetLocalDPI() float64 {
 	errorDPI := 72.0
 	dIndex, err := w.window.GetDisplayIndex()
@@ -159,6 +160,8 @@ func init() {
 		defer z.End()
 	}
 	sdl.Init(sdl.INIT_EVERYTHING)
+	// May, in fact, fail completely
+	sdl.SetHint("SDL_HINT_RENDER_SCALE_QUALITY", "1")
 	GlobalBackend = fyGlobalBackend
 }
 

@@ -74,6 +74,7 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 			},
 			{
 				Element:  titleWrapper,
+				Shrink:   1,
 				Order:    0,
 			},
 		},

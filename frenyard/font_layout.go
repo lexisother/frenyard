@@ -58,7 +58,7 @@ func (tlr *TextLayouterResult) Draw() Texture {
 		v.FyCDraw(img, dot)
 		dot = dot.Add(fixed.P(0, v.FyCHeight()))
 	}
-	return GoImageToTexture(img)
+	return GoImageToTexture(img, []ColourTransform{})
 }
 
 func fyTextLayouterBreakerNormal(text TypeChunk, xLimit int32, wordwrap bool) TextLayouterResult {

@@ -1,7 +1,7 @@
 package design
 
 // "go generate ./..." to regenerate bindata!
-//go:generate go run ./data-compiler borderButtonX1 borderHeaderX2
+//go:generate go run ./data-compiler borderButtonX4 borderButtonShadowX4 borderButtonShadowFocusX4 borderHeaderCompositeX4
 
 // DesignScale is the current scale for the Design.
 var DesignScale float64
@@ -11,4 +11,5 @@ func Setup(scale float64) {
 	DesignScale = scale
 	deSetupSizes()
 	deSetupFonts()
+	deSetupBorders()
 }

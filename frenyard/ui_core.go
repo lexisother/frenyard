@@ -49,7 +49,7 @@ type UIElement interface {
  * Part of core so it can't possibly get broken.
  */
 
-// UIElementComponent implements the resizing logic for UIElement.
+// UIElementComponent implements the resizing logic for UIElement and default method implementations.
 type UIElementComponent struct {
 	// SUPER DUPER PRIVATE! DO NOT ACCESS OUTSIDE OF MEMBER METHODS.
 	_fyUIElementComponentSize Vec2i
@@ -129,7 +129,7 @@ type PanelFixedElement struct {
 
 /*
  * Basic "set it and forget it" stateful panel that does not transmit or receive layout data.
- * This is part of core because it's responsible for implementing several UI rules.
+ * This is part of core because it's responsible for implementing several UI rules, such as cursor forwarding.
  */
 
 // UIPanel is a "set it and forget it" stateful panel for placing multiple elements into.

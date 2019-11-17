@@ -2,11 +2,33 @@ package frenyard
 
 // Constants
 
-// SizeUnlimited is equal to the maximum value an int32 can have, represents an infinite value.
+// SizeUnlimited is equal to the maximum value an int32 can have, represents an infinite value. Note that 0x80000000 is reserved; -0x7FFFFFFF is considered the definitive 'negative unlimited' value for simplicity's sake.
 const SizeUnlimited int32 = 0x7FFFFFFF
 
 // Vec2iUnlimited returns a Vec2i of unlimited size.
 func Vec2iUnlimited() Vec2i { return Vec2i{SizeUnlimited, SizeUnlimited} }
+
+// AddCU performs an addition with consideration for unlimited values.
+func AddCU(a int32, b int32) int32 {
+	if a == SizeUnlimited {
+		if b == -SizeUnlimited {
+			return 0
+		} else {
+			return SizeUnlimited
+		}
+	} else if b == SizeUnlimited {
+		if a == -SizeUnlimited {
+			return 0
+		} else {
+			return SizeUnlimited
+		}
+	} else if a == -SizeUnlimited {
+		return -SizeUnlimited
+	} else if b == -SizeUnlimited {
+		return -SizeUnlimited
+	}
+	return a + b
+}
 
 // Part I: Basic maths
 
@@ -35,7 +57,7 @@ type Vec2i struct {
 
 // Add adds two Vec2is.
 func (a Vec2i) Add(b Vec2i) Vec2i {
-	return Vec2i{a.X + b.X, a.Y + b.Y}
+	return Vec2i{AddCU(a.X, b.X), AddCU(a.Y, b.Y)}
 }
 
 // Min returns a Vec2i with each axis value being the minimum of the two input Vec2i values on that axis.
@@ -80,7 +102,7 @@ func (a Vec2i) ConditionalTranspose(yes bool) Vec2i {
 
 // Part III: Area Types (AABBs)
 
-// Area1i is a 1-dimensional axis-aligned area, which is a useful primitive for N-dimensional areas.
+// Area1i is a 1-dimensional axis-aligned area, which is a useful primitive for N-dimensional areas. Please note that Area1i, and by extension Area2i, may malfunction if given infinite values.
 type Area1i struct {
 	Pos  int32
 	Size int32
@@ -88,6 +110,9 @@ type Area1i struct {
 
 // Area1iOfSize returns an Area1i of the given size (covering range inclusive 0 to exclusive size)
 func Area1iOfSize(a int32) Area1i { return Area1i{0, a} }
+
+// Area1iMargin is a quick idiom for a margin of a given size.
+func Area1iMargin(l int32, r int32) Area1i { return Area1i{-l, l + r} }
 
 // Empty returns Size <= 0
 func (a Area1i) Empty() bool {
@@ -163,7 +188,7 @@ func UnionArea1i(areas []Area1i) Area1i {
 	return base
 }
 
-// Area2i is the basic rectangle type.
+// Area2i is the basic rectangle type. Please note that Area2i may malfunction if given infinite values.
 type Area2i struct {
 	X Area1i
 	Y Area1i
@@ -185,6 +210,9 @@ func Area2iFromVecs(pos Vec2i, size Vec2i) Area2i {
 
 // Area2iOfSize returns an Area2i of the given size.
 func Area2iOfSize(a Vec2i) Area2i { return Area2i{Area1iOfSize(a.X), Area1iOfSize(a.Y)} }
+
+// Area2iMargin is a quick idiom for a margin of a given size.
+func Area2iMargin(l int32, u int32, r int32, d int32) Area2i { return Area2i{Area1iMargin(l, r), Area1iMargin(u, d)} }
 
 // Empty returns Size <= 0
 func (a Area2i) Empty() bool {

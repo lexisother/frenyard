@@ -12,6 +12,12 @@ type NinePatch struct {
 	Centre Area2i
 }
 
+// Inset insets the NinePatch by expanding the container bounds.
+func (np NinePatch) Inset(margin Area2i) NinePatch {
+	np.Bounds = np.Bounds.Expand(margin)
+	return np
+}
+
 // Draw draws the NinePatch on the given renderer with the given container bounds.
 func (np NinePatch) Draw(r Renderer, where Area2i, scale float64, drawBase DrawRectCommand) {
 	if np.Tex == nil {

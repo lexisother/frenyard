@@ -55,8 +55,15 @@ func (ufc *UISlideTransitionContainer) TransitionTo(next UILayoutElement, time f
 	ufc._last = ufc._main
 	ufc._main = next
 	ufc.ThisUILayoutElementComponentDetails.Attach(ufc._main)
-	ufc._transitionTime = 0
-	ufc._transitionLength = time
+	if time > 0.0 {
+		// Completion takes non-zero time.
+		ufc._transitionTime = 0
+		ufc._transitionLength = time
+	} else {
+		// Cause instant completion.
+		ufc._transitionTime = 1
+		ufc._transitionLength = 1
+	}
 	ufc._transitionReverse = reverse
 	ufc._transitionVertical = vertical
 	ufc.ThisUILayoutElementComponentDetails.ContentChanged()

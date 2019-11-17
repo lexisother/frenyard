@@ -29,6 +29,7 @@ type FlexboxSlot struct {
 	// If there is a surplus, these are used to distribute it.
 	Grow int32
 	// If there is a deficit, these are used to distribute it (along with minimum sizes)
+	// DEFAULTS TO 1 IN CSS
 	Shrink int32
 	// If *non-zero*, then this specifies the "initial share size" of this element.
 	// Useful when Element is nil.
@@ -37,6 +38,9 @@ type FlexboxSlot struct {
 	MinBasis int32
 	// Used to order the flexboxes visually. The Z-Order remains the index order.
 	Order int
+	// If the container should respect the minimum size of this slot.
+	// DEFAULTS TO TRUE IN CSS (settable to false by overriding min w/h), BUT THIS IS REALLY STUPID B/C IT IGNORES SIZE CONSTRAINTS, SO LET'S NOT DO THAT
+	RespectMinimumSize bool
 }
 
 type fyFlexboxSlotlike interface {
@@ -44,6 +48,7 @@ type fyFlexboxSlotlike interface {
 	fyGrowShrink() (int32, int32)
 	fyCalcBasis(cross int32, vertical bool) int32
 	fyGetOrder() int
+	fyRespectMinimumSize() bool
 }
 
 func (slot FlexboxSlot) fyMainCrossSizeForMainCrossLimits(limits Vec2i, vertical bool, debug bool) Vec2i {
@@ -66,6 +71,9 @@ func (slot FlexboxSlot) fyCalcBasis(cross int32, vertical bool) int32 {
 }
 func (slot FlexboxSlot) fyGetOrder() int {
 	return slot.Order
+}
+func (slot FlexboxSlot) fyRespectMinimumSize() bool {
+	return slot.RespectMinimumSize
 }
 
 // -- Solver --
@@ -120,6 +128,9 @@ func (slot fyFlexboxRow) fyCalcBasis(cross int32, vertical bool) int32 {
 }
 func (slot fyFlexboxRow) fyGetOrder() int {
 	return 0
+}
+func (slot fyFlexboxRow) fyRespectMinimumSize() bool {
+	return false
 }
 
 // Do be aware, this only handles the one relevant axis.
@@ -323,7 +334,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 				}
 				grow, shrink := slot.fyGrowShrink()
 				factor := grow
-				smallestAlloc := int32(0)
+				smallestAlloc := -shares[idx] // Cannot shrink below 0
 				largestAlloc := SizeUnlimited
 				// There is no 'largest alloc'; if the element is told to grow, that is what it will do
 				if additionalSpaceAvailable < 0 {
@@ -333,7 +344,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 					// has no effect, and means totalFactorAccumulator could be 0
 					continue
 				}
-				if additionalSpaceAvailable < 0 && shrink > 0 {
+				if additionalSpaceAvailable < 0 && shrink > 0 && slot.fyRespectMinimumSize() {
 					// Smallest possible alloc: maximum amount that can be shrunk
 					smallestAlloc = slot.fyMainCrossSizeForMainCrossLimits(Vec2i{0, mainCrossLimits.Y}, details.DirVertical, false).X - shares[idx]
 				}

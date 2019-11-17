@@ -60,13 +60,21 @@ func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pa
 
 // FyFPadding implements Frame.FyFPadding
 func (de *deUIDesignButton) FyFPadding() frenyard.Area2i {
-	addedBorderX := sizeScale(12)
-	addedBorderY := sizeScale(8)
+	addedBorderX := sizeScale(16)
+	// Don't completely ignore the subject but don't go doing anything silly either
+	addedBorderY := sizeScale(4)
 	return frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2})
 }
 // FyFClipping implements Frame.FyFClipping
 func (de *deUIDesignButton) FyFClipping() bool {
 	return true
+}
+
+// FyLSizeForLimits overrides UILayoutProxy.FyLSizeForLimits
+func (de *deUIDesignButton) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
+	baseSize := de.UILayoutProxy.FyLSizeForLimits(limits)
+	// The 36px is implemented as a min-height rather than a strict height to prevent incredible levels of what I can only refer to as "incredibly dumb, yet predictable, results".
+	return baseSize.Max(frenyard.Vec2i{X: sizeScale(64), Y: sizeScale(36)})
 }
 
 func newDeUIDesignButtonPtr(content frenyard.UILayoutElement, label *frenyard.UILabel, behavior frenyard.ButtonBehavior) *frenyard.UIButton {

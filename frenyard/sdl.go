@@ -4,6 +4,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"runtime"
 	"time"
+	"fmt"
 )
 
 type fySDL2Window struct {
@@ -12,6 +13,7 @@ type fySDL2Window struct {
 	window     *sdl.Window
 	id         uint32
 	receiver   WindowReceiver
+	activeButtons uint32
 }
 
 func (w *fySDL2Window) Name() string {
@@ -91,6 +93,7 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 		window,
 		id,
 		receiver,
+		0,
 	}
 	fyGlobalBackend.windows[id] = sWindow
 	receiver.FyRStart(sWindow)
@@ -135,7 +138,8 @@ func _fySDL2MouseButton(button uint8) MouseButton {
 	}
 	return MouseButtonNone
 }
-func _fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, minus MouseButton, plus MouseButton) {
+// Do be aware that I got this the wrong way around at first (scrolling's weird)
+func _fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, plus MouseButton, minus MouseButton) {
 	for apply < 0 {
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventDown, minus})
 		application.FyRMouseEvent(MouseEvent{cacheMouse, MouseEventUp, minus})
@@ -208,8 +212,21 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 				if window != nil {
 					window.cacheMouse = _fySDL2MousePositionAdjuster(window, ev.X, ev.Y)
 					buttonS := MouseEventDown
-					if ev.State == sdl.RELEASED {
+					if ev.State == sdl.PRESSED {
+						window.activeButtons++
+						if window.activeButtons == 1 {
+							sdl.CaptureMouse(true)
+						}
+					} else if ev.State == sdl.RELEASED {
 						buttonS = MouseEventUp
+						if window.activeButtons == 0 {
+							fmt.Printf("SDL/Run: Button released when no buttons were pressed\n")
+						} else if window.activeButtons == 1 {
+							sdl.CaptureMouse(false)
+						}
+						if window.activeButtons != 0 {
+							window.activeButtons--
+						}
 					}
 					btn := _fySDL2MouseButton(ev.Button)
 					if btn != MouseButtonNone {

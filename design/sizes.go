@@ -19,7 +19,7 @@ func sizeScale(size int32) int32 {
 func deSetupSizes() {
 	SizeMarginAroundEverything = sizeScale(16)
 	SizeTextNudge = sizeScale(4)
-	SizeWindow = frenyard.ScaleVec2i(DesignScale, frenyard.Vec2i{X: 320, Y: 200})
+	SizeWindow = frenyard.ScaleVec2i(DesignScale, frenyard.Vec2i{X: 568, Y: 320})
 }
 
 // MarginBody is the amount to push the page body by.

@@ -7,11 +7,25 @@ import (
 	//"github.com/CCDirectLink/CCUpdaterCLI/cmd/api"
 )
 
+type upApplication struct {
+	slideContainer *frenyard.UISlideTransitionContainer
+	window frenyard.Window
+}
+
 func main() {
 	design.Setup(frenyard.InferScale())
 	frenyard.TargetFrameTime = 0.016
-	// Ok, now start...
-	upShowFailureToFindGameDialog()
+	slideContainer := frenyard.NewUISlideTransitionContainerPtr(nil)
+	slideContainer.FyEResize(design.SizeWindow)
+	wnd, err := frenyard.CreateBoundWindow("CCUpdaterUI", true, design.ThemeBackground, slideContainer)
+	if err != nil {
+		panic(err)
+	}
+	// Ok, now get it ready.
+	(&upApplication{
+		slideContainer: slideContainer,
+		window: wnd,
+	}).ShowGameFinderPreface()
 	// Started!
 	frenyard.GlobalBackend.Run(func(frameTime float64) {
 	})
@@ -81,7 +95,6 @@ func newUpTextPanelPtr(text string, ok func ()) *upTextPanel {
 	})
 
 	frenyard.InitUILayoutProxy(elem, titleAndThenBody)
-	elem.FyEResize(design.SizeWindow)
 	return elem
 }
 func (dialog *upTextPanel) FyETick(seconds float64) {
@@ -116,17 +129,12 @@ func (dialog *upTextPanel) FyETick(seconds float64) {
 	}
 }
 
-func upShowFailureToFindGameDialog() {
-	var elem *frenyard.UISlideTransitionContainer
+func upShowFailureToFindGameDialog(app *upApplication) {
 	slideNum := 0
 	var slideFn func ()
 	slideFn = func () {
-		elem.TransitionTo(newUpTextPanelPtr(fmt.Sprintf("Slide %v\tHello from slide %v\nIt's nice here", slideNum, slideNum), slideFn), 1.0, slideNum & 2 == 0, slideNum & 1 == 0)
+		app.slideContainer.TransitionTo(newUpTextPanelPtr(fmt.Sprintf("Slide %v\tHello from slide %v\nIt's nice here", slideNum, slideNum), slideFn), 1.0, slideNum & 2 == 0, slideNum & 1 == 0)
 		slideNum++
 	}
-	elem = frenyard.NewUISlideTransitionContainerPtr(newUpTextPanelPtr("Test yup YUP a test\tMeep", slideFn))
-	_, err := frenyard.CreateBoundWindow("CCUpdaterUI Installation Helper", true, design.ThemeBackground, elem)
-	if err != nil {
-		panic(err)
-	}
+	app.slideContainer.TransitionTo(newUpTextPanelPtr("Test yup YUP a test\tMeep", slideFn), 0, false, false)
 }

@@ -11,16 +11,18 @@ type UIRect struct {
 	Sprite Area2i
 	// Colour (either modulates Texture if present, or is filled as-is)
 	Colour uint32
+	// Alignment
+	Alignment Alignment2i
 }
 
 // NewColouredRectPtr creates a UIRect given a colour and size.
 func NewColouredRectPtr(colour uint32, size Vec2i) *UIRect {
-	return &UIRect{NewUIElementComponent(size), nil, Area2i{}, colour}
+	return &UIRect{NewUIElementComponent(size), nil, Area2i{}, colour, Alignment2i{}}
 }
 
 // NewTextureRectPtr creates a UIRect given a colour, texture, sprite area, and size.
-func NewTextureRectPtr(colour uint32, tex Texture, sprite Area2i, size Vec2i) *UIRect {
-	return &UIRect{NewUIElementComponent(size), tex, sprite, colour}
+func NewTextureRectPtr(colour uint32, tex Texture, sprite Area2i, size Vec2i, alignment Alignment2i) *UIRect {
+	return &UIRect{NewUIElementComponent(size), tex, sprite, colour, alignment}
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent
@@ -42,7 +44,7 @@ func (cr *UIRect) FyEDraw(target Renderer, under bool) {
 			Tex: cr.Tex,
 			Colour: cr.Colour,
 			TexSprite: cr.Sprite,
-			Target: Area2iOfSize(cr.FyESize()),
+			Target: Area2iOfSize(cr.FyESize()).Align(cr.Sprite.Size(), Alignment2i{}),
 		})
 	}
 }

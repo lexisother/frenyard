@@ -5,6 +5,9 @@ import "github.com/20kdc/CCUpdaterUI/frenyard"
 // ThemeText is the colour for most text.
 const ThemeText = 0xFFFFFFFF
 
+// ThemeSubText is for 'detail' text that doesn't matter that much.
+const ThemeSubText = 0xFFC0C0C0
+
 // ThemePlaceholder is the colour for placeholders.
 const ThemePlaceholder = 0xFFFF0000
 
@@ -61,18 +64,28 @@ func LayoutDocument(header Header, body frenyard.UILayoutElement, scrollable boo
 	return titleAndThenBody
 }
 
+// ButtonBar provides a 'button-bar' to put at the bottom of dialogs.
+func ButtonBar(buttons []frenyard.UILayoutElement) frenyard.UILayoutElement {
+	slots := []frenyard.FlexboxSlot{{Grow: 1}}
+	for _, v := range buttons {
+		slots = append(slots, frenyard.FlexboxSlot{
+			Basis: sizeScale(32),
+			Shrink: 1,
+		}, frenyard.FlexboxSlot{
+			Element: v,
+			Shrink: 1,
+		})
+	}
+	return frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
+		Slots: slots,
+	})
+}
+
 // LayoutMsgbox provides a 'message box' body layout.
 func LayoutMsgbox(text string, confirm func()) frenyard.UILayoutElement {
 	okButton := ButtonOkAction("OK", confirm)
 
-	buttonBar := frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
-		Slots: []frenyard.FlexboxSlot{
-			{Grow: 1},
-			{
-				Element: okButton,
-			},
-		},
-	})
+	buttonBar := ButtonBar([]frenyard.UILayoutElement{okButton})
 
 	bodyItself := frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
 		DirVertical: true,
@@ -94,4 +107,50 @@ func LayoutMsgbox(text string, confirm func()) frenyard.UILayoutElement {
 func ScrollboxV(inwards frenyard.UILayoutElement) frenyard.UILayoutElement {
 	sbox := frenyard.NewUIScrollboxPtr(ScrollbarThemeV, inwards, true)
 	return frenyard.NewUIOverlayContainerPtr(ScrollboxExterior, []frenyard.UILayoutElement{sbox})
+}
+
+// ListItem sets up a list item.
+// https://material.io/components/lists/#specs
+func ListItem(icon IconID, text string, subText string) frenyard.UILayoutElement {
+	var labelVertical frenyard.UILayoutElement
+	labelVertical = frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk(text, ListItemTextFont), ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignEnd})
+	labelVertical = frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
+		DirVertical: true,
+		Slots: []frenyard.FlexboxSlot{
+			frenyard.FlexboxSlot{
+				Element: labelVertical,
+				Grow: 1,
+			},
+			frenyard.FlexboxSlot{
+				Element: frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk(subText, ListItemSubTextFont), ThemeSubText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart}),
+				Grow: 1,
+			},
+		},
+	})
+	horizontalLayout := frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
+		Slots: []frenyard.FlexboxSlot{
+			frenyard.FlexboxSlot{
+				Basis: sizeScale(16),
+			},
+			frenyard.FlexboxSlot{
+				Element: NewIconPtr(0xFFFFFFFF, icon, 24),
+			},
+			frenyard.FlexboxSlot{
+				Basis: sizeScale(32),
+			},
+			frenyard.FlexboxSlot{
+				Element: labelVertical,
+			},
+		},
+	})
+	return frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
+		DirVertical: true,
+		Slots: []frenyard.FlexboxSlot{
+			frenyard.FlexboxSlot{
+				Element: horizontalLayout,
+				MinBasis: sizeScale(56),
+				RespectMinimumSize: true,
+			},
+		},
+	})
 }

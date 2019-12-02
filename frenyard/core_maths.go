@@ -13,15 +13,13 @@ func AddCU(a int32, b int32) int32 {
 	if a == SizeUnlimited {
 		if b == -SizeUnlimited {
 			return 0
-		} else {
-			return SizeUnlimited
 		}
+		return SizeUnlimited
 	} else if b == SizeUnlimited {
 		if a == -SizeUnlimited {
 			return 0
-		} else {
-			return SizeUnlimited
 		}
+		return SizeUnlimited
 	} else if a == -SizeUnlimited {
 		return -SizeUnlimited
 	} else if b == -SizeUnlimited {

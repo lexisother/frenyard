@@ -10,6 +10,7 @@ import (
 type upApplication struct {
 	slideContainer *frenyard.UISlideTransitionContainer
 	window frenyard.Window
+	upQueued chan func()
 }
 
 func main() {
@@ -22,12 +23,19 @@ func main() {
 		panic(err)
 	}
 	// Ok, now get it ready.
-	(&upApplication{
+	app := (&upApplication{
 		slideContainer: slideContainer,
 		window: wnd,
-	}).ShowGameFinderPreface()
+		upQueued: make(chan func(), 16),
+	})
+	app.ShowGameFinderPreface()
 	// Started!
 	frenyard.GlobalBackend.Run(func(frameTime float64) {
+		select {
+			case fn := <- app.upQueued:
+				fn()
+			default:
+		}
 	})
 }
 

@@ -47,6 +47,7 @@ type UIScrollbar struct {
 	_grabbed bool
 }
 
+// NewUIScrollbarPtr creates a new scrollbar with the given theme and direction.
 func NewUIScrollbarPtr(theme ScrollbarTheme, vertical bool, value ScrollbarValue) *UIScrollbar {
 	uis := &UIScrollbar{
 		_theme: theme,
@@ -221,7 +222,11 @@ func (usc *UIScrollbox) FyEResize(size Vec2i) {
 		}
 		// Subtract scrollbar from size; this is used for both layout and for calculating scroll len.
 		sizeWithoutScrollbar := Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
-		usc._scrollLength = usc._contained.FyLSizeForLimits(sizeWithoutScrollbar).ConditionalTranspose(usc._vertical).X - sizeMainCross.X
+		// Recalculate with the adjusted constraints because of the removed scrollbar
+		baseSizeMainCross = usc._contained.FyLSizeForLimits(sizeWithoutScrollbar).ConditionalTranspose(usc._vertical)
+		sizeWithoutScrollbar = Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
+		usc._scrollLength = baseSizeMainCross.X - sizeMainCross.X
+		usc._scrollbar.MouseNotch = (float64(sizeMainCross.X) / 2) / float64(usc._scrollLength)
 		// can haz scrollbar?
 		usc._scrollbar.FyEResize(Vec2i{sizeMainCross.X, usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical))
 		usc._contained.FyEResize(sizeWithoutScrollbar)

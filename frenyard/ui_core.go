@@ -42,6 +42,8 @@ type UIElement interface {
 	 */
 	FyEResize(size Vec2i)
 	FyESize() Vec2i
+	// Attempts to find an element relative to Area2iOfSize(FyESize()). Does not check for itself. Returns an empty area for 'not found'.
+	FyEFindElement(target UIElement) Area2i
 }
 
 /*
@@ -68,6 +70,11 @@ func (es *UIElementComponent) FyEResize(size Vec2i) {
 // FyESize implements UIElement.FyESize
 func (es *UIElementComponent) FyESize() Vec2i {
 	return es._fyUIElementComponentSize
+}
+
+// FyEFindElement implements UIElement.FyEFindElement
+func (es *UIElementComponent) FyEFindElement(target UIElement) Area2i {
+	return Area2i{}
 }
 
 type fyWindowElementBinding struct {
@@ -360,6 +367,20 @@ func (pan *UIPanel) FyETick(f float64) {
 	}
 }
 
+// FyEFindElement implements UIElement.FyEFindElement
+func (pan *UIPanel) FyEFindElement(target UIElement) Area2i {
+	for _, val := range pan.ThisUIPanelDetails._content {
+		if val.Element == target {
+			return Area2iFromVecs(val.Pos, val.Element.FyESize())
+		}
+		area := val.Element.FyEFindElement(target)
+		if !area.Empty() {
+			return area.Translate(val.Pos)
+		}
+	}
+	return Area2i{}
+}
+
 // UIProxyHost is used to 'drill down' to the UIProxy within an element.
 type UIProxyHost interface {
 	// Returns the *UIProxy within this element.
@@ -409,4 +430,12 @@ func (px *UIProxy) FyEResize(v Vec2i) {
 // FyESize implements UIElement.FyESize
 func (px *UIProxy) FyESize() Vec2i {
 	return px.fyUIProxyTarget.FyESize()
+}
+
+// FyEFindElement implements UIElement.FyEFindElement
+func (px *UIProxy) FyEFindElement(target UIElement) Area2i {
+	if px.fyUIProxyTarget == target {
+		return Area2iOfSize(px.FyESize())
+	}
+	return px.fyUIProxyTarget.FyEFindElement(target)
 }

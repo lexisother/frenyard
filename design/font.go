@@ -17,6 +17,11 @@ var GlobalFont font.Face
 // ButtonTextFont for buttons
 var ButtonTextFont font.Face
 
+// ListItemTextFont for main list item text
+var ListItemTextFont font.Face
+// ListItemSubTextFont for undertext
+var ListItemSubTextFont font.Face
+
 func deSetupFonts() {
 	font, err := freetype.ParseFont(goregular.TTF)
 	if err != nil {
@@ -29,4 +34,9 @@ func deSetupFonts() {
 	PageTitleFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 24)))
 	GlobalFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 16)))
 	ButtonTextFont = frenyard.CreateTTFFont(fontB, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 14)))
+	
+	// 16dp
+	ListItemTextFont = GlobalFont
+	// 12dp (NON-STANDARD)
+	ListItemSubTextFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 12)))
 }

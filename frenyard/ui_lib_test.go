@@ -35,11 +35,17 @@ func (cr *UIEventDebugger) FyEDraw(target Renderer, under bool) {
 	if !under {
 		target.DrawRect(DrawRectCommand{
 			Colour: 0xFF3F51B5,
-			: Area2iOfSize(cr.FyESize()),
+			Bounds: Area2iOfSize(cr.FyESize()),
 		})
 	} else {
-		target.DrawRect(DrawRectCommand{0x40000000, Area2iOfSize(cr.FyESize()).Expand(Area2iFromVecs(Vec2i{-4, -4}, Vec2i{4, 4}))})
-		target.DrawRect(DrawRectCommand{0x40000000, Area2iOfSize(cr.FyESize()).Expand(Area2iFromVecs(Vec2i{-8, -8}, Vec2i{8, 8}))})
+		target.DrawRect(DrawRectCommand{
+			Colour: 0x40000000,
+			Bounds: Area2iOfSize(cr.FyESize()).Expand(Area2iFromVecs(Vec2i{-4, -4}, Vec2i{4, 4})),
+		})
+		target.DrawRect(DrawRectCommand{
+			Colour: 0x40000000,
+			Bounds: Area2iOfSize(cr.FyESize()).Expand(Area2iFromVecs(Vec2i{-8, -8}, Vec2i{8, 8})),
+		})
 	}
 	var cursorRect Area2i
 	if !under {
@@ -50,4 +56,8 @@ func (cr *UIEventDebugger) FyEDraw(target Renderer, under bool) {
 	target.Translate(cr._mousePos)
 	target.DrawRect(DrawRectCommand{0x80FF0000, cursorRect})
 	target.Translate(cr._mousePos.Negate())
+}
+
+// NewDebugWrapPtr wraps in an interior layout.
+func NewDebugWrapPtr(inner UILayoutElement) UILayoutElement {
 }

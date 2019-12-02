@@ -1,7 +1,7 @@
 package design
 
 // "go generate ./..." to regenerate bindata!
-//go:generate go run ./data-compiler generationX4
+//go:generate go run ./data-compiler generationX4 icon72 icon96
 
 // DesignScale is the current scale for the Design.
 var DesignScale float64
@@ -12,4 +12,5 @@ func Setup(scale float64) {
 	deSetupSizes()
 	deSetupFonts()
 	deSetupBorders()
+	deSetupIcons()
 }

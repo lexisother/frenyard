@@ -4,11 +4,40 @@ import (
 	//"fmt"
 	"github.com/20kdc/CCUpdaterUI/design"
 	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/20kdc/CCUpdaterUI/middle"
 	//"github.com/CCDirectLink/CCUpdaterCLI/cmd/api"
 )
 
 func (app *upApplication) ShowGameFinderPreface() {
-	foundInstallsScroller := design.ScrollboxV(frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("EXAMPLE INSTALLATION 1 [OPEN] [OK]\nEXAMPLE INSTALLATION 2 [OPEN] [OK]\nEXAMPLE INSTALLATION 1 [OPEN] [OK]\nEXAMPLE INSTALLATION 2 [OPEN] [OK]\nEXAMPLE INSTALLATION 1 [OPEN] [OK]\nEXAMPLE INSTALLATION 2 [OPEN] [OK]\n", design.GlobalFont), design.ThemePlaceholder, 0, frenyard.Alignment2i{}))
+	var gameLocations []middle.GameLocation
+	app.ShowWaiter("Finding CrossCode...", func (progress func(string)) {
+		progress("Autodetecting game locations...")
+		gameLocations = middle.AutodetectGameLocations()
+	}, func () {
+		app.ShowGameFinderPrefaceInternal(gameLocations)
+	})
+}
+
+func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameLocation) {
+
+	suggestSlots := []frenyard.FlexboxSlot{}
+	for _, location := range locations {
+		suggestSlots = append(suggestSlots, frenyard.FlexboxSlot{
+			Element: design.ListItem(design.GameIconID, "CrossCode " + location.Version, location.Location),
+			RespectMinimumSize: true,
+		})
+	}
+	// Space-taker to prevent wrongly scaled list items
+	suggestSlots = append(suggestSlots, frenyard.FlexboxSlot{
+		Grow: 1,
+		Shrink: 0,
+	})
+
+	foundInstallsScroller := design.ScrollboxV(frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
+		DirVertical: true,
+		WrapMode: frenyard.FlexboxWrapModeNone,
+		Slots: suggestSlots,
+	}))
 	
 	content := frenyard.NewUIFlexboxContainerPtr(frenyard.FlexboxContainer{
 		DirVertical: true,
@@ -29,19 +58,23 @@ func (app *upApplication) ShowGameFinderPreface() {
 				Basis: design.SizeMarginAroundEverything,
 			},
 			frenyard.FlexboxSlot{
-				Element: frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("If the installation you'd like to install mods to isn't shown here, you can locate it manually below.", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{}),
+				Element: frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("If the installation you'd like to install mods to isn't shown here, you can locate it manually.", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{}),
 			},
 			frenyard.FlexboxSlot{
 				Basis: design.SizeMarginAroundEverything,
 			},
 			frenyard.FlexboxSlot{
-				Element: frenyard.NewUILabelPtr(frenyard.NewTextTypeChunk("[LOCATE MANUALLY]", design.GlobalFont), design.ThemePlaceholder, 0, frenyard.Alignment2i{}),
+				Element: design.ButtonBar([]frenyard.UILayoutElement{
+					design.ButtonOkAction("LOCATE MANUALLY", func () {
+						app.ShowGameFinder()
+					}),
+				}),
 			},
 		},
 	})
 	primary := design.LayoutDocument(design.Header{
 		Title: "Welcome",
 	}, content, true)
-	app.slideContainer.TransitionTo(primary, 1.0, true, true)
+	app.slideContainer.TransitionTo(primary, 1.0, false, false)
 	
 }

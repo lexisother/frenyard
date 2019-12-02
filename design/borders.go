@@ -2,6 +2,8 @@ package design
 
 import (
 	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
+	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 )
 
 /*
@@ -30,34 +32,34 @@ var borderEffectiveScale float64
 var borderGenTextureMask frenyard.Texture
 var borderGenTextureShadow frenyard.Texture
 
-var borderButton frenyard.NinePatch
-var borderButtonShadow frenyard.NinePatch
-var borderButtonShadowFocus frenyard.NinePatch
+var borderButton framework.NinePatch
+var borderButtonShadow framework.NinePatch
+var borderButtonShadowFocus framework.NinePatch
 
 // ScrollboxExterior should be wrapped around scrollboxen.
-var ScrollboxExterior frenyard.NinePatchFrame
+var ScrollboxExterior framework.NinePatchFrame
 
 // ScrollbarThemeH is the ScrollbarTheme for horizontal scrollbars.
-var ScrollbarThemeH frenyard.ScrollbarTheme
+var ScrollbarThemeH framework.ScrollbarTheme
 // ScrollbarThemeV is the ScrollbarTheme for vertical scrollbars.
-var ScrollbarThemeV frenyard.ScrollbarTheme
+var ScrollbarThemeV framework.ScrollbarTheme
 
 func deSetupBorders() {
 	// This must all be kept in sync!
 	
 	borderImageScale = 4
-	generationImage := frenyard.CreateHardcodedPNGImage(generationX4B64)
+	generationImage := integration.CreateHardcodedPNGImage(generationX4B64)
 	borderEffectiveScale = DesignScale / float64(borderImageScale)
 	
 	for borderImageScale > 1 && borderEffectiveScale <= 0.5 {
 		borderEffectiveScale *= 2
 		borderImageScale /= 2
 		
-		generationImage = frenyard.ScaleImageToHalfSize(generationImage)
+		generationImage = integration.ScaleImageToHalfSize(generationImage)
 	}
 
-	borderGenTextureMask = frenyard.GoImageToTexture(generationImage, []frenyard.ColourTransform{frenyard.ColourTransformBlueToStencil})
-	borderGenTextureShadow = frenyard.GoImageToTexture(generationImage, []frenyard.ColourTransform{frenyard.ColourTransformInvert, frenyard.ColourTransformBlueToStencil, frenyard.ColourTransformInvert})
+	borderGenTextureMask = integration.GoImageToTexture(generationImage, []integration.ColourTransform{integration.ColourTransformBlueToStencil})
+	borderGenTextureShadow = integration.GoImageToTexture(generationImage, []integration.ColourTransform{integration.ColourTransformInvert, integration.ColourTransformBlueToStencil, integration.ColourTransformInvert})
 	
 	deBorderGenInit()
 	
@@ -71,28 +73,28 @@ func deSetupBorders() {
 	sbBase := sizeScale(4)
 	sbMovement := sizeScale(4)
 	sbMovementLong := sizeScale(8)
-	ScrollbarThemeH.Base = frenyard.NinePatchFrame{
-		Layers: []frenyard.NinePatchFrameLayer{
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+	ScrollbarThemeH.Base = framework.NinePatchFrame{
+		Layers: []framework.NinePatchFrameLayer{
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenSquareHeadshadow2dpX4,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF101010,
 			},
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenSquareMaskX4,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF181818,
 			},
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenSquareMaskX4.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF101010,
 			},
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenSquareHeadshadowInset1dpX4.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFFFFFFFF,
@@ -100,16 +102,16 @@ func deSetupBorders() {
 		},
 		Padding: frenyard.Area2iMargin(sbBase, sbBase, sbBase, sbBase),
 	}
-	movementFrameH := frenyard.NinePatchFrame{
-		Layers: []frenyard.NinePatchFrameLayer{
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+	movementFrameH := framework.NinePatchFrame{
+		Layers: []framework.NinePatchFrameLayer{
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenRounded4dpHeadshadow1dpX4,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF606060,
 			},
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenRounded4dpMaskX4,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF606060,
@@ -123,16 +125,16 @@ func deSetupBorders() {
 	movementFrameV.Padding = frenyard.Area2i{X: movementFrameH.Padding.Y, Y: movementFrameH.Padding.X}
 	ScrollbarThemeV.Movement = movementFrameV
 	
-	ScrollboxExterior = frenyard.NinePatchFrame{
-		Layers: []frenyard.NinePatchFrameLayer{
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassUnderBefore,
+	ScrollboxExterior = framework.NinePatchFrame{
+		Layers: []framework.NinePatchFrameLayer{
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassUnderBefore,
 				NinePatch: borderGenSquareMaskX4,
 				Scale: borderEffectiveScale,
 				ColourMod: ThemeBackgroundUnderlayer,
 			},
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverAfter,
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverAfter,
 				NinePatch: borderGenSquareHeadshadowInset2dpX4,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF000000,
@@ -143,7 +145,7 @@ func deSetupBorders() {
 
 // Returns a "standard ninepatch" for the autogenerated stuff.
 // 'n' represents the bounds <-> centre margin in prescaled units.
-func _borderStandardBorderNinepatch(base frenyard.NinePatch, n int32) frenyard.NinePatch {
+func _borderStandardBorderNinepatch(base framework.NinePatch, n int32) framework.NinePatch {
 	base.Sprite = frenyard.Area2iFromVecs(frenyard.Vec2i{X: 0, Y: 0}, frenyard.Vec2i{X: 32 * borderImageScale, Y: 32 * borderImageScale})
 	base.Bounds = frenyard.Area2iFromVecs(frenyard.Vec2i{X: 8 * borderImageScale, Y: 8 * borderImageScale}, frenyard.Vec2i{X: 16 * borderImageScale, Y: 16 * borderImageScale})
 	base.Centre = frenyard.Area2iFromVecs(frenyard.Vec2i{X: (8 + n) * borderImageScale, Y: (8 + n) * borderImageScale}, frenyard.Vec2i{X: (16 - (n * 2)) * borderImageScale, Y: (16 - (n * 2)) * borderImageScale})
@@ -155,19 +157,19 @@ func _borderStandardBorderNinepatch(base frenyard.NinePatch, n int32) frenyard.N
 // this produces a shadow effect that even hangs over other UI.
 
 // BorderTitle produces a border for the shadowing effect under a title.
-func BorderTitle(colour uint32) frenyard.Frame {
+func BorderTitle(colour uint32) framework.Frame {
 	addedBorderX := sizeScale(8)
 	addedBorderY := sizeScale(8)
-	return frenyard.NinePatchFrame{
-		Layers: []frenyard.NinePatchFrameLayer{
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+	return framework.NinePatchFrame{
+		Layers: []framework.NinePatchFrameLayer{
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenSquareHeadshadow2dpX4,
 				Scale: borderEffectiveScale,
 				ColourMod: colour,
 			},
-			frenyard.NinePatchFrameLayer{
-				Pass: frenyard.FramePassOverBefore,
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
 				NinePatch: borderGenSquareMaskX4,
 				Scale: borderEffectiveScale,
 				ColourMod: colour,

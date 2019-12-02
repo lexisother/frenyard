@@ -48,21 +48,18 @@ func ScaleVec2i(scale float64, target Vec2i) Vec2i {
 	}
 }
 
-// InferScale infers a 'reasonable scale' from environment variables or by creating a window.
-func InferScale() float64 {
+// InferScale infers a 'reasonable scale' for a provided window.
+func InferScale(dpiSource Window) float64 {
 	env := os.Getenv("FRENYARD_SCALE")
 	envScale, err := strconv.ParseFloat(env, 64)
 	if err == nil {
 		return envScale
 	}
 	
-	microTestElement := NewColouredRectPtr(0xFF000000, Vec2i{128, 128})
-	microTestWindow, err := CreateBoundWindow("DPI Test Window", false, 0xFF000000, microTestElement)
-	if err != nil {
+	if dpiSource == nil {
 		return 1.0
 	}
-	val := microTestWindow.GetLocalDPI() / 96.0
-	microTestWindow.Destroy()
+	val := dpiSource.GetLocalDPI() / 96.0
 	// Prevent weirdness for anything that looks even remotely like a sensible DPI value
 	return ModifyScaleBinInt(val)
 }

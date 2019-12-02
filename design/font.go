@@ -2,6 +2,7 @@ package design
 
 import (
 	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 	"github.com/golang/freetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/gobold"
@@ -31,12 +32,12 @@ func deSetupFonts() {
 	if err != nil {
 		panic(err)
 	}
-	PageTitleFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 24)))
-	GlobalFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 16)))
-	ButtonTextFont = frenyard.CreateTTFFont(fontB, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 14)))
+	PageTitleFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 24)))
+	GlobalFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 16)))
+	ButtonTextFont = integration.CreateTTFFont(fontB, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 14)))
 	
 	// 16dp
 	ListItemTextFont = GlobalFont
 	// 12dp (NON-STANDARD)
-	ListItemSubTextFont = frenyard.CreateTTFFont(font, frenyard.DPIPixels, float64(frenyard.Scale(DesignScale, 12)))
+	ListItemSubTextFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 12)))
 }

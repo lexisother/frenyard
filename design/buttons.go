@@ -1,14 +1,18 @@
 package design
 
-import "github.com/20kdc/CCUpdaterUI/frenyard"
+import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
+	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
+)
 //import "fmt"
 
 type deUIDesignButton struct {
-	frenyard.UILayoutProxy
+	framework.UILayoutProxy
 	focusState float64
-	attachedLabel *frenyard.UILabel
-	overlay *frenyard.UIOverlayContainer
-	button *frenyard.UIButton
+	attachedLabel *framework.UILabel
+	overlay *framework.UIOverlayContainer
+	button *framework.UIButton
 }
 
 // FyETick overrides UILayoutProxy.FyETick
@@ -35,9 +39,9 @@ func (de *deUIDesignButton) FyETick(time float64) {
 }
 
 // FyFDraw implements Frame.FyFDraw
-func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass frenyard.FramePass) {
-	if pass == frenyard.FramePassUnderBefore {
-		alpha := frenyard.ColourComponentClamp(int32(de.focusState * 255))
+func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass framework.FramePass) {
+	if pass == framework.FramePassUnderBefore {
+		alpha := integration.ColourComponentClamp(int32(de.focusState * 255))
 		alphaInv := 255 - alpha
 		borderButtonShadow.Draw(r, frenyard.Area2iOfSize(size), borderEffectiveScale, frenyard.DrawRectCommand{
 			Colour: (uint32(alphaInv) << 24) | 0xFFFFFF,
@@ -45,7 +49,7 @@ func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pa
 		borderButtonShadowFocus.Draw(r, frenyard.Area2iOfSize(size), borderEffectiveScale, frenyard.DrawRectCommand{
 			Colour: (uint32(alpha) << 24) | 0xFFFFFF,
 		})
-	} else if pass == frenyard.FramePassOverBefore {
+	} else if pass == framework.FramePassOverBefore {
 		primaryColour := uint32(0xFF2040FF)
 		if de.button.Down {
 			primaryColour = 0xFF102080
@@ -77,11 +81,11 @@ func (de *deUIDesignButton) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec
 	return baseSize.Max(frenyard.Vec2i{X: sizeScale(64), Y: sizeScale(36)})
 }
 
-func newDeUIDesignButtonPtr(content frenyard.UILayoutElement, label *frenyard.UILabel, behavior frenyard.ButtonBehavior) *frenyard.UIButton {
+func newDeUIDesignButtonPtr(content framework.UILayoutElement, label *framework.UILabel, behavior framework.ButtonBehavior) *framework.UIButton {
 	des := &deUIDesignButton{}
-	overlay := frenyard.NewUIOverlayContainerPtr(des, []frenyard.UILayoutElement{content})
+	overlay := framework.NewUIOverlayContainerPtr(des, []framework.UILayoutElement{content})
 	des.overlay = overlay
-	frenyard.InitUILayoutProxy(des, overlay)
-	des.button = frenyard.NewUIButtonPtr(des, behavior)
+	framework.InitUILayoutProxy(des, overlay)
+	des.button = framework.NewUIButtonPtr(des, behavior)
 	return des.button
 }

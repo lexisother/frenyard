@@ -1,6 +1,7 @@
-package frenyard
+package integration
 
 import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"encoding/base64"
 	"image"
 	"image/png"
@@ -8,11 +9,11 @@ import (
 )
 
 // GoImageToTexture imports an image from Go's "image" library to a texture.
-func GoImageToTexture(img image.Image, ct []ColourTransform) Texture {
+func GoImageToTexture(img image.Image, ct []ColourTransform) frenyard.Texture {
 	min := img.Bounds().Min
 	sizePreTranslate := img.Bounds().Size()
 	pixels := make([]uint32, sizePreTranslate.X*sizePreTranslate.Y)
-	size := Vec2i{int32(sizePreTranslate.X), int32(sizePreTranslate.Y)}
+	size := frenyard.Vec2i{int32(sizePreTranslate.X), int32(sizePreTranslate.Y)}
 	index := 0
 	for y := 0; y < sizePreTranslate.Y; y++ {
 		for x := 0; x < sizePreTranslate.X; x++ {
@@ -24,7 +25,7 @@ func GoImageToTexture(img image.Image, ct []ColourTransform) Texture {
 			index++
 		}
 	}
-	return GlobalBackend.CreateTexture(size, pixels)
+	return frenyard.GlobalBackend.CreateTexture(size, pixels)
 }
 
 // CreateHardcodedPNGImage gets an image.Image from a base64 string.
@@ -61,12 +62,12 @@ func ScaleImageToHalfSize(source image.Image) image.Image {
 }
 
 // CreateHardcodedPNGTexture gets a frenyard.Texture from a base64 string.
-func CreateHardcodedPNGTexture(pngb64 string, ct []ColourTransform) Texture {
+func CreateHardcodedPNGTexture(pngb64 string, ct []ColourTransform) frenyard.Texture {
 	return GoImageToTexture(CreateHardcodedPNGImage(pngb64), ct)
 }
 
 // Run runs the colour transform on a pair of images to create a third image.
-func (ct ColourTransform2) Run(part1 image.Image, part2 image.Image, shift Vec2i) image.Image {
+func (ct ColourTransform2) Run(part1 image.Image, part2 image.Image, shift frenyard.Vec2i) image.Image {
 	sourceBounds := part1.Bounds()
 	part2Bounds := part2.Bounds()
 	dest := image.NewNRGBA(sourceBounds)

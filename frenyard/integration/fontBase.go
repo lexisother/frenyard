@@ -1,6 +1,7 @@
-package frenyard
+package integration
 
 import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -231,11 +232,11 @@ func (ctc fyCompoundTypeChunk) FyCDraw(img draw.Image, dot fixed.Point26_6) fixe
 
 
 // FontRectangleConverter converts a fixed.Rectangle26_6 into pixels (rounding outwards)
-func FontRectangleConverter(bounds fixed.Rectangle26_6) Area2i {
+func FontRectangleConverter(bounds fixed.Rectangle26_6) frenyard.Area2i {
 	area := bounds.Max.Sub(bounds.Min)
-	return Area2i{
-		Area1i{int32(bounds.Min.X.Floor()), int32(area.X.Ceil())},
-		Area1i{int32(bounds.Min.Y.Floor()), int32(area.Y.Ceil())},
+	return frenyard.Area2i{
+		frenyard.Area1i{int32(bounds.Min.X.Floor()), int32(area.X.Ceil())},
+		frenyard.Area1i{int32(bounds.Min.Y.Floor()), int32(area.Y.Ceil())},
 	}
 }
 

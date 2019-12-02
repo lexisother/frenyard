@@ -1,4 +1,8 @@
-package frenyard
+package framework
+
+import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+)
 
 // ButtonBehavior represents a button's behavior.
 type ButtonBehavior func()
@@ -23,7 +27,7 @@ func NewUIButtonPtr(theme UILayoutElement, click ButtonBehavior) *UIButton {
 }
 
 // FyENormalEvent overrides UILayoutProxy.FyENormalEvent
-func (btn *UIButton) FyENormalEvent(me NormalEvent) {
+func (btn *UIButton) FyENormalEvent(me frenyard.NormalEvent) {
 	btn.UILayoutProxy.FyENormalEvent(me)
 	switch val := me.(type) {
 		case FocusEvent:
@@ -32,16 +36,16 @@ func (btn *UIButton) FyENormalEvent(me NormalEvent) {
 }
 
 // FyEMouseEvent overrides UILayoutProxy.FyEMouseEvent
-func (btn *UIButton) FyEMouseEvent(me MouseEvent) {
+func (btn *UIButton) FyEMouseEvent(me frenyard.MouseEvent) {
 	btn.UILayoutProxy.FyEMouseEvent(me)
-	btn.Hover = Area2iOfSize(btn.FyESize()).Contains(me.Pos)
-	if me.Button == MouseButtonLeft {
-		if me.ID == MouseEventUp {
+	btn.Hover = frenyard.Area2iOfSize(btn.FyESize()).Contains(me.Pos)
+	if me.Button == frenyard.MouseButtonLeft {
+		if me.ID == frenyard.MouseEventUp {
 			btn.Down = false
 			if btn.Hover {
 				btn._behavior()
 			}
-		} else if me.ID == MouseEventDown {
+		} else if me.ID == frenyard.MouseEventDown {
 			btn.Down = true
 		}
 	}

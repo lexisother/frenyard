@@ -1,7 +1,3 @@
-/*
- * PLEASE KEEP IN MIND: NONE OF THIS IS 'PUBLIC' FOR DEPENDENCY PURPOSES (yet)
- */
-
 package frenyard
 
 // ExitFlag when set to true, exits the application.
@@ -40,6 +36,8 @@ type Window interface {
 	Destroy()
 	// Gets the DPI of the window. This can change. Oh well.
 	GetLocalDPI() float64
+	// Sets the size of the window (if possible)
+	SetSize(size Vec2i)
 }
 
 /*

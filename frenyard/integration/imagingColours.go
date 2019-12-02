@@ -1,4 +1,4 @@
-package frenyard
+package integration
 
 import (
 	"image/color"

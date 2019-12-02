@@ -1,6 +1,9 @@
-package frenyard
+package framework
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+)
 
 /*
  * BEFORE CONTINUING: If you're here because of an "issue" where the scrollbox never activates the scrollbar,
@@ -63,15 +66,15 @@ func NewUIScrollbarPtr(theme ScrollbarTheme, vertical bool, value ScrollbarValue
 func (uis *UIScrollbar) FyETick(time float64) {
 }
 
-func (uis *UIScrollbar) _calcMetrics() (insideArea Area2i, movementSize Vec2i, movementArea Area2i) {
-	insideArea = Area2iOfSize(uis.FyESize()).Contract(uis._theme.Base.FyFPadding())
+func (uis *UIScrollbar) _calcMetrics() (insideArea frenyard.Area2i, movementSize frenyard.Vec2i, movementArea frenyard.Area2i) {
+	insideArea = frenyard.Area2iOfSize(uis.FyESize()).Contract(uis._theme.Base.FyFPadding())
 	movementSize = uis._theme.Movement.FyFPadding().Size()
-	movementArea = insideArea.Align(movementSize, Alignment2i{})
+	movementArea = insideArea.Align(movementSize, frenyard.Alignment2i{})
 	return insideArea, movementSize, movementArea
 }
 
 // FyEDraw implements UIElement.FyEDraw
-func (uis *UIScrollbar) FyEDraw(r Renderer, under bool) {
+func (uis *UIScrollbar) FyEDraw(r frenyard.Renderer, under bool) {
 	if under {
 		uis._theme.Base.FyFDraw(r, uis.FyESize(), FramePassUnderBefore)
 	} else {
@@ -103,22 +106,22 @@ func (uis *UIScrollbar) FyEDraw(r Renderer, under bool) {
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent
-func (uis *UIScrollbar) FyENormalEvent(me NormalEvent) {
+func (uis *UIScrollbar) FyENormalEvent(me frenyard.NormalEvent) {
 }
 
 // FyEMouseEvent implements UIElement.FyEMouseEvent
-func (uis *UIScrollbar) FyEMouseEvent(me MouseEvent) {
-	decreaser, increaser := MouseButtonScrollLeft, MouseButtonScrollRight
+func (uis *UIScrollbar) FyEMouseEvent(me frenyard.MouseEvent) {
+	decreaser, increaser := frenyard.MouseButtonScrollLeft, frenyard.MouseButtonScrollRight
 	if uis._vertical {
-		decreaser, increaser = MouseButtonScrollUp, MouseButtonScrollDown
+		decreaser, increaser = frenyard.MouseButtonScrollUp, frenyard.MouseButtonScrollDown
 	}
-	if me.ID == MouseEventDown && me.Button == increaser {
+	if me.ID == frenyard.MouseEventDown && me.Button == increaser {
 		uis.Value.FySSetValue(uis.Value.FySValue() + uis.MouseNotch)
-	} else if me.ID == MouseEventDown && me.Button == decreaser {
+	} else if me.ID == frenyard.MouseEventDown && me.Button == decreaser {
 		uis.Value.FySSetValue(uis.Value.FySValue() - uis.MouseNotch)
-	} else if me.ID == MouseEventDown && me.Button == MouseButtonLeft {
+	} else if me.ID == frenyard.MouseEventDown && me.Button == frenyard.MouseButtonLeft {
 		uis._grabbed = true
-	} else if me.ID == MouseEventUp && me.Button == MouseButtonLeft {
+	} else if me.ID == frenyard.MouseEventUp && me.Button == frenyard.MouseButtonLeft {
 		uis._grabbed = false
 	}
 	if uis._grabbed {
@@ -133,7 +136,7 @@ func (uis *UIScrollbar) FyEMouseEvent(me MouseEvent) {
 }
 
 // FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
-func (uis *UIScrollbar) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (uis *UIScrollbar) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	movementEffectiveSize := uis._theme.Movement.FyFPadding().Size()
 	if uis._vertical {
 		movementEffectiveSize.Y *= 2
@@ -148,7 +151,7 @@ type UIScrollbox struct {
 	UIPanel
 	UILayoutElementComponent
 	// The requirements for the scrollbar. Cached for simplicity's sake.
-	_scrollbarMainCross Vec2i
+	_scrollbarMainCross frenyard.Vec2i
 	_contained UILayoutElement
 	_scrollbar *UIScrollbar
 	// >0 means scrollbar is active
@@ -179,26 +182,26 @@ func (usc *UIScrollbox) FyLSubelementChanged() {
 }
 
 // FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
-func (usc *UIScrollbox) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (usc *UIScrollbox) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	limitsMainCross := limits.ConditionalTranspose(usc._vertical)
 	baseSize := usc._contained.FyLSizeForLimits(limits)
 	if baseSize.ConditionalTranspose(usc._vertical).X > limitsMainCross.X {
 		// scrollbar penalty
-		limitsNormalWithBar := Vec2i{SizeUnlimited, AddCU(limitsMainCross.Y, -usc._scrollbarMainCross.X)}.ConditionalTranspose(usc._vertical)
+		limitsNormalWithBar := frenyard.Vec2i{frenyard.SizeUnlimited, frenyard.AddCU(limitsMainCross.Y, -usc._scrollbarMainCross.X)}.ConditionalTranspose(usc._vertical)
 		baseSize = usc._contained.FyLSizeForLimits(limitsNormalWithBar)
 		baseSizeMainCross := baseSize.ConditionalTranspose(usc._vertical)
-		return Vec2i{usc._scrollbarMainCross.X, baseSizeMainCross.Y + usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
+		return frenyard.Vec2i{usc._scrollbarMainCross.X, baseSizeMainCross.Y + usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
 	}
 	return baseSize
 }
 
 // FyEMouseEvent overrides UIPanel.FyEMouseEvent
-func (usc *UIScrollbox) FyEMouseEvent(me MouseEvent) {
+func (usc *UIScrollbox) FyEMouseEvent(me frenyard.MouseEvent) {
 	acceptance := false
-	if usc._scrollLength > 0 && (me.ID == MouseEventDown || me.ID == MouseEventUp) {
-		acceptance = me.Button == MouseButtonScrollLeft || me.Button == MouseButtonScrollRight
+	if usc._scrollLength > 0 && (me.ID == frenyard.MouseEventDown || me.ID == frenyard.MouseEventUp) {
+		acceptance = me.Button == frenyard.MouseButtonScrollLeft || me.Button == frenyard.MouseButtonScrollRight
 		if usc._vertical {
-			acceptance = me.Button == MouseButtonScrollDown || me.Button == MouseButtonScrollUp
+			acceptance = me.Button == frenyard.MouseButtonScrollDown || me.Button == frenyard.MouseButtonScrollUp
 		}
 	}
 	if acceptance {
@@ -209,26 +212,26 @@ func (usc *UIScrollbox) FyEMouseEvent(me MouseEvent) {
 }
 
 // FyEResize overrides UIPanel.FyEResize
-func (usc *UIScrollbox) FyEResize(size Vec2i) {
+func (usc *UIScrollbox) FyEResize(size frenyard.Vec2i) {
 	usc.UIPanel.FyEResize(size)
-	usc._scrollbarMainCross = usc._scrollbar.FyLSizeForLimits(Vec2i{}).ConditionalTranspose(usc._vertical)
+	usc._scrollbarMainCross = usc._scrollbar.FyLSizeForLimits(frenyard.Vec2i{}).ConditionalTranspose(usc._vertical)
 
 	baseSize := usc._contained.FyLSizeForLimits(size)
 	baseSizeMainCross := baseSize.ConditionalTranspose(usc._vertical)
 	sizeMainCross := size.ConditionalTranspose(usc._vertical)
 	if baseSizeMainCross.X > sizeMainCross.X {
-		if baseSizeMainCross.X == SizeUnlimited {
+		if baseSizeMainCross.X == frenyard.SizeUnlimited {
 			fmt.Printf("frenyard/UIScrollbox: Scroll layout was given element that wanted literally infinite size. This can't be made to work; track it down and get rid of it: %v %v\n", usc, baseSize)
 		}
 		// Subtract scrollbar from size; this is used for both layout and for calculating scroll len.
-		sizeWithoutScrollbar := Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
+		sizeWithoutScrollbar := frenyard.Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
 		// Recalculate with the adjusted constraints because of the removed scrollbar
 		baseSizeMainCross = usc._contained.FyLSizeForLimits(sizeWithoutScrollbar).ConditionalTranspose(usc._vertical)
-		sizeWithoutScrollbar = Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
+		sizeWithoutScrollbar = frenyard.Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
 		usc._scrollLength = baseSizeMainCross.X - sizeMainCross.X
 		usc._scrollbar.MouseNotch = (float64(sizeMainCross.X) / 2) / float64(usc._scrollLength)
 		// can haz scrollbar?
-		usc._scrollbar.FyEResize(Vec2i{sizeMainCross.X, usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical))
+		usc._scrollbar.FyEResize(frenyard.Vec2i{sizeMainCross.X, usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical))
 		usc._contained.FyEResize(sizeWithoutScrollbar)
 	} else {
 		usc._scrollLength = 0
@@ -244,12 +247,12 @@ func (usc *UIScrollbox) _updatePositions() {
 		usc.ThisUIPanelDetails.SetContent([]PanelFixedElement{
 			PanelFixedElement{
 				Element: usc._contained,
-				Pos: Vec2i{scrollPos, 0}.ConditionalTranspose(usc._vertical),
+				Pos: frenyard.Vec2i{scrollPos, 0}.ConditionalTranspose(usc._vertical),
 				Visible: true,
 			},
 			PanelFixedElement{
 				Element: usc._scrollbar,
-				Pos: Vec2i{0, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical),
+				Pos: frenyard.Vec2i{0, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical),
 				Visible: true,
 			},
 		})

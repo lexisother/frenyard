@@ -1,4 +1,6 @@
-package frenyard
+package framework
+
+import "github.com/20kdc/CCUpdaterUI/frenyard"
 
 // UISlideTransitionContainer creates a 'slide transition' box.
 type UISlideTransitionContainer struct {
@@ -21,7 +23,7 @@ type UISlideTransitionContainer struct {
 // NewUISlideTransitionContainerPtr creates a 'slide transition' box.
 func NewUISlideTransitionContainerPtr(initContent UILayoutElement) *UISlideTransitionContainer {
 	container := &UISlideTransitionContainer{
-		UIPanel: NewPanel(Vec2i{}),
+		UIPanel: NewPanel(frenyard.Vec2i{}),
 		_main: initContent,
 		_transitionTime: 1.0,
 	}
@@ -40,11 +42,11 @@ func (ufc *UISlideTransitionContainer) FyLSubelementChanged() {
 }
 
 // FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
-func (ufc *UISlideTransitionContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (ufc *UISlideTransitionContainer) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	if ufc._main != nil {
 		return ufc._main.FyLSizeForLimits(limits)
 	}
-	return Vec2i{}
+	return frenyard.Vec2i{}
 }
 
 // TransitionTo transitions to a new slide.
@@ -70,7 +72,7 @@ func (ufc *UISlideTransitionContainer) TransitionTo(next UILayoutElement, time f
 }
 
 // FyEResize overrides UIPanel.FyEResize
-func (ufc *UISlideTransitionContainer) FyEResize(size Vec2i) {
+func (ufc *UISlideTransitionContainer) FyEResize(size frenyard.Vec2i) {
 	ufc.UIPanel.FyEResize(size)
 	if ufc._main != nil {
 		ufc._main.FyEResize(size)
@@ -83,20 +85,20 @@ func (ufc *UISlideTransitionContainer) FyEResize(size Vec2i) {
 func (ufc *UISlideTransitionContainer) _fyUpdatePositions() {
 	areaSize := ufc.FyESize().ConditionalTranspose(ufc._transitionVertical).X
 	transitionIP := ufc._transitionTime / ufc._transitionLength
-	transitionIP = EasingInOut(EasingQuadraticIn)(transitionIP)
+	transitionIP = frenyard.EasingInOut(frenyard.EasingQuadraticIn)(transitionIP)
 	point := int32(float64(areaSize) * transitionIP)
 	mul := int32(1)
 	if ufc._transitionReverse {
 		mul *= -1
 	}
 	feA := PanelFixedElement{
-		Pos: Vec2i{(-point) * mul, 0}.ConditionalTranspose(ufc._transitionVertical),
+		Pos: frenyard.Vec2i{(-point) * mul, 0}.ConditionalTranspose(ufc._transitionVertical),
 		Element: ufc._last,
 		Locked: true,
 		Visible: true,
 	}
 	feB := PanelFixedElement{
-		Pos: Vec2i{(areaSize - point) * mul, 0}.ConditionalTranspose(ufc._transitionVertical),
+		Pos: frenyard.Vec2i{(areaSize - point) * mul, 0}.ConditionalTranspose(ufc._transitionVertical),
 		Element: ufc._main,
 		Visible: true,
 	}
@@ -105,7 +107,7 @@ func (ufc *UISlideTransitionContainer) _fyUpdatePositions() {
 		if ufc._last != nil {
 			slice = []PanelFixedElement{feA, feB}
 		} else {
-			feB.Pos = Vec2i{}
+			feB.Pos = frenyard.Vec2i{}
 			slice = []PanelFixedElement{feB}
 		}
 	} else {

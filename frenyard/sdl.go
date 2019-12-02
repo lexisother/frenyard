@@ -31,6 +31,14 @@ func (w *fySDL2Window) SetName(n string) {
 	w.window.SetTitle(n)
 }
 
+func (w *fySDL2Window) SetSize(s Vec2i) {
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
+	w.window.SetSize(s.X, s.Y)
+}
+
 func (w *fySDL2Window) Destroy() {
 	if w.window == nil {
 		panic("Window was destroyed twice.")

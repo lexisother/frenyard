@@ -1,11 +1,9 @@
-/*
- * PLEASE KEEP IN MIND: NONE OF THIS IS 'PUBLIC' FOR DEPENDENCY PURPOSES (yet)
- */
+package framework
 
-package frenyard
-
-// For warnings
-import "fmt"
+import (
+	"fmt"
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+)
 
 // FocusEvent is an event type specific to the UI framework that represents focusing/unfocusing the receiving element.
 type FocusEvent struct {
@@ -20,8 +18,8 @@ type FocusEvent struct {
 
 // UIElement is the core UI element type (no layout capabilities). An implementation must contain UIElementComponent or UIProxy.
 type UIElement interface {
-	FyENormalEvent(ev NormalEvent)
-	FyEMouseEvent(ev MouseEvent)
+	FyENormalEvent(ev frenyard.NormalEvent)
+	FyEMouseEvent(ev frenyard.MouseEvent)
 	// Updates the element.
 	FyETick(deltaTime float64)
 	/*
@@ -30,7 +28,7 @@ type UIElement interface {
 	 * As such, if an element has a background, it draws the shadow for that (if any) in the 'under' pass,
 	 *  and splits its main pass into, in order: background, sub-element 'under' pass, sub-element main pass.
 	 */
-	FyEDraw(target Renderer, under bool)
+	FyEDraw(target frenyard.Renderer, under bool)
 	/*
 	 * Sets FyESize.
 	 * FyESize MUST NOT change without FyEResize being used.
@@ -40,10 +38,10 @@ type UIElement interface {
 	 *  3. the parameter is equal to FyESize() (relayout)
 	 * FyESize SHOULD default to a reasonable default size for the element.
 	 */
-	FyEResize(size Vec2i)
-	FyESize() Vec2i
+	FyEResize(size frenyard.Vec2i)
+	FyESize() frenyard.Vec2i
 	// Attempts to find an element relative to Area2iOfSize(FyESize()). Does not check for itself. Returns an empty area for 'not found'.
-	FyEFindElement(target UIElement) Area2i
+	FyEFindElement(target UIElement) frenyard.Area2i
 }
 
 /*
@@ -54,38 +52,38 @@ type UIElement interface {
 // UIElementComponent implements the resizing logic for UIElement and default method implementations.
 type UIElementComponent struct {
 	// SUPER DUPER PRIVATE! DO NOT ACCESS OUTSIDE OF MEMBER METHODS.
-	_fyUIElementComponentSize Vec2i
+	_fyUIElementComponentSize frenyard.Vec2i
 }
 
 // NewUIElementComponent creates a new UIElementComponent.
-func NewUIElementComponent(size Vec2i) UIElementComponent {
+func NewUIElementComponent(size frenyard.Vec2i) UIElementComponent {
 	return UIElementComponent{size}
 }
 
 // FyEResize implements UIElement.FyEResize
-func (es *UIElementComponent) FyEResize(size Vec2i) {
+func (es *UIElementComponent) FyEResize(size frenyard.Vec2i) {
 	es._fyUIElementComponentSize = size
 }
 
 // FyESize implements UIElement.FyESize
-func (es *UIElementComponent) FyESize() Vec2i {
+func (es *UIElementComponent) FyESize() frenyard.Vec2i {
 	return es._fyUIElementComponentSize
 }
 
 // FyEFindElement implements UIElement.FyEFindElement
-func (es *UIElementComponent) FyEFindElement(target UIElement) Area2i {
-	return Area2i{}
+func (es *UIElementComponent) FyEFindElement(target UIElement) frenyard.Area2i {
+	return frenyard.Area2i{}
 }
 
 type fyWindowElementBinding struct {
-	window      Window
+	window      frenyard.Window
 	clearColour uint32
 	element     UIElement
 }
 
 // CreateBoundWindow creates a window that is bound to an element.
-func CreateBoundWindow(title string, vsync bool, clearColour uint32, e UIElement) (Window, error) {
-	return GlobalBackend.CreateWindow(title, e.FyESize(), vsync, &fyWindowElementBinding{
+func CreateBoundWindow(title string, vsync bool, clearColour uint32, e UIElement) (frenyard.Window, error) {
+	return frenyard.GlobalBackend.CreateWindow(title, e.FyESize(), vsync, &fyWindowElementBinding{
 		nil,
 		clearColour,
 		e,
@@ -93,7 +91,7 @@ func CreateBoundWindow(title string, vsync bool, clearColour uint32, e UIElement
 }
 
 // FyRStart implements WindowReceiver.FyRStart
-func (web *fyWindowElementBinding) FyRStart(w Window) {
+func (web *fyWindowElementBinding) FyRStart(w frenyard.Window) {
 	web.window = w
 	web.element.FyENormalEvent(FocusEvent{true})
 }
@@ -111,12 +109,12 @@ func (web *fyWindowElementBinding) FyRTick(f float64) {
 }
 
 // FyRNormalEvent implements WindowReceiver.FyRNormalEvent
-func (web *fyWindowElementBinding) FyRNormalEvent(ev NormalEvent) {
+func (web *fyWindowElementBinding) FyRNormalEvent(ev frenyard.NormalEvent) {
 	web.element.FyENormalEvent(ev)
 }
 
 // FyRMouseEvent implements WindowReceiver.FyRMouseEvent
-func (web *fyWindowElementBinding) FyRMouseEvent(ev MouseEvent) {
+func (web *fyWindowElementBinding) FyRMouseEvent(ev frenyard.MouseEvent) {
 	web.element.FyEMouseEvent(ev)
 }
 
@@ -126,7 +124,7 @@ func (web *fyWindowElementBinding) FyRClose() {
 
 // PanelFixedElement describes an element attached to a panel.
 type PanelFixedElement struct {
-	Pos Vec2i
+	Pos frenyard.Vec2i
 	// Setting this to false is useful if you want an element to still tick but want to remove the drawing overhead.
 	Visible bool
 	// Setting this to true 'locks' the element. The element still participates in hit-tests but fails to focus and events are NOT forwarded.
@@ -158,7 +156,7 @@ type UIPanelDetails struct {
 }
 
 // NewPanel creates a UIPanel.
-func NewPanel(size Vec2i) UIPanel {
+func NewPanel(size frenyard.Vec2i) UIPanel {
 	return UIPanel{
 		NewUIElementComponent(size),
 		UIPanelDetails{
@@ -194,12 +192,12 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 			// Has to occur before the buttons get removed or ordering issues occur.
 			pan._focus = -1
 			// And we've successfully delivered the MOUSEDOWNs to the *new* element, -1, by default
-			for button := (uint)(0); button < (uint)(MouseButtonLength); button++ {
+			for button := (uint)(0); button < (uint)(frenyard.MouseButtonLength); button++ {
 				if pan._buttonsDown&(1<<button) != 0 {
-					focusElement.Element.FyEMouseEvent(MouseEvent{
-						Vec2i{0, 0},
-						MouseEventUp,
-						(MouseButton)(button),
+					focusElement.Element.FyEMouseEvent(frenyard.MouseEvent{
+						frenyard.Vec2i{0, 0},
+						frenyard.MouseEventUp,
+						(frenyard.MouseButton)(button),
 					})
 				}
 			}
@@ -210,7 +208,7 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent
-func (pan *UIPanel) FyENormalEvent(ev NormalEvent) {
+func (pan *UIPanel) FyENormalEvent(ev frenyard.NormalEvent) {
 	if pan.ThisUIPanelDetails._focus != -1 {
 		elem := pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
 		if elem.Visible && !elem.Locked {
@@ -219,14 +217,14 @@ func (pan *UIPanel) FyENormalEvent(ev NormalEvent) {
 	}
 }
 
-func (pan *UIPanel) _fyUIPanelForwardMouseEvent(target PanelFixedElement, ev MouseEvent) {
+func (pan *UIPanel) _fyUIPanelForwardMouseEvent(target PanelFixedElement, ev frenyard.MouseEvent) {
 	ev = ev.Offset(target.Pos.Negate())
 	// Problematic mouse events are prevented from reaching locked targets via the hit-test logic.
 	target.Element.FyEMouseEvent(ev)
 }
 
 // FyEMouseEvent implements UIElement.FyEMouseEvent
-func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
+func (pan *UIPanel) FyEMouseEvent(ev frenyard.MouseEvent) {
 	// Useful for debugging if any of the warnings come up
 	// if ev.ID != MouseEventMove { fmt.Printf("ui_core.go/Panel (%p)/FyEMouseEvent %v %v (%v, %v)\n", pan, ev.ID, ev.Button, ev.Pos.X, ev.Pos.Y) }
 	
@@ -243,7 +241,7 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 		if !val.Visible {
 			continue
 		}
-		if Area2iFromVecs(val.Pos, val.Element.FyESize()).Contains(ev.Pos) {
+		if frenyard.Area2iFromVecs(val.Pos, val.Element.FyESize()).Contains(ev.Pos) {
 			//fmt.Printf(" Hit index %v\n", key)
 			hittest = key
 			if val.Locked {
@@ -253,20 +251,20 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 		}
 	}
 	switch ev.ID {
-	case MouseEventMove:
+	case frenyard.MouseEventMove:
 		// Mouse-move events go everywhere.
 		for _, val := range pan.ThisUIPanelDetails._content {
 			pan._fyUIPanelForwardMouseEvent(val, ev)
 		}
 		invalid = true
-	case MouseEventUp:
+	case frenyard.MouseEventUp:
 		if pan.ThisUIPanelDetails._buttonsDown & buttonMask == 0 {
 			fmt.Printf("ui_core.go/Panel (%p)/FyEMouseEvent warning: Button removal on non-existent button %v\n", pan, ev.Button)
 			invalid = true
 		} else {
 			pan.ThisUIPanelDetails._buttonsDown &= 0xFFFF ^ buttonMask
 		}
-	case MouseEventDown:
+	case frenyard.MouseEventDown:
 		if pan.ThisUIPanelDetails._buttonsDown == 0 {
 			/*
 			 * FOCUS REASONING DESCRIPTION
@@ -321,14 +319,14 @@ func (pan *UIPanel) FyEMouseEvent(ev MouseEvent) {
 }
 
 // FyEDraw implements UIElement.FyEDraw
-func (pan *UIPanel) FyEDraw(target Renderer, under bool) {
+func (pan *UIPanel) FyEDraw(target frenyard.Renderer, under bool) {
 	if pan.ThisUIPanelDetails.Clipping {
 		// Clipping: everything is inside panel bounds
 		if under {
 			return
 		}
 		oldClip := target.Clip()
-		newClip := oldClip.Intersect(Area2iOfSize(pan.FyESize()))
+		newClip := oldClip.Intersect(frenyard.Area2iOfSize(pan.FyESize()))
 		if newClip.Empty() {
 			return
 		}
@@ -368,17 +366,17 @@ func (pan *UIPanel) FyETick(f float64) {
 }
 
 // FyEFindElement implements UIElement.FyEFindElement
-func (pan *UIPanel) FyEFindElement(target UIElement) Area2i {
+func (pan *UIPanel) FyEFindElement(target UIElement) frenyard.Area2i {
 	for _, val := range pan.ThisUIPanelDetails._content {
 		if val.Element == target {
-			return Area2iFromVecs(val.Pos, val.Element.FyESize())
+			return frenyard.Area2iFromVecs(val.Pos, val.Element.FyESize())
 		}
 		area := val.Element.FyEFindElement(target)
 		if !area.Empty() {
 			return area.Translate(val.Pos)
 		}
 	}
-	return Area2i{}
+	return frenyard.Area2i{}
 }
 
 // UIProxyHost is used to 'drill down' to the UIProxy within an element.
@@ -403,17 +401,17 @@ func InitUIProxy(proxy UIProxyHost, target UIElement) {
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent
-func (px *UIProxy) FyENormalEvent(ev NormalEvent) {
+func (px *UIProxy) FyENormalEvent(ev frenyard.NormalEvent) {
 	px.fyUIProxyTarget.FyENormalEvent(ev)
 }
 
 // FyEMouseEvent implements UIElement.FyEMouseEvent
-func (px *UIProxy) FyEMouseEvent(ev MouseEvent) {
+func (px *UIProxy) FyEMouseEvent(ev frenyard.MouseEvent) {
 	px.fyUIProxyTarget.FyEMouseEvent(ev)
 }
 
 // FyEDraw implements UIElement.FyEDraw
-func (px *UIProxy) FyEDraw(target Renderer, under bool) {
+func (px *UIProxy) FyEDraw(target frenyard.Renderer, under bool) {
 	px.fyUIProxyTarget.FyEDraw(target, under)
 }
 
@@ -423,19 +421,19 @@ func (px *UIProxy) FyETick(f float64) {
 }
 
 // FyEResize implements UIElement.FyEResize
-func (px *UIProxy) FyEResize(v Vec2i) {
+func (px *UIProxy) FyEResize(v frenyard.Vec2i) {
 	px.fyUIProxyTarget.FyEResize(v)
 }
 
 // FyESize implements UIElement.FyESize
-func (px *UIProxy) FyESize() Vec2i {
+func (px *UIProxy) FyESize() frenyard.Vec2i {
 	return px.fyUIProxyTarget.FyESize()
 }
 
 // FyEFindElement implements UIElement.FyEFindElement
-func (px *UIProxy) FyEFindElement(target UIElement) Area2i {
+func (px *UIProxy) FyEFindElement(target UIElement) frenyard.Area2i {
 	if px.fyUIProxyTarget == target {
-		return Area2iOfSize(px.FyESize())
+		return frenyard.Area2iOfSize(px.FyESize())
 	}
 	return px.fyUIProxyTarget.FyEFindElement(target)
 }

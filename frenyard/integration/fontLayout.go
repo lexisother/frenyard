@@ -1,6 +1,7 @@
-package frenyard
+package integration
 
 import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"image"
 	"golang.org/x/image/math/fixed"
 )
@@ -12,12 +13,12 @@ import (
 type TextLayouterOptions struct {
 	Text TypeChunk
 	// SizeUnlimited should be used if an axis should be unbounded.
-	Limits Vec2i
+	Limits frenyard.Vec2i
 }
 
 // TextLayouterResult contains the results from text layouting.
 type TextLayouterResult struct {
-	Area  Area2i
+	Area  frenyard.Area2i
 	Lines []TypeChunk
 }
 
@@ -50,7 +51,7 @@ func (tlr *TextLayouterResult) fyCalcSize(xLimit int32) {
 }
 
 // Draw draws the laid-out text to a texture.
-func (tlr *TextLayouterResult) Draw() Texture {
+func (tlr *TextLayouterResult) Draw() frenyard.Texture {
 	img := image.NewNRGBA(image.Rect(0, 0, int(tlr.Area.X.Size), int(tlr.Area.Y.Size)))
 	dotFy := tlr.Area.Pos().Negate()
 	dot := fixed.P(int(dotFy.X), int(dotFy.Y))

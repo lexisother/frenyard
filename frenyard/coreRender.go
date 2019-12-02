@@ -1,7 +1,3 @@
-/*
- * PLEASE KEEP IN MIND: NONE OF THIS IS 'PUBLIC' FOR DEPENDENCY PURPOSES (yet)
- */
-
 package frenyard
 
 // DrawMode represents some form of drawing mode for the primitive. (Documentation for these should include a GLSLish equal for those versed in graphics, ideally translated from the SDL2 documentation.)

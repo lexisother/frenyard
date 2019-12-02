@@ -1,4 +1,8 @@
-package frenyard
+package framework
+
+import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+)
 
 /*
  *  THE FULL REASONING BEHIND THE DESIGN
@@ -47,7 +51,7 @@ type UILayoutElement interface {
 	 * The result may exceed the limitations given.
 	 * Note that this MUST NOT CHANGE given the same content.
 	 */
-	FyLSizeForLimits(limits Vec2i) Vec2i
+	FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i
 }
 
 // "Details", not "Private". Only access from the component's user.
@@ -137,10 +141,10 @@ type fyAdaptedLayoutElement struct {
 	UILayoutElementComponent
 	LayoutElementNoSubelementsComponent
 	UIProxy
-	CacheSize Vec2i
+	CacheSize frenyard.Vec2i
 }
 
-func (ale *fyAdaptedLayoutElement) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (ale *fyAdaptedLayoutElement) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	return ale.CacheSize
 }
 
@@ -161,6 +165,6 @@ func (px *UILayoutProxy) _fyGetUILayoutElementComponent() *UILayoutElementCompon
 }
 
 // FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
-func (px *UILayoutProxy) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (px *UILayoutProxy) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	return px.fyUIProxyTarget.(UILayoutElement).FyLSizeForLimits(limits)
 }

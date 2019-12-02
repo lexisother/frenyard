@@ -8,6 +8,9 @@ var SizeMarginAroundEverything int32
 // SizeTextNudge is the amount to nudge text vertically downwards to make it seem even.
 var SizeTextNudge int32
 
+// SizeWindowInit is the size of the main window at 1x scale (used for initialization)
+var SizeWindowInit frenyard.Vec2i = frenyard.Vec2i{X: 568, Y: 320}
+
 // SizeWindow is the size of the main window.
 var SizeWindow frenyard.Vec2i
 
@@ -19,7 +22,7 @@ func sizeScale(size int32) int32 {
 func deSetupSizes() {
 	SizeMarginAroundEverything = sizeScale(16)
 	SizeTextNudge = sizeScale(4)
-	SizeWindow = frenyard.ScaleVec2i(DesignScale, frenyard.Vec2i{X: 568, Y: 320})
+	SizeWindow = frenyard.ScaleVec2i(DesignScale, SizeWindowInit)
 }
 
 // MarginBody is the amount to push the page body by.

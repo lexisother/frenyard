@@ -1,37 +1,38 @@
-package frenyard
+package framework
+import "github.com/20kdc/CCUpdaterUI/frenyard"
 
 // A NinePatch is a resizable rectangular border and background to fit a given container.
 type NinePatch struct {
 	// If nil, this NinePatch is disabled.
-	Tex Texture
+	Tex frenyard.Texture
 	// The area of the image containing the under nine-patch.
-	Sprite Area2i
+	Sprite frenyard.Area2i
 	// The area within that area, absolute, where the container bounds sit.
-	Bounds Area2i
+	Bounds frenyard.Area2i
 	// The area within that area, absolute, where the nine-patch centre bounds sit.
-	Centre Area2i
+	Centre frenyard.Area2i
 }
 
 // Inset insets the NinePatch by expanding the container bounds.
-func (np NinePatch) Inset(margin Area2i) NinePatch {
+func (np NinePatch) Inset(margin frenyard.Area2i) NinePatch {
 	np.Bounds = np.Bounds.Expand(margin)
 	return np
 }
 
 // Draw draws the NinePatch on the given renderer with the given container bounds.
-func (np NinePatch) Draw(r Renderer, where Area2i, scale float64, drawBase DrawRectCommand) {
+func (np NinePatch) Draw(r frenyard.Renderer, where frenyard.Area2i, scale float64, drawBase frenyard.DrawRectCommand) {
 	if np.Tex == nil {
 		return
 	}
-	expansionAreas := SplitArea2iGrid3x3(np.Sprite, np.Bounds)
-	spriteAreas := SplitArea2iGrid3x3(np.Sprite, np.Centre)
-	intrusionAreas := SplitArea2iGrid3x3(np.Bounds, np.Centre)
-	expansionMargin := ScaleMargin2(scale, expansionAreas.AsMargin())
-	intrusionMargin := ScaleMargin2(scale, intrusionAreas.AsMargin())
+	expansionAreas := frenyard.SplitArea2iGrid3x3(np.Sprite, np.Bounds)
+	spriteAreas := frenyard.SplitArea2iGrid3x3(np.Sprite, np.Centre)
+	intrusionAreas := frenyard.SplitArea2iGrid3x3(np.Bounds, np.Centre)
+	expansionMargin := frenyard.ScaleMargin2(scale, expansionAreas.AsMargin())
+	intrusionMargin := frenyard.ScaleMargin2(scale, intrusionAreas.AsMargin())
 
 	whereOuter := where.Expand(expansionMargin)
 	whereInner := where.Contract(intrusionMargin)
-	drawAreas := SplitArea2iGrid3x3(whereOuter, whereInner)
+	drawAreas := frenyard.SplitArea2iGrid3x3(whereOuter, whereInner)
 	drawBase.Tex = np.Tex
 
 	drawBase.TexSprite = spriteAreas.A; drawBase.Target = drawAreas.A

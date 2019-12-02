@@ -1,36 +1,40 @@
-package frenyard
+package framework
 
-import "golang.org/x/image/font"
+import (
+	"golang.org/x/image/font"
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
+)
 
 // UIRect is a 'filler' background element.
 type UIRect struct {
 	UIElementComponent
 	// May be nil.
-	Tex Texture
+	Tex frenyard.Texture
 	// If Texture is nil, this is ignored.
-	Sprite Area2i
+	Sprite frenyard.Area2i
 	// Colour (either modulates Texture if present, or is filled as-is)
 	Colour uint32
 	// Alignment
-	Alignment Alignment2i
+	Alignment frenyard.Alignment2i
 }
 
 // NewColouredRectPtr creates a UIRect given a colour and size.
-func NewColouredRectPtr(colour uint32, size Vec2i) *UIRect {
-	return &UIRect{NewUIElementComponent(size), nil, Area2i{}, colour, Alignment2i{}}
+func NewColouredRectPtr(colour uint32, size frenyard.Vec2i) *UIRect {
+	return &UIRect{NewUIElementComponent(size), nil, frenyard.Area2i{}, colour, frenyard.Alignment2i{}}
 }
 
 // NewTextureRectPtr creates a UIRect given a colour, texture, sprite area, and size.
-func NewTextureRectPtr(colour uint32, tex Texture, sprite Area2i, size Vec2i, alignment Alignment2i) *UIRect {
+func NewTextureRectPtr(colour uint32, tex frenyard.Texture, sprite frenyard.Area2i, size frenyard.Vec2i, alignment frenyard.Alignment2i) *UIRect {
 	return &UIRect{NewUIElementComponent(size), tex, sprite, colour, alignment}
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent
-func (cr *UIRect) FyENormalEvent(ev NormalEvent) {
+func (cr *UIRect) FyENormalEvent(ev frenyard.NormalEvent) {
 }
 
 // FyEMouseEvent implements UIElement.FyEMouseEvent
-func (cr *UIRect) FyEMouseEvent(ev MouseEvent) {
+func (cr *UIRect) FyEMouseEvent(ev frenyard.MouseEvent) {
 }
 
 // FyETick implements UIElement.FyETick
@@ -38,24 +42,24 @@ func (cr *UIRect) FyETick(deltaTime float64) {
 }
 
 // FyEDraw implements UIElement.FyEDraw
-func (cr *UIRect) FyEDraw(target Renderer, under bool) {
+func (cr *UIRect) FyEDraw(target frenyard.Renderer, under bool) {
 	if !under {
-		target.DrawRect(DrawRectCommand{
+		target.DrawRect(frenyard.DrawRectCommand{
 			Tex: cr.Tex,
 			Colour: cr.Colour,
 			TexSprite: cr.Sprite,
-			Target: Area2iOfSize(cr.FyESize()).Align(cr.Sprite.Size(), Alignment2i{}),
+			Target: frenyard.Area2iOfSize(cr.FyESize()).Align(cr.Sprite.Size(), frenyard.Alignment2i{}),
 		})
 	}
 }
 
 type fyTextLayoutCacheEntry struct {
-	Layout    TextLayouterResult
-	LimitsMin Vec2i
-	LimitsMax Vec2i
+	Layout    integration.TextLayouterResult
+	LimitsMin frenyard.Vec2i
+	LimitsMax frenyard.Vec2i
 }
 
-func (cacheEntry fyTextLayoutCacheEntry) Matches(limits Vec2i) bool {
+func (cacheEntry fyTextLayoutCacheEntry) Matches(limits frenyard.Vec2i) bool {
 	return limits.Ge(cacheEntry.LimitsMin) && cacheEntry.LimitsMax.Ge(limits)
 }
 
@@ -64,20 +68,20 @@ type UILabel struct {
 	UIElementComponent
 	UILayoutElementComponent
 	LayoutElementNoSubelementsComponent
-	_text          TypeChunk
+	_text          integration.TypeChunk
 	_font          font.Face
 	_colour        uint32
 	_background    uint32 // very useful for debugging
-	_alignment     Alignment2i
+	_alignment     frenyard.Alignment2i
 	_didInit       bool
-	_texture       Texture // Changes based on size!
+	_texture       frenyard.Texture // Changes based on size!
 	_textureLimits fyTextLayoutCacheEntry
 	_layoutCache   []fyTextLayoutCacheEntry
-	_preferredSize Vec2i
+	_preferredSize frenyard.Vec2i
 }
 
 // NewUILabelPtr creates a new UILabel from the various visual details about it.
-func NewUILabelPtr(text TypeChunk, colour uint32, back uint32, align Alignment2i) *UILabel {
+func NewUILabelPtr(text integration.TypeChunk, colour uint32, back uint32, align frenyard.Alignment2i) *UILabel {
 	base := &UILabel{}
 	InitUILayoutElementComponent(base)
 	base.SetText(text)
@@ -88,15 +92,15 @@ func NewUILabelPtr(text TypeChunk, colour uint32, back uint32, align Alignment2i
 }
 
 // Text gets the document.
-func (cr *UILabel) Text() TypeChunk {
+func (cr *UILabel) Text() integration.TypeChunk {
 	return cr._text
 }
 
 // SetText sets the document.
-func (cr *UILabel) SetText(text TypeChunk) {
+func (cr *UILabel) SetText(text integration.TypeChunk) {
 	cr._text = text
 	cr._layoutCache = []fyTextLayoutCacheEntry{}
-	baseLayout := cr.fyLayoutCacheGet(Vec2iUnlimited())
+	baseLayout := cr.fyLayoutCacheGet(frenyard.Vec2iUnlimited())
 	cr._texture = baseLayout.Layout.Draw()
 	cr._textureLimits = baseLayout
 	cr._preferredSize = cr._texture.Size()
@@ -131,24 +135,24 @@ func (cr *UILabel) SetBackground(colour uint32) {
 }
 
 // Alignment gets the alignment.
-func (cr *UILabel) Alignment() Alignment2i {
+func (cr *UILabel) Alignment() frenyard.Alignment2i {
 	return cr._alignment
 }
 
 // SetAlignment sets the alignment.
-func (cr *UILabel) SetAlignment(align Alignment2i) {
+func (cr *UILabel) SetAlignment(align frenyard.Alignment2i) {
 	// This doesn't require a reset.
 	cr._alignment = align
 }
 
-func (cr *UILabel) fyLayoutCacheGet(limits Vec2i) fyTextLayoutCacheEntry {
+func (cr *UILabel) fyLayoutCacheGet(limits frenyard.Vec2i) fyTextLayoutCacheEntry {
 	for _, cacheEntry := range cr._layoutCache {
 		if cacheEntry.Matches(limits) {
 			return cacheEntry
 		}
 	}
 	entry := fyTextLayoutCacheEntry{}
-	entry.Layout = TheOneTextLayouterToRuleThemAll(TextLayouterOptions{
+	entry.Layout = integration.TheOneTextLayouterToRuleThemAll(integration.TextLayouterOptions{
 		Text:   cr._text,
 		Limits: limits,
 	})
@@ -160,7 +164,7 @@ func (cr *UILabel) fyLayoutCacheGet(limits Vec2i) fyTextLayoutCacheEntry {
 }
 
 // FyEResize overrides UIElementComponent.FyEResize
-func (cr *UILabel) FyEResize(s Vec2i) {
+func (cr *UILabel) FyEResize(s frenyard.Vec2i) {
 	cr.UIElementComponent.FyEResize(s)
 	// Check to see if we can just use the current texture. This is extremely efficient in comparison.
 	if cr._textureLimits.Matches(s) {
@@ -173,11 +177,11 @@ func (cr *UILabel) FyEResize(s Vec2i) {
 }
 
 // FyENormalEvent implements UIElement.FyENormalEvent
-func (cr *UILabel) FyENormalEvent(ev NormalEvent) {
+func (cr *UILabel) FyENormalEvent(ev frenyard.NormalEvent) {
 }
 
 // FyEMouseEvent implements UIElement.FyEMouseEvent
-func (cr *UILabel) FyEMouseEvent(ev MouseEvent) {
+func (cr *UILabel) FyEMouseEvent(ev frenyard.MouseEvent) {
 }
 
 // FyETick implements UIElement.FyETick
@@ -185,19 +189,19 @@ func (cr *UILabel) FyETick(deltaTime float64) {
 }
 
 // FyEDraw implements UIElement.FyEDraw
-func (cr *UILabel) FyEDraw(target Renderer, under bool) {
+func (cr *UILabel) FyEDraw(target frenyard.Renderer, under bool) {
 	if !under {
-		labelArea := Area2iOfSize(cr.FyESize())
+		labelArea := frenyard.Area2iOfSize(cr.FyESize())
 		if cr._background != 0 {
-			target.DrawRect(DrawRectCommand{
+			target.DrawRect(frenyard.DrawRectCommand{
 				Colour: cr._background,
 				Target: labelArea,
 			})
 		}
 		texSize := cr._texture.Size()
-		target.DrawRect(DrawRectCommand{
+		target.DrawRect(frenyard.DrawRectCommand{
 			Tex: cr._texture,
-			TexSprite: Area2iOfSize(texSize),
+			TexSprite: frenyard.Area2iOfSize(texSize),
 			Colour: cr._colour,
 			Target: labelArea.Align(texSize, cr._alignment),
 		})
@@ -205,7 +209,7 @@ func (cr *UILabel) FyEDraw(target Renderer, under bool) {
 }
 
 // FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
-func (cr *UILabel) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (cr *UILabel) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	if limits.Ge(cr._preferredSize) {
 		return cr._preferredSize
 	}

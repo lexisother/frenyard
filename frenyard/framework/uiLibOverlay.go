@@ -1,4 +1,8 @@
-package frenyard
+package framework
+
+import (
+	"github.com/20kdc/CCUpdaterUI/frenyard"
+)
 
 /*
  * Details on this:
@@ -21,9 +25,9 @@ const FramePassOverAfter FramePass = 3
 // Frame represents a frame around the stacked elements in a UIOverlayContainer. It is, in a way, a simplified version of a single-element-container suitable for writing theme-related code.
 type Frame interface {
 	// FyFDraw draws a pass of the frame.
-	FyFDraw(r Renderer, size Vec2i, pass FramePass)
+	FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass FramePass)
 	// FyFPadding returns the padding. This is expected to not change without a notification - given by either resetting the holding container's frame or by doing something else that causes that to occur.
-	FyFPadding() Area2i
+	FyFPadding() frenyard.Area2i
 	// FyFClipping returns the requested PanelClipping value for when using this framing.
 	FyFClipping() bool
 }
@@ -38,13 +42,13 @@ type UIOverlayContainer struct {
 	UILayoutElementComponent
 	_framing       Frame
 	_state         []UILayoutElement
-	_preferredSize Vec2i
+	_preferredSize frenyard.Vec2i
 }
 
 // NewUIOverlayContainerPtr creates a UIOverlayContainer
 func NewUIOverlayContainerPtr(npp Frame, setup []UILayoutElement) *UIOverlayContainer {
 	container := &UIOverlayContainer{
-		UIPanel: NewPanel(Vec2i{}),
+		UIPanel: NewPanel(frenyard.Vec2i{}),
 	}
 	InitUILayoutElementComponent(container)
 	container.SetContent(npp, setup)
@@ -54,20 +58,20 @@ func NewUIOverlayContainerPtr(npp Frame, setup []UILayoutElement) *UIOverlayCont
 
 // FyLSubelementChanged implements UILayoutElement.FyLSubelementChanged
 func (ufc *UIOverlayContainer) FyLSubelementChanged() {
-	size := Vec2i{}
+	size := frenyard.Vec2i{}
 	for _, v := range ufc._state {
-		size = size.Max(v.FyLSizeForLimits(Vec2iUnlimited()))
+		size = size.Max(v.FyLSizeForLimits(frenyard.Vec2iUnlimited()))
 	}
 	ufc._preferredSize = size.Add(ufc._framing.FyFPadding().Size())
 	ufc.ThisUILayoutElementComponentDetails.ContentChanged()
 }
 
 // FyLSizeForLimits implements UILayoutElement.FyLSizeForLimits
-func (ufc *UIOverlayContainer) FyLSizeForLimits(limits Vec2i) Vec2i {
+func (ufc *UIOverlayContainer) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
 	if limits.Ge(ufc._preferredSize) {
 		return ufc._preferredSize
 	}
-	max := Vec2i{}
+	max := frenyard.Vec2i{}
 	paddingSize := ufc._framing.FyFPadding().Size()
 	for _, v := range ufc._state {
 		max = max.Max(v.FyLSizeForLimits(limits.Add(paddingSize.Negate())))
@@ -92,9 +96,9 @@ func (ufc *UIOverlayContainer) SetContent(npp Frame, setup []UILayoutElement) {
 }
 
 // FyEResize overrides UIPanel.FyEResize
-func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
+func (ufc *UIOverlayContainer) FyEResize(size frenyard.Vec2i) {
 	ufc.UIPanel.FyEResize(size)
-	area := Area2iOfSize(size).Contract(ufc._framing.FyFPadding())
+	area := frenyard.Area2iOfSize(size).Contract(ufc._framing.FyFPadding())
 	fixes := make([]PanelFixedElement, len(ufc._state))
 	for idx, slot := range ufc._state {
 		fixes[idx] = PanelFixedElement{
@@ -109,7 +113,7 @@ func (ufc *UIOverlayContainer) FyEResize(size Vec2i) {
 }
 
 // FyEDraw overrides UIPanel.FyEDraw
-func (ufc *UIOverlayContainer) FyEDraw(r Renderer, under bool) {
+func (ufc *UIOverlayContainer) FyEDraw(r frenyard.Renderer, under bool) {
 	areaSize := ufc.FyESize()
 	beforePass := FramePassOverBefore
 	afterPass := FramePassOverAfter

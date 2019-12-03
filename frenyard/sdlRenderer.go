@@ -52,10 +52,13 @@ func (r *sdl2Renderer) osFySDL2DrawColour(colour uint32) {
 	r.base.base.SetDrawColor(red, green, blue, alpha)
 }
 func (r *sdl2Renderer) osFyExtractSDL2Texture(tex Texture) *sdl.Texture {
-	sheetActual := tex.(*crtcTextureExternal)
-	// Explicit cast so you can see what's going on with the contexts
-	sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
-	return sheetLocal.base
+	switch sheetActual := tex.(type) {
+		case *crtcTextureExternal:
+			// Explicit cast so you can see what's going on with the contexts
+			sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
+			return sheetLocal.base
+	}
+	panic("Unknown texture type forwarded into engine core.")
 }
 func (r *sdl2Renderer) DrawRect(drc DrawRectCommand) {
 	{
@@ -139,16 +142,8 @@ func (r *sdl2Renderer) Reset(colour uint32) {
 	r.translate = Vec2i{}
 	r.SetClip(Area2iOfSize(r.Size()))
 	r.osFySDL2DrawColour(colour)
-	r.base.base.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
+	r.base.base.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	r.base.base.Clear()
-}
-
-func osFySDL2FinalizeLocalTexture(ext *fySDL2LocalTexture) {
-	{
-		z := sdl2Os()
-		defer z.End()
-	}
-	ext.osDelete()
 }
 
 func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func (), reserved bool) Texture {
@@ -160,20 +155,33 @@ func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func (), reserved bool
 		panic("reserved must be kept false for future expansion")
 	}
 	
+	if size.X <= 0 || size.Y <= 0 {
+		// Empty texture
+		return GlobalBackend.CreateTexture(Vec2i{}, []uint32{})
+	}
 	tex, err := r.base.base.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, size.X, size.Y)
 	if err != nil {
-		panic(err)
+		// No RTT, so ignore the whole thing and return an empty texture
+		return GlobalBackend.CreateTexture(Vec2i{}, []uint32{})
 	}
+	oldClip := r.Clip()
+	oldTranslate := r.translate
 	oldRT := r.base.base.GetRenderTarget()
+
+	r.translate = Vec2i{}
+	r.SetClip(Area2iOfSize(size))
 	r.base.base.SetRenderTarget(tex)
+	
 	drawer()
+
 	r.base.base.SetRenderTarget(oldRT)
+	r.translate = oldTranslate
+	r.SetClip(oldClip)
+
 	localTexture := &fySDL2LocalTexture{
-		tex,
-		size,
+		base: tex,
 	}
-	runtime.SetFinalizer(localTexture, osFySDL2FinalizeLocalTexture)
-	return localTexture
+	return fySDL2CRTCRegistry.osCreateLocalTexture(crtcContext(r.base), localTexture, size)
 }
 func (r *sdl2Renderer) Present() {
 	{
@@ -185,12 +193,8 @@ func (r *sdl2Renderer) Present() {
 
 type fySDL2LocalTexture struct {
 	base *sdl.Texture
-	size Vec2i
 }
 
-func (r *fySDL2LocalTexture) Size() Vec2i {
-	return r.size
-}
 func (r *fySDL2LocalTexture) osDelete() {
 	r.base.Destroy()
 }
@@ -207,12 +211,11 @@ func (r *fySDL2TextureData) osMakeLocal(render crtcContext) crtcLocalTexture {
 	}
 	return &fySDL2LocalTexture{
 		result,
-		r.Size(),
 	}
 }
 
 func (r *fySDL2TextureData) Size() Vec2i {
-	return Vec2i{r.base.W, r.base.H}
+	return Vec2i{X: r.base.W, Y: r.base.H}
 }
 func (r *fySDL2TextureData) osDelete() {
 	r.base.Free()
@@ -221,7 +224,7 @@ func (r *fySDL2TextureData) osDelete() {
 // This API is package-local so that sdl_ttf & sdl can get at it
 func osSdl2SurfaceToFyTexture(surface *sdl.Surface) Texture {
 	return fySDL2CRTCRegistry.osCreateTexture(&fySDL2TextureData{
-		surface,
+		base: surface,
 	})
 }
 

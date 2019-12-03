@@ -14,6 +14,7 @@ type UIButton struct {
 	Focused       bool
 	Hover         bool
 	Down          bool
+	LastMousePos  frenyard.Vec2i
 	_behavior     func()
 }
 
@@ -39,6 +40,7 @@ func (btn *UIButton) FyENormalEvent(me frenyard.NormalEvent) {
 func (btn *UIButton) FyEMouseEvent(me frenyard.MouseEvent) {
 	btn.UILayoutProxy.FyEMouseEvent(me)
 	btn.Hover = frenyard.Area2iOfSize(btn.FyESize()).Contains(me.Pos)
+	btn.LastMousePos = me.Pos
 	if me.Button == frenyard.MouseButtonLeft {
 		if me.ID == frenyard.MouseEventUp {
 			btn.Down = false

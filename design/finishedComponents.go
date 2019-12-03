@@ -242,7 +242,7 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 		},
 	})
 	if details.Click != nil {
-		return deRippleInstall(assembledItem, borderGenSquareMaskX4, borderEffectiveScale, details.Click)
+		return deRippleInstall(assembledItem, borderGenSquareMaskX4Raw, borderEffectiveScale, details.Click)
 	}
 	return assembledItem
 }

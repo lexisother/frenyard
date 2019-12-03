@@ -1,6 +1,8 @@
 package frenyard
 
-import "runtime"
+import (
+	"runtime"
+)
 
 type crtcContext interface{}
 
@@ -32,6 +34,15 @@ func (cr *crtcRegistry) osFlush() {
 	}
 }
 
+func (cr *crtcRegistry) osGetRendererEntry(r crtcContext) map[*crtcTextureInternal]crtcLocalTexture {
+	alt, altPresent := cr._fyCrtcRegistryAllLocalTextures[r]
+	if !altPresent {
+		alt = map[*crtcTextureInternal]crtcLocalTexture{}
+		cr._fyCrtcRegistryAllLocalTextures[r] = alt
+	}
+	return alt
+}
+
 // Use to notify CRTC that a Renderer is going away.
 // This deletes all local textures for the given renderer.
 func (cr *crtcRegistry) osRemoveRenderer(r crtcContext) {
@@ -50,7 +61,7 @@ type crtcLocalTexture interface {
 
 /*
  * This is an abstraction over the backend's cross-renderer image format (such as sdl.Surface)
- * The fact it extends Texture is important as this is essentially the real Texture implementation.
+ * Inherits Texture because this is the real Texture implementation
  */
 type crtcTextureData interface {
 	Texture
@@ -63,12 +74,16 @@ type crtcTextureData interface {
 type crtcTextureInternal struct {
 	// The registry hosting this. (Creates a reference loop, but it's all cleaned up later)
 	Registry *crtcRegistry
-	// The backend's data.
+	// The backend's data. May be nil if this is a local-only texture.
 	Data crtcTextureData
+	// The size of the texture.
+	Size Vec2i
 }
 
 func (c *crtcTextureInternal) osDelete() {
-	c.Data.osDelete()
+	if c.Data != nil {
+		c.Data.osDelete()
+	}
 	for _, rv := range c.Registry._fyCrtcRegistryAllLocalTextures {
 		purgeMe := rv[c]
 		if purgeMe != nil {
@@ -84,18 +99,17 @@ type crtcTextureExternal struct {
 }
 
 func (cte *crtcTextureExternal) Size() Vec2i {
-	return cte.Internal.Data.Size()
+	return cte.Internal.Size
 }
 
 func (cte *crtcTextureExternal) osGetLocalTexture(r crtcContext) crtcLocalTexture {
-	alt, altPresent := cte.Internal.Registry._fyCrtcRegistryAllLocalTextures[r]
-	if !altPresent {
-		alt = map[*crtcTextureInternal]crtcLocalTexture{}
-		cte.Internal.Registry._fyCrtcRegistryAllLocalTextures[r] = alt
-	}
+	alt := cte.Internal.Registry.osGetRendererEntry(r)
 
 	localTexture := alt[cte.Internal]
 	if localTexture == nil {
+		if cte.Internal.Data == nil {
+			panic("Attempted to use local texture outside of valid renderer")
+		}
 		localTexture = cte.Internal.Data.osMakeLocal(r)
 		alt[cte.Internal] = localTexture
 	}
@@ -110,8 +124,20 @@ func fyCRTCTextureFinalizer(ext *crtcTextureExternal) {
 }
 
 func (cr *crtcRegistry) osCreateTexture(data crtcTextureData) Texture {
-	internal := &crtcTextureInternal{cr, data}
+	internal := &crtcTextureInternal{
+		Registry: cr,
+		Data: data,
+		Size: data.Size(),
+	}
 	external := &crtcTextureExternal{internal}
+	runtime.SetFinalizer(external, fyCRTCTextureFinalizer)
+	return external
+}
+
+func (cr *crtcRegistry) osCreateLocalTexture(renderer crtcContext, data crtcLocalTexture, size Vec2i) Texture {
+	internal := &crtcTextureInternal{cr, nil, size}
+	external := &crtcTextureExternal{internal}
+	cr.osGetRendererEntry(renderer)[internal] = data
 	runtime.SetFinalizer(external, fyCRTCTextureFinalizer)
 	return external
 }

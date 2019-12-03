@@ -85,7 +85,7 @@ func newDeUIDesignButtonPtr(primary uint32, content framework.UILayoutElement, b
 	des.button = framework.NewUIButtonPtr(des, behavior)
 	des.ripple = deRippleFrame{
 		Button: des.button,
-		Mask: borderButton,
+		MaskRaw: borderButtonRaw,
 		Scale: borderEffectiveScale,
 	}
 	return des.button

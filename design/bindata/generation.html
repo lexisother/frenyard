@@ -74,53 +74,53 @@
  </head>
  <body>
   <!-- Masks -->
-  <div id="Mask_SquareMaskX4" class="area black">
+  <div id="SquareMaskX4" class="area black">
    <div class="component white"></div>
   </div>
-  <div id="Mask_Rounded4dpMaskX4" class="area black">
+  <div id="Rounded4dpMaskX4" class="area black">
    <div class="component rounded-4dp white"></div>
   </div>
   <!-- Shadows Square -->
-  <div id="Shadow_SquareShadow2dpX4" class="area white">
+  <div id="SquareShadow2dpX4" class="area white">
    <div class="component shadow-2dp"></div>
   </div>
-  <div id="Shadow_SquareShadow4dpX4" class="area white">
+  <div id="SquareShadow4dpX4" class="area white">
    <div class="component shadow-4dp"></div>
   </div>
   <!-- Shadows Rounded4dp -->
-  <div id="Shadow_Rounded4dpShadow2dpX4" class="area white">
+  <div id="Rounded4dpShadow2dpX4" class="area white">
    <div class="component rounded-4dp shadow-2dp"></div>
   </div>
-  <div id="Shadow_Rounded4dpShadow4dpX4" class="area white">
+  <div id="Rounded4dpShadow4dpX4" class="area white">
    <div class="component rounded-4dp shadow-4dp"></div>
   </div>
   <!-- Headshadows Square -->
-  <div id="Shadow_SquareHeadshadow1dpX4" class="area white">
+  <div id="SquareHeadshadow1dpX4" class="area white">
    <div class="component headshadow-1dp"></div>
   </div>
-  <div id="Shadow_SquareHeadshadow2dpX4" class="area white">
+  <div id="SquareHeadshadow2dpX4" class="area white">
    <div class="component headshadow-2dp"></div>
   </div>
-  <div id="Shadow_SquareHeadshadowInset1dpX4" class="area white">
+  <div id="SquareHeadshadowInset1dpX4" class="area white">
    <div class="component headshadow-inset-1dp">
    </div>
   </div>
-  <div id="Shadow_SquareHeadshadowInset2dpX4" class="area white">
+  <div id="SquareHeadshadowInset2dpX4" class="area white">
    <div class="component headshadow-inset-2dp">
    </div>
   </div>
   <!-- Headshadows Rounded4dp -->
-  <div id="Shadow_Rounded4dpHeadshadow1dpX4" class="area white">
+  <div id="Rounded4dpHeadshadow1dpX4" class="area white">
    <div class="component rounded-4dp headshadow-1dp"></div>
   </div>
-  <div id="Shadow_Rounded4dpHeadshadow2dpX4" class="area white">
+  <div id="Rounded4dpHeadshadow2dpX4" class="area white">
    <div class="component rounded-4dp headshadow-2dp"></div>
   </div>
-  <div id="Shadow_Rounded4dpHeadshadowInset1dpX4" class="area white">
+  <div id="Rounded4dpHeadshadowInset1dpX4" class="area white">
    <div class="component rounded-4dp headshadow-inset-1dp">
    </div>
   </div>
-  <div id="Shadow_Rounded4dpHeadshadowInset2dpX4" class="area white">
+  <div id="Rounded4dpHeadshadowInset2dpX4" class="area white">
    <div class="component rounded-4dp headshadow-inset-2dp">
    </div>
   </div>
@@ -133,6 +133,7 @@
   let totalA = "";
   let totalB = "";
   let index = 0;
+  let renderModes = ["Shadow", "Mask", "Raw"];
   function composeArea(x, y, w, h) {
    return "frenyard.Area2i{X: frenyard.Area1i{Pos: " + x + " * borderImageScale, Size: " + w + " * borderImageScale}, Y: frenyard.Area1i{Pos: " + y + " * borderImageScale, Size: " + h + " * borderImageScale}}"
   }
@@ -142,15 +143,15 @@
      x += main1x * index;
      return composeArea(x, y, w, h)
     }
-    ctPattern = v.id.split("_")[0]
-    name = v.id.split("_")[1];
-    totalA += "var borderGen" + name + " framework.NinePatch\n";
-    totalB += "\tborderGen" + name + " = framework.NinePatch{\n";
-    totalB += "\t\tTex: borderGenTexture" + ctPattern + ",\n";
-    totalB += "\t\tSprite: " + composeCArea(0, 0, main1x, main1x) + ",\n";
-    totalB += "\t\tBounds: " + composeCArea(componentOfs1x, componentOfs1x, component1x, component1x) + ",\n";
-    totalB += "\t\tCentre: " + composeCArea(componentOfs1x + corner1x, componentOfs1x + corner1x, component1x - (corner1x * 2), component1x - (corner1x * 2)) + ",\n";
-    totalB += "\t}\n";
+    for (let renderMode of renderModes) {
+     totalA += "var borderGen" + v.id + renderMode + " framework.NinePatch\n";
+     totalB += "\tborderGen" + v.id + renderMode + " = framework.NinePatch{\n";
+     totalB += "\t\tTex: borderGenTexture" + renderMode + ",\n";
+     totalB += "\t\tSprite: " + composeCArea(0, 0, main1x, main1x) + ",\n";
+     totalB += "\t\tBounds: " + composeCArea(componentOfs1x, componentOfs1x, component1x, component1x) + ",\n";
+     totalB += "\t\tCentre: " + composeCArea(componentOfs1x + corner1x, componentOfs1x + corner1x, component1x - (corner1x * 2), component1x - (corner1x * 2)) + ",\n";
+     totalB += "\t}\n";
+    }
     index++;
    }
   }

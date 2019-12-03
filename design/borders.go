@@ -31,8 +31,10 @@ var borderImageScale int32
 var borderEffectiveScale float64
 var borderGenTextureMask frenyard.Texture
 var borderGenTextureShadow frenyard.Texture
+var borderGenTextureRaw frenyard.Texture
 
 var borderButton framework.NinePatch
+var borderButtonRaw framework.NinePatch
 var borderButtonShadow framework.NinePatch
 var borderButtonShadowFocus framework.NinePatch
 
@@ -60,13 +62,15 @@ func deSetupBorders() {
 
 	borderGenTextureMask = integration.GoImageToTexture(generationImage, []integration.ColourTransform{integration.ColourTransformBlueToStencil})
 	borderGenTextureShadow = integration.GoImageToTexture(generationImage, []integration.ColourTransform{integration.ColourTransformInvert, integration.ColourTransformBlueToStencil, integration.ColourTransformInvert})
+	borderGenTextureRaw = integration.GoImageToTexture(generationImage, []integration.ColourTransform{})
 	
 	deBorderGenInit()
 	
 	// -- Standard ninepatches --
-	borderButton = borderGenRounded4dpMaskX4
-	borderButtonShadow = borderGenRounded4dpShadow2dpX4
-	borderButtonShadowFocus = borderGenRounded4dpShadow4dpX4
+	borderButton = borderGenRounded4dpMaskX4Mask
+	borderButtonRaw = borderGenRounded4dpMaskX4Raw
+	borderButtonShadow = borderGenRounded4dpShadow2dpX4Shadow
+	borderButtonShadowFocus = borderGenRounded4dpShadow4dpX4Shadow
 	
 	// -- Scrollbar Theme --
 	sbBaseInframe := sizeScale(2)
@@ -77,25 +81,25 @@ func deSetupBorders() {
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenSquareHeadshadow2dpX4,
+				NinePatch: borderGenSquareHeadshadow2dpX4Shadow,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF101010,
 			},
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenSquareMaskX4,
+				NinePatch: borderGenSquareMaskX4Mask,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF181818,
 			},
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenSquareMaskX4.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
+				NinePatch: borderGenSquareMaskX4Mask.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF101010,
 			},
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenSquareHeadshadowInset1dpX4.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
+				NinePatch: borderGenSquareHeadshadowInset1dpX4Shadow.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFFFFFFFF,
 			},
@@ -106,13 +110,13 @@ func deSetupBorders() {
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenRounded4dpHeadshadow1dpX4,
+				NinePatch: borderGenRounded4dpHeadshadow1dpX4Shadow,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF606060,
 			},
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenRounded4dpMaskX4,
+				NinePatch: borderGenRounded4dpMaskX4Mask,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF606060,
 			},
@@ -129,13 +133,13 @@ func deSetupBorders() {
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassUnderBefore,
-				NinePatch: borderGenSquareMaskX4,
+				NinePatch: borderGenSquareMaskX4Mask,
 				Scale: borderEffectiveScale,
 				ColourMod: ThemeBackgroundUnderlayer,
 			},
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverAfter,
-				NinePatch: borderGenSquareHeadshadowInset2dpX4,
+				NinePatch: borderGenSquareHeadshadowInset2dpX4Shadow,
 				Scale: borderEffectiveScale,
 				ColourMod: 0xFF000000,
 			},
@@ -164,13 +168,13 @@ func BorderTitle(colour uint32) framework.Frame {
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenSquareHeadshadow2dpX4,
+				NinePatch: borderGenSquareHeadshadow2dpX4Shadow,
 				Scale: borderEffectiveScale,
 				ColourMod: colour,
 			},
 			framework.NinePatchFrameLayer{
 				Pass: framework.FramePassOverBefore,
-				NinePatch: borderGenSquareMaskX4,
+				NinePatch: borderGenSquareMaskX4Mask,
 				Scale: borderEffectiveScale,
 				ColourMod: colour,
 			},

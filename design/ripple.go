@@ -8,7 +8,7 @@ import (
 )
 
 var rippleTex frenyard.Texture
-func deInitRipple() {
+func deSetupRipple() {
 	rippleTex = integration.CreateHardcodedPNGTexture(rippleB64, []integration.ColourTransform{
 		integration.ColourTransformBlueToStencil,
 	})

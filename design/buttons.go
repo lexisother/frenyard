@@ -7,38 +7,31 @@ import (
 )
 //import "fmt"
 
-type deUIDesignButton struct {
-	framework.UILayoutProxy
+type deDesignButtonFrame struct {
 	focusState float64
-	overlay *framework.UIOverlayContainer
 	button *framework.UIButton
 	ripple deRippleFrame
 	primary uint32
 }
 
 // FyFTick implements Frame.FyFTick
-func (de *deUIDesignButton) FyFTick(delta float64) {
-}
-
-// FyETick overrides UILayoutProxy.FyETick
-func (de *deUIDesignButton) FyETick(time float64) {
-	de.UILayoutProxy.FyETick(time)
+func (de *deDesignButtonFrame) FyFTick(delta float64) {
 	if de.button.Hover || de.button.Down || de.button.Focused {
-		de.focusState += time * 4
+		de.focusState += delta * 4
 		if de.focusState >= 1 {
 			de.focusState = 1
 		}
 	} else {
-		de.focusState -= time * 4
+		de.focusState -= delta * 4
 		if de.focusState <= 0 {
 			de.focusState = 0
 		}
 	}
-	de.ripple.FyFTick(time)
+	de.ripple.FyFTick(delta)
 }
 
 // FyFDraw implements Frame.FyFDraw
-func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass framework.FramePass) {
+func (de *deDesignButtonFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass framework.FramePass) {
 	if pass == framework.FramePassUnderBefore {
 		alpha := integration.ColourComponentClamp(int32(de.focusState * 255))
 		alphaInv := 255 - alpha
@@ -57,36 +50,107 @@ func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pa
 }
 
 // FyFPadding implements Frame.FyFPadding
-func (de *deUIDesignButton) FyFPadding() frenyard.Area2i {
+func (de *deDesignButtonFrame) FyFPadding() frenyard.Area2i {
 	addedBorderX := sizeScale(16)
 	// Don't completely ignore the subject but don't go doing anything silly either
 	addedBorderY := sizeScale(4)
 	return frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2})
 }
 // FyFClipping implements Frame.FyFClipping
-func (de *deUIDesignButton) FyFClipping() bool {
+func (de *deDesignButtonFrame) FyFClipping() bool {
 	return true
 }
 
-// FyLSizeForLimits overrides UILayoutProxy.FyLSizeForLimits
-func (de *deUIDesignButton) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec2i {
-	baseSize := de.UILayoutProxy.FyLSizeForLimits(limits)
-	// The 36px is implemented as a min-height rather than a strict height to prevent incredible levels of what I can only refer to as "incredibly dumb, yet predictable, results".
-	return baseSize.Max(frenyard.Vec2i{X: sizeScale(64), Y: sizeScale(36)})
-}
-
 func newDeUIDesignButtonPtr(primary uint32, content framework.UILayoutElement, behavior framework.ButtonBehavior) *framework.UIButton {
-	des := &deUIDesignButton{
+	des := &deDesignButtonFrame{
 		primary: primary,
 	}
-	overlay := framework.NewUIOverlayContainerPtr(des, []framework.UILayoutElement{content})
-	des.overlay = overlay
-	framework.InitUILayoutProxy(des, overlay)
-	des.button = framework.NewUIButtonPtr(des, behavior)
+	minSizePanel := framework.NewPanel(frenyard.Vec2i{
+		// The 36px is implemented as a min-height rather than a strict height to prevent incredible levels of what I can only refer to as "incredibly dumb, yet predictable, results".
+		X: sizeScale(64),
+		Y: sizeScale(36),
+	})
+	overlay := framework.NewUIOverlayContainerPtr(des, []framework.UILayoutElement{framework.ConvertElementToLayout(&minSizePanel), content})
+	des.button = framework.NewUIButtonPtr(overlay, behavior)
 	des.ripple = deRippleFrame{
 		Button: des.button,
 		MaskRaw: borderButtonRaw,
 		Scale: borderEffectiveScale,
 	}
 	return des.button
+}
+
+type deCircleButtonFrame struct {
+	focusState float64
+	sizeState float64
+	lastDown bool
+	releasing bool
+	button *framework.UIButton
+}
+
+// FyFTick implements Frame.FyFTick
+func (de *deCircleButtonFrame) FyFTick(delta float64) {
+	if de.releasing {
+		de.sizeState += delta * 4
+		de.focusState -= delta * 4
+		if de.focusState <= 0 {
+			de.focusState = 0
+			de.sizeState = 1
+			de.releasing = false
+		}
+	} else if de.button.Down {
+		de.focusState += delta * 2
+		if de.focusState >= 1 {
+			de.focusState = 1
+		}
+	} else if de.lastDown && !de.button.Down {
+		de.releasing = true
+	} else if de.button.Hover || de.button.Focused {
+		de.focusState += delta * 2
+		if de.focusState >= 0.5 {
+			de.focusState = 0.5
+		}
+	} else {
+		de.focusState -= delta * 2
+		if de.focusState <= 0 {
+			de.focusState = 0
+		}
+	}
+	if !de.releasing {
+		de.sizeState = 1
+	}
+	de.lastDown = de.button.Down
+}
+
+// FyFDraw implements Frame.FyFDraw
+func (de *deCircleButtonFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass framework.FramePass) {
+	if pass == framework.FramePassOverBefore {
+		circleSize := int32(de.sizeState * float64(frenyard.Max(size.X, size.Y)))
+		r.DrawRect(deEncodeCircleCmd(circleTexReductionsMask, frenyard.Vec2i{
+			X: size.X / 2,
+			Y: size.Y / 2,
+		}, circleSize, frenyard.DrawRectCommand{
+			Colour: integration.ColourMix(0x00FFFFFF, 0xFFFFFFFF, de.focusState * 0.5),
+		}))
+	}
+}
+
+// FyFPadding implements Frame.FyFPadding
+func (de *deCircleButtonFrame) FyFPadding() frenyard.Area2i {
+	return frenyard.Area2i{}
+}
+// FyFClipping implements Frame.FyFClipping
+func (de *deCircleButtonFrame) FyFClipping() bool {
+	return false
+}
+
+// Do be aware: Adds 8dp on each edge.
+func newDeUICircleButtonPtr(content framework.UILayoutElement, behavior framework.ButtonBehavior) *framework.UIButton {
+	frame := deCircleButtonFrame{
+		focusState: 0.0,
+	}
+	content = framework.NewUIOverlayContainerPtr(&frame, []framework.UILayoutElement{content})
+	button := framework.NewUIButtonPtr(content, behavior)
+	frame.button = button
+	return button
 }

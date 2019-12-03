@@ -49,9 +49,9 @@ setTimeout(begin, 100);</script>
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="16"
-     inkscape:cx="177.43778"
-     inkscape:cy="371.02886"
+     inkscape:zoom="5.6568543"
+     inkscape:cx="152.70376"
+     inkscape:cy="367.90739"
      inkscape:document-units="px"
      inkscape:current-layer="layer5"
      showgrid="true"
@@ -252,7 +252,7 @@ setTimeout(begin, 100);</script>
        inkscape:connector-curvature="0" />
     <path
        style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 162,21 -9,-9 9,-9"
+       d="m 160,21 -9,-9 9,-9"
        id="path859"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccc" />

@@ -29,6 +29,8 @@ const ThemeBackgroundUnderlayer = 0xFF101010
 // Header describes a 'title' header.
 type Header struct {
 	Back framework.ButtonBehavior
+	// If null, this is changed to BackIconID
+	BackIcon IconID
 	Title string
 }
 
@@ -38,26 +40,29 @@ func ButtonOkAction(text string, behavior framework.ButtonBehavior) *framework.U
 	return newDeUIDesignButtonPtr(0xFF2040FF, textElm, behavior)
 }
 
-// ButtonIcon creates an 'icon button'. This is an incomplete API.
+// ButtonIcon creates an 'icon button'.
 func ButtonIcon(icon IconID, dp int32, click framework.ButtonBehavior) *framework.UIButton {
-	return framework.NewUIButtonPtr(NewIconPtr(0xFFFFFFFF, icon, dp), click)
+	return newDeUICircleButtonPtr(NewIconPtr(0xFFFFFFFF, icon, dp), click)
 }
 
 func headerConstruct(header Header) framework.UILayoutElement {
+	if header.BackIcon == NullIconID {
+		header.BackIcon = BackIconID
+	}
 	label := framework.NewUILabelPtr(integration.NewTextTypeChunk(header.Title, PageTitleFont), ThemeText, 0, frenyard.Alignment2i{})
 	if header.Back != nil {
 		return framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 			DirVertical: false,
 			Slots: []framework.FlexboxSlot{
 				{
-					Basis: 16,
+					Basis: sizeScale(16),
 				},
 				{
-					Element: ButtonIcon(BackIconID, 18, header.Back),
+					Element: ButtonIcon(header.BackIcon, 18, header.Back),
 					RespectMinimumSize: true,
 				},
 				{
-					Basis: 16,
+					Basis: sizeScale(16),
 				},
 				{
 					Element: label,
@@ -67,7 +72,7 @@ func headerConstruct(header Header) framework.UILayoutElement {
 					RespectMinimumSize: true,
 				},
 				{
-					Basis: 50,
+					Basis: sizeScale(50),
 				},
 			},
 		})
@@ -164,11 +169,11 @@ type ListItemDetails struct {
 // https://material.io/components/lists/#specs
 func ListItem(details ListItemDetails) framework.UILayoutElement {
 	var labelVertical framework.UILayoutElement
-	noIconSize := int32(48)
-	withIconSize := int32(56)
+	noIconSizeDP := int32(48)
+	withIconSizeDP := int32(56)
 	if details.Subtext != "" {
-		noIconSize = 64
-		withIconSize = 72
+		noIconSizeDP = 64
+		withIconSizeDP = 72
 		labelVertical = framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 			DirVertical: true,
 			Slots: []framework.FlexboxSlot{
@@ -192,7 +197,7 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 	} else {
 		labelVertical = framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, ListItemTextFont), ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignMiddle})
 	}
-	resSize := noIconSize
+	resSizeDP := noIconSizeDP
 	horizontalLayoutSlots := []framework.FlexboxSlot{
 		framework.FlexboxSlot{
 			Basis: sizeScale(16),
@@ -207,7 +212,7 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 	}
 
 	if details.Icon != NullIconID {
-		resSize = withIconSize
+		resSizeDP = withIconSizeDP
 		horizontalLayoutSlots = []framework.FlexboxSlot{
 			framework.FlexboxSlot{
 				Basis: sizeScale(16),
@@ -236,7 +241,7 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 		Slots: []framework.FlexboxSlot{
 			framework.FlexboxSlot{
 				Element: horizontalLayout,
-				MinBasis: sizeScale(resSize),
+				MinBasis: sizeScale(resSizeDP),
 				RespectMinimumSize: true,
 			},
 		},

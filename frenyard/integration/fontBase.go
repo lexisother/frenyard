@@ -40,6 +40,7 @@ type TypeChunk interface {
 type fyTextTypeChunk struct {
 	_text []rune
 	_face font.Face
+	_colour uint32
 }
 
 // NewTextTypeChunk creates a TypeChunk from text and a font. This is the simplest kind of TypeChunk.
@@ -51,6 +52,19 @@ func NewTextTypeChunk(text string, face font.Face) TypeChunk {
 	return fyTextTypeChunk{
 		runes,
 		face,
+		0xFFFFFFFF,
+	}
+}
+// NewColouredTextTypeChunk is a version of NewTextTypeChunk that supports putting coloured text inline.
+func NewColouredTextTypeChunk(text string, face font.Face, colour uint32) TypeChunk {
+	runes := []rune{}
+	for _, r := range text {
+		runes = append(runes, r)
+	}
+	return fyTextTypeChunk{
+		runes,
+		face,
+		colour,
 	}
 }
 
@@ -83,6 +97,7 @@ func (ttc fyTextTypeChunk) FyCSection(start int, end int) TypeChunk {
 	return fyTextTypeChunk{
 		ttc._text[start:end],
 		ttc._face,
+		ttc._colour,
 	}
 }
 
@@ -119,6 +134,9 @@ func (ttc fyTextTypeChunk) FyCDraw(img draw.Image, dot fixed.Point26_6) fixed.Po
 		Dot: dot,
 		Src: image.White,
 		Dst: img,
+	}
+	if ttc._colour != 0xFFFFFFFF {
+		drawer.Src = image.NewUniform(ConvertUint32ToGoImageColour(ttc._colour))
 	}
 	drawer.DrawString(string(ttc._text))
 	return drawer.Dot

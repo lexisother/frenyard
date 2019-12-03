@@ -13,7 +13,7 @@ func GoImageToTexture(img image.Image, ct []ColourTransform) frenyard.Texture {
 	min := img.Bounds().Min
 	sizePreTranslate := img.Bounds().Size()
 	pixels := make([]uint32, sizePreTranslate.X*sizePreTranslate.Y)
-	size := frenyard.Vec2i{int32(sizePreTranslate.X), int32(sizePreTranslate.Y)}
+	size := frenyard.Vec2i{X: int32(sizePreTranslate.X), Y: int32(sizePreTranslate.Y)}
 	index := 0
 	for y := 0; y < sizePreTranslate.Y; y++ {
 		for x := 0; x < sizePreTranslate.X; x++ {

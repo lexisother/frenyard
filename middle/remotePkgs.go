@@ -3,10 +3,11 @@ package middle
 import (
 	"github.com/CCDirectLink/CCUpdaterCLI"
 	"github.com/CCDirectLink/CCUpdaterCLI/remote"
+	"github.com/20kdc/CCUpdaterUI/design"
 )
 
 // FakeError should be enabled to prevent internet access by CCUpdaterUI.
-const FakeError bool = false
+const FakeError bool = true
 
 // InternetConnectionWarning is true if the last GetRemotePackages() call actually resulted in error.
 var InternetConnectionWarning bool = true
@@ -35,4 +36,15 @@ func GetLatestOf(local ccmodupdater.Package, remote ccmodupdater.Package) ccmodu
 		return local
 	}
 	return remote
+}
+
+// PackageIcon returns the relevant icon ID for a package.
+func PackageIcon(pkg ccmodupdater.Package) design.IconID {
+	typ := pkg.Metadata().Type()
+	if typ == ccmodupdater.PackageTypeMod {
+		return design.ModIconID
+	} else if typ == ccmodupdater.PackageTypeTool {
+		return design.ToolIconID
+	}
+	return design.DirectoryIconID
 }

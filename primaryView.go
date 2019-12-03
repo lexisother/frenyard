@@ -83,7 +83,7 @@ func (app *upApplication) ShowPrimaryView() {
 		pkgIDLocal := pkgID
 		slots = append(slots, framework.FlexboxSlot{
 			Element: design.ListItem(design.ListItemDetails{
-				Icon: design.ModIconID,
+				Icon: middle.PackageIcon(latest),
 				Text: latest.Metadata().HumanName(),
 				Subtext: status,
 				Click: func () {

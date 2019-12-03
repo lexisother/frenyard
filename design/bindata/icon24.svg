@@ -50,10 +50,10 @@ setTimeout(begin, 100);</script>
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="16"
-     inkscape:cx="133.66313"
-     inkscape:cy="367.61056"
+     inkscape:cx="177.43778"
+     inkscape:cy="371.02886"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer5"
      showgrid="true"
      units="px"
      inkscape:window-width="1366"
@@ -63,23 +63,23 @@ setTimeout(begin, 100);</script>
      inkscape:window-maximized="1"
      inkscape:pagecheckerboard="true">
     <inkscape:grid
-       originy="0"
-       spacingy="3"
-       spacingx="3"
-       empspacing="2"
-       empopacity="0.25098039"
-       empcolor="#909090"
-       opacity="0.1254902"
-       color="#df0059"
-       id="grid844"
-       type="xygrid" />
-    <inkscape:grid
-       id="grid873"
        type="xygrid"
-       snapvisiblegridlinesonly="false"
-       empopacity="0.06666667"
+       id="grid844"
+       color="#df0059"
+       opacity="0.1254902"
+       empcolor="#909090"
+       empopacity="0.25098039"
+       empspacing="2"
+       spacingx="3"
+       spacingy="3"
+       originy="0" />
+    <inkscape:grid
+       empspacing="1"
        empcolor="#3f3fff"
-       empspacing="1" />
+       empopacity="0.06666667"
+       snapvisiblegridlinesonly="false"
+       type="xygrid"
+       id="grid873" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -228,7 +228,7 @@ setTimeout(begin, 100);</script>
          style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:2.83;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#ffffff;stroke-width:2.82999992;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="M 123,21 135,9"
        id="path1325"
        inkscape:connector-curvature="0"
@@ -250,6 +250,18 @@ setTimeout(begin, 100);</script>
        d="M 0,0 24,12 0,24 Z"
        id="path842"
        inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 162,21 -9,-9 9,-9"
+       id="path859"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
+    <path
+       sodipodi:nodetypes="ccccc"
+       inkscape:connector-curvature="0"
+       id="path867"
+       d="m 174,24 a 3,3 0 0 1 -3,-3 V 3 a 3,3 0 0 1 3,-3 h 12 a 3,3 0 0 1 3,3 v 18 a 3,3 0 0 1 -3,3 z"
+       style="fill:#ffffff;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -360,6 +372,31 @@ setTimeout(begin, 100);</script>
        id="path858"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccccc" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect933"
+       width="6"
+       height="3"
+       x="180"
+       y="18" />
+    <circle
+       style="display:inline;fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path869"
+       cy="9"
+       cx="180"
+       r="6" />
+    <circle
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path871"
+       cx="180"
+       cy="9"
+       r="1" />
+    <path
+       style="display:inline;fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 174,18 8,-6"
+       id="path931"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
   </g>
   <g
      inkscape:groupmode="layer"

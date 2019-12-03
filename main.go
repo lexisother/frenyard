@@ -4,10 +4,13 @@ import (
 	"github.com/20kdc/CCUpdaterUI/design"
 	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
-	//"github.com/CCDirectLink/CCUpdaterCLI/cmd/api"
+	"github.com/20kdc/CCUpdaterUI/middle"
+	"github.com/CCDirectLink/CCUpdaterCLI"
 )
 
 type upApplication struct {
+	gameInstance *ccmodupdater.GameInstance
+	config middle.UpdaterConfig
 	slideContainer *framework.UISlideTransitionContainer
 	window frenyard.Window
 	upQueued chan func()
@@ -25,6 +28,7 @@ func main() {
 	wnd.SetSize(design.SizeWindow)
 	// Ok, now get it ready.
 	app := (&upApplication{
+		config: middle.ReadUpdaterConfig(),
 		slideContainer: slideContainer,
 		window: wnd,
 		upQueued: make(chan func(), 16),

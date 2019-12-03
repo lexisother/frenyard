@@ -1,31 +1,70 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/20kdc/CCUpdaterUI/design"
 	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
 	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 	"github.com/20kdc/CCUpdaterUI/middle"
-	//"github.com/CCDirectLink/CCUpdaterCLI/cmd/api"
+	"github.com/CCDirectLink/CCUpdaterCLI"
+	"github.com/CCDirectLink/CCUpdaterCLI/local"
 )
+
+func (app *upApplication) ResetWithGameLocation(location string) {
+	app.gameInstance = nil
+	app.config.GamePath = location
+	middle.WriteUpdaterConfig(app.config)
+	// Re-kick
+	app.ShowGameFinderPreface()
+}
 
 func (app *upApplication) ShowGameFinderPreface() {
 	var gameLocations []middle.GameLocation
-	app.ShowWaiter("Finding CrossCode...", func (progress func(string)) {
-		progress("Autodetecting game locations...")
+	app.ShowWaiter(framework.SlideTransition{
+		Length: 1.0,
+	}, "Starting...", func (progress func(string)) {
+		progress("Preparing remote packages...")
+		middle.GetRemotePackages()
+		progress("Scanning local installation...")
+		gi := ccmodupdater.NewGameInstance(app.config.GamePath)
+		fmt.Printf("Doing preliminary check of %s\n", app.config.GamePath)
+		lp, err := local.AllLocalPackagePlugins(gi)
+		if err == nil {
+			gi.LocalPlugins = lp
+			_, hasCC := gi.Packages()["crosscode"]
+			if hasCC {
+				app.gameInstance = gi
+				return
+			}
+			fmt.Printf("Game not present?\n")
+		} else {
+			fmt.Printf("Failed check: %s\n", err.Error())
+		}
+		progress("Not configured ; Autodetecting game locations...")
 		gameLocations = middle.AutodetectGameLocations()
 	}, func () {
-		app.ShowGameFinderPrefaceInternal(gameLocations)
+		if app.gameInstance == nil {
+			app.ShowGameFinderPrefaceInternal(false, gameLocations)
+		} else {
+			app.ShowPrimaryView()
+		}
 	})
 }
 
-func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameLocation) {
+func (app *upApplication) ShowGameFinderPrefaceInternal(backwards bool, locations []middle.GameLocation) {
 
 	suggestSlots := []framework.FlexboxSlot{}
 	for _, location := range locations {
 		suggestSlots = append(suggestSlots, framework.FlexboxSlot{
-			Element: design.ListItem(design.GameIconID, "CrossCode " + location.Version, location.Location),
+			Element: design.ListItem(design.ListItemDetails{
+				Icon: design.GameIconID,
+				Text: "CrossCode " + location.Version,
+				Subtext: location.Location,
+				Click: func () {
+					app.ResetWithGameLocation(location.Location)
+				},
+			}),
 			RespectMinimumSize: true,
 		})
 	}
@@ -68,7 +107,9 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameL
 			framework.FlexboxSlot{
 				Element: design.ButtonBar([]framework.UILayoutElement{
 					design.ButtonOkAction("LOCATE MANUALLY", func () {
-						app.ShowGameFinder()
+						app.ShowGameFinder(false, func () {
+							app.ShowGameFinderPrefaceInternal(true, locations)
+						}, middle.GameFinderVFSPathDefault)
 					}),
 				}),
 			},
@@ -77,6 +118,5 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameL
 	primary := design.LayoutDocument(design.Header{
 		Title: "Welcome",
 	}, content, true)
-	app.slideContainer.TransitionTo(primary, 1.0, false, false)
-	
+	app.slideContainer.TransitionTo(framework.SlideTransition{Element: primary, Length: 1.0, Reverse: backwards})
 }

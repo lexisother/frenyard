@@ -38,6 +38,6 @@ func deSetupFonts() {
 	
 	// 16dp
 	ListItemTextFont = GlobalFont
-	// 12dp (NON-STANDARD)
-	ListItemSubTextFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 12)))
+	// 14dp
+	ListItemSubTextFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 14)))
 }

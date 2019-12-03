@@ -10,9 +10,14 @@ import (
 type deUIDesignButton struct {
 	framework.UILayoutProxy
 	focusState float64
-	attachedLabel *framework.UILabel
 	overlay *framework.UIOverlayContainer
 	button *framework.UIButton
+	ripple deRippleFrame
+	primary uint32
+}
+
+// FyFTick implements Frame.FyFTick
+func (de *deUIDesignButton) FyFTick(delta float64) {
 }
 
 // FyETick overrides UILayoutProxy.FyETick
@@ -29,13 +34,7 @@ func (de *deUIDesignButton) FyETick(time float64) {
 			de.focusState = 0
 		}
 	}
-	if de.attachedLabel != nil {
-		if !de.button.Down {
-			de.attachedLabel.SetColour(0xFF404040)
-		} else {
-			de.attachedLabel.SetColour(0xFFFFFFFF)
-		}
-	}
+	de.ripple.FyFTick(time)
 }
 
 // FyFDraw implements Frame.FyFDraw
@@ -50,16 +49,11 @@ func (de *deUIDesignButton) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pa
 			Colour: (uint32(alpha) << 24) | 0xFFFFFF,
 		})
 	} else if pass == framework.FramePassOverBefore {
-		primaryColour := uint32(0xFF2040FF)
-		if de.button.Down {
-			primaryColour = 0xFF102080
-		} else if de.button.Hover || de.button.Focused {
-			primaryColour = 0xFF4060FF
-		}
 		borderButton.Draw(r, frenyard.Area2iOfSize(size), borderEffectiveScale, frenyard.DrawRectCommand{
-			Colour: primaryColour,
+			Colour: de.primary,
 		})
 	}
+	de.ripple.FyFDraw(r, size, pass)
 }
 
 // FyFPadding implements Frame.FyFPadding
@@ -81,11 +75,18 @@ func (de *deUIDesignButton) FyLSizeForLimits(limits frenyard.Vec2i) frenyard.Vec
 	return baseSize.Max(frenyard.Vec2i{X: sizeScale(64), Y: sizeScale(36)})
 }
 
-func newDeUIDesignButtonPtr(content framework.UILayoutElement, label *framework.UILabel, behavior framework.ButtonBehavior) *framework.UIButton {
-	des := &deUIDesignButton{}
+func newDeUIDesignButtonPtr(primary uint32, content framework.UILayoutElement, behavior framework.ButtonBehavior) *framework.UIButton {
+	des := &deUIDesignButton{
+		primary: primary,
+	}
 	overlay := framework.NewUIOverlayContainerPtr(des, []framework.UILayoutElement{content})
 	des.overlay = overlay
 	framework.InitUILayoutProxy(des, overlay)
 	des.button = framework.NewUIButtonPtr(des, behavior)
+	des.ripple = deRippleFrame{
+		Button: des.button,
+		Mask: borderButton,
+		Scale: borderEffectiveScale,
+	}
 	return des.button
 }

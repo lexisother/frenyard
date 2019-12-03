@@ -51,6 +51,12 @@ func (r *sdl2Renderer) osFySDL2DrawColour(colour uint32) {
 	alpha := (uint8)((colour >> 24) & 0xFF)
 	r.base.base.SetDrawColor(red, green, blue, alpha)
 }
+func (r *sdl2Renderer) osFyExtractSDL2Texture(tex Texture) *sdl.Texture {
+	sheetActual := tex.(*crtcTextureExternal)
+	// Explicit cast so you can see what's going on with the contexts
+	sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
+	return sheetLocal.base
+}
 func (r *sdl2Renderer) DrawRect(drc DrawRectCommand) {
 	{
 		z := sdl2Os()
@@ -69,22 +75,20 @@ func (r *sdl2Renderer) DrawRect(drc DrawRectCommand) {
 	}
 	
 	if drc.Tex != nil {
-		sheetActual := drc.Tex.(*crtcTextureExternal)
 		// If the image has zero size, it doesn't exist. Anyway, osGetLocalTexture will crash
 		size := drc.Tex.Size()
 		if size.X == 0 || size.Y == 0 {
 			return
 		}
-		// Explicit cast so you can see what's going on with the contexts
-		sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
+		sheetLocal := r.osFyExtractSDL2Texture(drc.Tex)
 		red := (uint8)((drc.Colour >> 16) & 0xFF)
 		green := (uint8)((drc.Colour >> 8) & 0xFF)
 		blue := (uint8)((drc.Colour >> 0) & 0xFF)
 		alpha := (uint8)((drc.Colour >> 24) & 0xFF)
-		sheetLocal.base.SetColorMod(red, green, blue)
-		sheetLocal.base.SetAlphaMod(alpha)
-		sheetLocal.base.SetBlendMode(blendMode)
-		r.base.base.Copy(sheetLocal.base, &sRect, &tRect)
+		sheetLocal.SetColorMod(red, green, blue)
+		sheetLocal.SetAlphaMod(alpha)
+		sheetLocal.SetBlendMode(blendMode)
+		r.base.base.Copy(sheetLocal, &sRect, &tRect)
 	} else {
 		r.osFySDL2DrawColour(drc.Colour)
 		r.base.base.SetDrawBlendMode(blendMode)
@@ -138,6 +142,39 @@ func (r *sdl2Renderer) Reset(colour uint32) {
 	r.base.base.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
 	r.base.base.Clear()
 }
+
+func osFySDL2FinalizeLocalTexture(ext *fySDL2LocalTexture) {
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
+	ext.osDelete()
+}
+
+func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func (), reserved bool) Texture {
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
+	if reserved {
+		panic("reserved must be kept false for future expansion")
+	}
+	
+	tex, err := r.base.base.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, size.X, size.Y)
+	if err != nil {
+		panic(err)
+	}
+	oldRT := r.base.base.GetRenderTarget()
+	r.base.base.SetRenderTarget(tex)
+	drawer()
+	r.base.base.SetRenderTarget(oldRT)
+	localTexture := &fySDL2LocalTexture{
+		tex,
+		size,
+	}
+	runtime.SetFinalizer(localTexture, osFySDL2FinalizeLocalTexture)
+	return localTexture
+}
 func (r *sdl2Renderer) Present() {
 	{
 		z := sdl2Os()
@@ -148,8 +185,12 @@ func (r *sdl2Renderer) Present() {
 
 type fySDL2LocalTexture struct {
 	base *sdl.Texture
+	size Vec2i
 }
 
+func (r *fySDL2LocalTexture) Size() Vec2i {
+	return r.size
+}
 func (r *fySDL2LocalTexture) osDelete() {
 	r.base.Destroy()
 }
@@ -166,6 +207,7 @@ func (r *fySDL2TextureData) osMakeLocal(render crtcContext) crtcLocalTexture {
 	}
 	return &fySDL2LocalTexture{
 		result,
+		r.Size(),
 	}
 }
 

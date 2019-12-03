@@ -30,6 +30,9 @@ func (npcf NinePatchFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pas
 		})
 	}
 }
+// FyFTick implements Frame.FyFTick
+func (npcf NinePatchFrame) FyFTick(delta float64) {
+}
 // FyFPadding implements Frame.FyFPadding
 func (npcf NinePatchFrame) FyFPadding() frenyard.Area2i {
 	return npcf.Padding

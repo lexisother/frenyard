@@ -24,6 +24,8 @@ const FramePassOverAfter FramePass = 3
 
 // Frame represents a frame around the stacked elements in a UIOverlayContainer. It is, in a way, a simplified version of a single-element-container suitable for writing theme-related code.
 type Frame interface {
+	// FyFTick ticks the frame. Unstateful frames should really just ignore this.
+	FyFTick(delta float64)
 	// FyFDraw draws a pass of the frame.
 	FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass FramePass)
 	// FyFPadding returns the padding. This is expected to not change without a notification - given by either resetting the holding container's frame or by doing something else that causes that to occur.
@@ -110,6 +112,12 @@ func (ufc *UIOverlayContainer) FyEResize(size frenyard.Vec2i) {
 	}
 
 	ufc.ThisUIPanelDetails.SetContent(fixes)
+}
+
+// FyETick overrides UIPanel.FyETick
+func (ufc *UIOverlayContainer) FyETick(delta float64) {
+	ufc.UIPanel.FyETick(delta)
+	ufc._framing.FyFTick(delta)
 }
 
 // FyEDraw overrides UIPanel.FyEDraw

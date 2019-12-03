@@ -50,6 +50,11 @@ type Renderer interface {
 	Size() Vec2i
 	// Clears & resets clip/translate/etc. You should do this at the start of  frame.
 	Reset(colour uint32)
+	
+	// Calls drawer() while rendering to a texture. All other operations occur within this texture for that duration. Can be stacked; the latest RenderToTexture applies.
+	// 'reserved' does nothing but must be left false.
+	// The resulting texture from this renderer may only be used on this renderer.
+	RenderToTexture(size Vec2i, drawer func (), reserved bool) Texture
 }
 
 // Texture interface. This is automatically deleted on finalization.

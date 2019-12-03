@@ -66,7 +66,9 @@ func (slot FlexboxSlot) fyMainCrossSizeForMainCrossLimits(limits frenyard.Vec2i,
 	if debug {
 		fmt.Print("?")
 	}
-	return slot.Element.FyLSizeForLimits(limits.ConditionalTranspose(vertical)).ConditionalTranspose(vertical)
+	mainCrossSize := slot.Element.FyLSizeForLimits(limits.ConditionalTranspose(vertical)).ConditionalTranspose(vertical)
+	mainCrossSize.X = frenyard.Max(mainCrossSize.X, slot.MinBasis)
+	return mainCrossSize
 }
 func (slot FlexboxSlot) fyGrowShrink() (int32, int32) {
 	return slot.Grow, slot.Shrink
@@ -75,7 +77,7 @@ func (slot FlexboxSlot) fyCalcBasis(cross int32, vertical bool) int32 {
 	if slot.Basis != 0 {
 		return slot.Basis
 	}
-	return frenyard.Max(slot.MinBasis, slot.fyMainCrossSizeForMainCrossLimits(frenyard.Vec2i{frenyard.SizeUnlimited, cross}, vertical, false).X)
+	return slot.fyMainCrossSizeForMainCrossLimits(frenyard.Vec2i{frenyard.SizeUnlimited, cross}, vertical, false).X
 }
 func (slot FlexboxSlot) fyGetOrder() int {
 	return slot.Order
@@ -215,7 +217,7 @@ func fyFlexboxSolveLayout(details FlexboxContainer, limits frenyard.Vec2i) []fre
 	// Stage 2. Wrapping (if relevant)
 	out := make([]frenyard.Area2i, len(slots))
 	mainCrossLimits := limits.ConditionalTranspose(details.DirVertical)
-	shouldWrap := fyFlexboxSolveLine(details, slots, out, mainCrossLimits, false)
+	shouldWrap := fyFlexboxSolveLine(details, slots, out, mainCrossLimits, details.Debug)
 	// One row, so this is simple
 	rows := []fyFlexboxRow{{slots, out, frenyard.UnionArea2i(out)}}
 	if shouldWrap && details.WrapMode != FlexboxWrapModeNone {
@@ -354,7 +356,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 				}
 				if additionalSpaceAvailable < 0 && shrink > 0 && slot.fyRespectMinimumSize() {
 					// Smallest possible alloc: maximum amount that can be shrunk
-					smallestAlloc = slot.fyMainCrossSizeForMainCrossLimits(frenyard.Vec2i{0, mainCrossLimits.Y}, details.DirVertical, false).X - shares[idx]
+					smallestAlloc = slot.fyMainCrossSizeForMainCrossLimits(frenyard.Vec2i{X: 0, Y: mainCrossLimits.Y}, details.DirVertical, false).X - shares[idx]
 				}
 				alloc := (additionalSpaceAvailable * factor) / totalFactorAccumulator
 				// Limit allocation.
@@ -384,7 +386,7 @@ func fyFlexboxSolveLine(details FlexboxContainer, slots []fyFlexboxSlotlike, out
 	// Substage 3. With horizontal sizes established, calculate crossLimit
 	crossLimit := int32(0)
 	for idx := 0; idx < len(slots); idx++ {
-		crossLimit = frenyard.Max(crossLimit, slots[idx].fyMainCrossSizeForMainCrossLimits(frenyard.Vec2i{shares[idx], mainCrossLimits.Y}, details.DirVertical, false).Y)
+		crossLimit = frenyard.Max(crossLimit, slots[idx].fyMainCrossSizeForMainCrossLimits(frenyard.Vec2i{X: shares[idx], Y: mainCrossLimits.Y}, details.DirVertical, false).Y)
 	}
 	// -- Actual layout! For real this time! --
 	mainPosition := int32(0)

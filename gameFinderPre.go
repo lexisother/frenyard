@@ -11,19 +11,19 @@ import (
 	"github.com/CCDirectLink/CCUpdaterCLI/local"
 )
 
-func (app *upApplication) ResetWithGameLocation(location string) {
+func (app *upApplication) ResetWithGameLocation(save bool, location string) {
 	app.gameInstance = nil
 	app.config.GamePath = location
-	middle.WriteUpdaterConfig(app.config)
+	if save {
+		middle.WriteUpdaterConfig(app.config)
+	}
 	// Re-kick
 	app.ShowGameFinderPreface()
 }
 
 func (app *upApplication) ShowGameFinderPreface() {
 	var gameLocations []middle.GameLocation
-	app.ShowWaiter(framework.SlideTransition{
-		Length: 1.0,
-	}, "Starting...", func (progress func(string)) {
+	app.ShowWaiter("Starting...", func (progress func(string)) {
 		progress("Preparing remote packages...")
 		middle.GetRemotePackages()
 		progress("Scanning local installation...")
@@ -45,14 +45,14 @@ func (app *upApplication) ShowGameFinderPreface() {
 		gameLocations = middle.AutodetectGameLocations()
 	}, func () {
 		if app.gameInstance == nil {
-			app.ShowGameFinderPrefaceInternal(false, gameLocations)
+			app.ShowGameFinderPrefaceInternal(gameLocations)
 		} else {
 			app.ShowPrimaryView()
 		}
 	})
 }
 
-func (app *upApplication) ShowGameFinderPrefaceInternal(backwards bool, locations []middle.GameLocation) {
+func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameLocation) {
 
 	suggestSlots := []framework.FlexboxSlot{}
 	for _, location := range locations {
@@ -62,7 +62,8 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(backwards bool, location
 				Text: "CrossCode " + location.Version,
 				Subtext: location.Location,
 				Click: func () {
-					app.ResetWithGameLocation(location.Location)
+					app.GSRightwards()
+					app.ResetWithGameLocation(true, location.Location)
 				},
 			}),
 			RespectMinimumSize: true,
@@ -107,8 +108,10 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(backwards bool, location
 			framework.FlexboxSlot{
 				Element: design.ButtonBar([]framework.UILayoutElement{
 					design.ButtonOkAction("LOCATE MANUALLY", func () {
-						app.ShowGameFinder(false, func () {
-							app.ShowGameFinderPrefaceInternal(true, locations)
+						app.GSDownwards()
+						app.ShowGameFinder(func () {
+							app.GSUpwards()
+							app.ShowGameFinderPrefaceInternal(locations)
 						}, middle.GameFinderVFSPathDefault)
 					}),
 				}),
@@ -118,5 +121,5 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(backwards bool, location
 	primary := design.LayoutDocument(design.Header{
 		Title: "Welcome",
 	}, content, true)
-	app.slideContainer.TransitionTo(framework.SlideTransition{Element: primary, Length: 1.0, Reverse: backwards})
+	app.Teleport(primary)
 }

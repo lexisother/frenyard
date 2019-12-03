@@ -125,7 +125,7 @@ func (de *deCircleButtonFrame) FyFTick(delta float64) {
 // FyFDraw implements Frame.FyFDraw
 func (de *deCircleButtonFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass framework.FramePass) {
 	if pass == framework.FramePassOverBefore {
-		circleSize := int32(de.sizeState * float64(frenyard.Max(size.X, size.Y)))
+		circleSize := int32(de.sizeState * 1 * float64(frenyard.Max(size.X, size.Y)))
 		r.DrawRect(deEncodeCircleCmd(circleTexReductionsMask, frenyard.Vec2i{
 			X: size.X / 2,
 			Y: size.Y / 2,

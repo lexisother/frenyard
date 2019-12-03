@@ -21,8 +21,6 @@ func detectPossibleGameLocations() []string {
 	home := os.Getenv("HOME")
 	locations := []string{
 		home + "/.steam/steam/steamapps/common/CrossCode",
-		// Sorry, but I need to test stacking these
-		home + "/Documents/Local/Quicksand/apple",
 	}
 	// Windows users may have a home drive from A to Z.
 	// A and B are historically floppy disk drives, but try anyway.

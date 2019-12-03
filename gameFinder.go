@@ -7,13 +7,10 @@ import (
 	"path/filepath"
 )
 
-func (app *upApplication) ShowGameFinder(reverse bool, back framework.ButtonBehavior, vfsPath string) {
+func (app *upApplication) ShowGameFinder(back framework.ButtonBehavior, vfsPath string) {
 	var vfsList []middle.GameLocation
 	
-	app.ShowWaiter(framework.SlideTransition{
-		Reverse: reverse,
-		Length: 1.0,
-	}, "Reading", func (progress func(string)) {
+	app.ShowWaiter("Reading", func (progress func(string)) {
 		progress("Scanning to find all of the contents of in:\n" + vfsPath + "\nIf this includes CD/DVD drives or network partitions, this may take a while.")
 		vfsList = middle.GameFinderVFSList(vfsPath)
 	}, func () {
@@ -26,13 +23,16 @@ func (app *upApplication) ShowGameFinder(reverse bool, back framework.ButtonBeha
 				Text: filepath.Base(thisLocation),
 			}
 			ild.Click = func () {
-				app.ShowGameFinder(false, func () {
-					app.ShowGameFinder(true, back, vfsPath)
+				app.GSRightwards()
+				app.ShowGameFinder(func () {
+					app.GSLeftwards()
+					app.ShowGameFinder(back, vfsPath)
 				}, thisLocation)
 			}
 			if v.Valid {
 				ild.Click = func () {
-					app.ResetWithGameLocation(thisLocation)
+					app.GSRightwards()
+					app.ResetWithGameLocation(true, thisLocation)
 				}
 				ild.Text = "CrossCode " + v.Version
 				ild.Subtext = thisLocation
@@ -60,6 +60,6 @@ func (app *upApplication) ShowGameFinder(reverse bool, back framework.ButtonBeha
 			DirVertical: true,
 			Slots: slots,
 		}), true)
-		app.slideContainer.TransitionTo(framework.SlideTransition{Element: primary, Length: 1.0, Reverse: reverse})
+		app.Teleport(primary)
 	})
 }

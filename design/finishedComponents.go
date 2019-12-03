@@ -26,18 +26,30 @@ const ThemeBackgroundTitle = 0xFF404040
 // ThemeBackgroundUnderlayer is the colour for backgrounds in "underground" lists.
 const ThemeBackgroundUnderlayer = 0xFF101010
 
+// ThemeBackgroundWarning is the colour for warning backgrounds.
+const ThemeBackgroundWarning = 0xFF100000
+
 // Header describes a 'title' header.
 type Header struct {
 	Back framework.ButtonBehavior
 	// If null, this is changed to BackIconID
 	BackIcon IconID
 	Title string
+	Forward framework.ButtonBehavior
+	// If null, this is changed to RunIconID
+	ForwardIcon IconID
 }
 
 // ButtonOkAction creates a 'OK' button for some given text (likely 'OK')
 func ButtonOkAction(text string, behavior framework.ButtonBehavior) *framework.UIButton {
 	textElm := framework.NewUILabelPtr(integration.NewTextTypeChunk(text, ButtonTextFont), 0xFFFFFFFF, 0, frenyard.Alignment2i{})
 	return newDeUIDesignButtonPtr(0xFF2040FF, textElm, behavior)
+}
+
+// ButtonWarningFixAction creates a 'fix XYZ' button
+func ButtonWarningFixAction(text string, behavior framework.ButtonBehavior) *framework.UIButton {
+	textElm := framework.NewUILabelPtr(integration.NewTextTypeChunk(text, ButtonTextFont), 0xFFFFFFFF, 0, frenyard.Alignment2i{})
+	return newDeUIDesignButtonPtr(0x40E8D254, textElm, behavior)
 }
 
 // ButtonIcon creates an 'icon button'.
@@ -49,35 +61,63 @@ func headerConstruct(header Header) framework.UILayoutElement {
 	if header.BackIcon == NullIconID {
 		header.BackIcon = BackIconID
 	}
-	label := framework.NewUILabelPtr(integration.NewTextTypeChunk(header.Title, PageTitleFont), ThemeText, 0, frenyard.Alignment2i{})
-	if header.Back != nil {
-		return framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
-			DirVertical: false,
-			Slots: []framework.FlexboxSlot{
-				{
-					Basis: sizeScale(16),
-				},
-				{
-					Element: ButtonIcon(header.BackIcon, 18, header.Back),
-					RespectMinimumSize: true,
-				},
-				{
-					Basis: sizeScale(16),
-				},
-				{
-					Element: label,
-					Grow: 1,
-					Shrink: 1,
-					Order: 0,
-					RespectMinimumSize: true,
-				},
-				{
-					Basis: sizeScale(50),
-				},
-			},
-		})
+	if header.ForwardIcon == NullIconID {
+		header.ForwardIcon = RunIconID
 	}
-	return label
+	label := framework.NewUILabelPtr(integration.NewTextTypeChunk(header.Title, PageTitleFont), ThemeText, 0, frenyard.Alignment2i{})
+	
+	slots := []framework.FlexboxSlot{}
+	if header.Back != nil {
+		slots = append(slots,
+			framework.FlexboxSlot{
+				Basis: sizeScale(16),
+			},
+			framework.FlexboxSlot{
+				Element: ButtonIcon(header.BackIcon, 18, header.Back),
+				RespectMinimumSize: true,
+			},
+			framework.FlexboxSlot{
+				Basis: sizeScale(16),
+			},
+		)
+	} else {
+		slots = append(slots,
+			framework.FlexboxSlot{
+				Basis: sizeScale(50),
+			},
+		)
+	}
+	slots = append(slots, framework.FlexboxSlot{
+		Element: label,
+		Grow: 1,
+		Shrink: 1,
+		Order: 0,
+		RespectMinimumSize: true,
+	})
+	if header.Forward != nil {
+		slots = append(slots,
+			framework.FlexboxSlot{
+				Basis: sizeScale(16),
+			},
+			framework.FlexboxSlot{
+				Element: ButtonIcon(header.ForwardIcon, 18, header.Forward),
+				RespectMinimumSize: true,
+			},
+			framework.FlexboxSlot{
+				Basis: sizeScale(16),
+			},
+		)
+	} else {
+		slots = append(slots,
+			framework.FlexboxSlot{
+				Basis: sizeScale(50),
+			},
+		)
+	}
+	return framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
+		DirVertical: false,
+		Slots: slots,
+	})
 }
 
 // LayoutDocument creates a 'document' format element, with a title header & body.
@@ -250,4 +290,72 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 		return deRippleInstall(assembledItem, borderGenSquareMaskX4Raw, borderEffectiveScale, details.Click)
 	}
 	return assembledItem
+}
+
+// InformationPanelDetails tags a block of content with an icon
+type InformationPanelDetails struct {
+	Text string
+	ActionText string
+	Action framework.ButtonBehavior
+}
+
+// InformationPanel applies InformationPanelDetails
+func InformationPanel(details InformationPanelDetails) framework.UILayoutElement {
+	icon := WarningIconID
+	margin := sizeScale(8)
+	hMargin := sizeScale(4)
+	
+	var body framework.UILayoutElement
+	body = framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, GlobalFont), ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
+
+	primaryHorizontalSlots := []framework.FlexboxSlot{
+		framework.FlexboxSlot{
+			Element: framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
+				DirVertical: true,
+				Slots: []framework.FlexboxSlot{
+					framework.FlexboxSlot{
+						Element: NewIconPtr(0xFFFFFFFF, icon, 18),
+						RespectMinimumSize: true,
+					},
+					framework.FlexboxSlot{
+						Grow: 1,
+					},
+				},
+			}),
+			RespectMinimumSize: true,
+		},
+		framework.FlexboxSlot{
+			Basis: margin,
+		},
+		framework.FlexboxSlot{
+			Element: body,
+			RespectMinimumSize: true,
+			Grow: 1,
+			Shrink: 1,
+		},
+	}
+	
+	if details.Action != nil {
+		primaryHorizontalSlots = append(primaryHorizontalSlots,
+			framework.FlexboxSlot{
+				Basis: margin,
+			},
+			framework.FlexboxSlot{
+				Element: ButtonWarningFixAction(details.ActionText, details.Action),
+				RespectMinimumSize: true,
+			},
+		)
+	}
+	return framework.NewUIOverlayContainerPtr(framework.NinePatchFrame{
+		Layers: []framework.NinePatchFrameLayer{
+			{
+				Pass: framework.FramePassOverBefore,
+				ColourMod: ThemeBackgroundWarning,
+				NinePatch: borderGenRounded4dpMaskX4Mask.Inset(frenyard.Area2iMargin(0, 0, 0, hMargin * 2)),
+				Scale: borderEffectiveScale,
+			},
+		},
+		Clipping: true,
+		Padding: frenyard.Area2iMargin(margin, margin, margin, margin + (hMargin * 2)),
+	}, []framework.UILayoutElement{framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{DirVertical: false, Slots: primaryHorizontalSlots})})
 }

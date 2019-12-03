@@ -6,7 +6,7 @@ import (
 )
 
 // FakeError should be enabled to prevent internet access by CCUpdaterUI.
-const FakeError bool = true
+const FakeError bool = false
 
 // InternetConnectionWarning is true if the last GetRemotePackages() call actually resulted in error.
 var InternetConnectionWarning bool = true
@@ -22,4 +22,17 @@ func GetRemotePackages() map[string]ccmodupdater.RemotePackage {
 		}
 	}
 	return map[string]ccmodupdater.RemotePackage{}
+}
+
+// GetLatestOf returns the latest of two possibly-nil packages (returning nil if both are nil)
+func GetLatestOf(local ccmodupdater.Package, remote ccmodupdater.Package) ccmodupdater.Package {
+	if local != nil {
+		if remote != nil {
+			if remote.Metadata().Version().GreaterThan(local.Metadata().Version()) {
+				return remote
+			}
+		}
+		return local
+	}
+	return remote
 }

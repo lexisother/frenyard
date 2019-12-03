@@ -49,11 +49,11 @@ setTimeout(begin, 100);</script>
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6568543"
-     inkscape:cx="152.70376"
-     inkscape:cy="367.90739"
+     inkscape:zoom="16"
+     inkscape:cx="9.8777173"
+     inkscape:cy="371.41625"
      inkscape:document-units="px"
-     inkscape:current-layer="layer5"
+     inkscape:current-layer="layer1"
      showgrid="true"
      units="px"
      inkscape:window-width="1366"
@@ -247,9 +247,10 @@ setTimeout(begin, 100);</script>
        r="9" />
     <path
        style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 0,0 24,12 0,24 Z"
+       d="M 3,0 24,12 3,24 Z"
        id="path842"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
     <path
        style="fill:none;stroke:#ffffff;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 160,21 -9,-9 9,-9"

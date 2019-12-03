@@ -11,9 +11,37 @@ import (
 type upApplication struct {
 	gameInstance *ccmodupdater.GameInstance
 	config middle.UpdaterConfig
-	slideContainer *framework.UISlideTransitionContainer
+	mainContainer *framework.UISlideTransitionContainer
 	window frenyard.Window
 	upQueued chan func()
+	teleportSettings framework.SlideTransition
+}
+
+// GSLeftwards sets the teleportation affinity to LEFT.
+func (app *upApplication) GSLeftwards() {
+	app.teleportSettings.Reverse = true
+	app.teleportSettings.Vertical = false
+}
+// GSRightwards sets the teleportation affinity to RIGHT.
+func (app *upApplication) GSRightwards() {
+	app.teleportSettings.Reverse = false
+	app.teleportSettings.Vertical = false
+}
+// GSLeftwards sets the teleportation affinity to UP.
+func (app *upApplication) GSUpwards() {
+	app.teleportSettings.Reverse = true
+	app.teleportSettings.Vertical = true
+}
+// GSRightwards sets the teleportation affinity to DOWN.
+func (app *upApplication) GSDownwards() {
+	app.teleportSettings.Reverse = false
+	app.teleportSettings.Vertical = true
+}
+// Teleport starts a transition with the cached affinity settings.
+func (app *upApplication) Teleport(target framework.UILayoutElement) {
+	forkTD := app.teleportSettings
+	forkTD.Element = target
+	app.mainContainer.TransitionTo(forkTD)
 }
 
 func main() {
@@ -29,9 +57,12 @@ func main() {
 	// Ok, now get it ready.
 	app := (&upApplication{
 		config: middle.ReadUpdaterConfig(),
-		slideContainer: slideContainer,
+		mainContainer: slideContainer,
 		window: wnd,
 		upQueued: make(chan func(), 16),
+		teleportSettings: framework.SlideTransition{
+			Length: 1.0,
+		},
 	})
 	app.ShowGameFinderPreface()
 	// Started!

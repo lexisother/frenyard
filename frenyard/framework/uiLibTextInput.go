@@ -12,11 +12,14 @@ type UITextbox struct {
 	
 	// Called on rebuild (this includes, though isn't strictly limited to, changes)
 	OnRebuild func()
+	// Called after some time without anything happening
+	OnStall func()
 	// Called on enter
 	OnConfirm func()
 	
 	_open bool
 	_caretBlinker float64
+	_stallTimer float64
 	
 	_hint string
 
@@ -66,6 +69,13 @@ func (tb *UITextbox) SetText(text string) {
 
 // FyETick overrides UILayoutProxy.FyETick
 func (tb *UITextbox) FyETick(delta float64) {
+	tb._stallTimer += delta
+	if tb._stallTimer > 0.25 {
+		tb._stallTimer = 0
+		if tb.OnStall != nil {
+			tb.OnStall()
+		}
+	}
 	if tb._open {
 		oldCB := tb._caretBlinker
 		tb._caretBlinker += delta
@@ -80,6 +90,7 @@ func (tb *UITextbox) FyETick(delta float64) {
 }
 
 func (tb *UITextbox) rebuild() {
+	tb._stallTimer = 0
 	if !tb._open {
 		if tb._textPre == "" && tb._textPost == "" {
 			tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
@@ -207,10 +218,12 @@ func (tb *UITextbox) FyTClose() {
 }
 // FyTEditing implements TextInput.FyTEditing
 func (tb *UITextbox) FyTEditing(text string, start int, length int) {
-	textRs := []rune(text)
-	tb._textSuggestion1 = string(textRs[:start])
-	tb._textSuggestion2 = string(textRs[start:start + length])
-	tb._textSuggestion3 = string(textRs[start + length:])
+	// Ok, so as it turns out, it's entirely possible for start/length to do stupid things.
+	// Stupid things that cause runtime errors in this code.
+	// If anyone REALLY REALLY needs this working, figure it out yourself...
+	tb._textSuggestion1 = ""
+	tb._textSuggestion2 = text
+	tb._textSuggestion3 = ""
 	tb._suggesting = text != ""
 	tb.rebuild()
 }

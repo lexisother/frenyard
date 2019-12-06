@@ -9,6 +9,12 @@ import (
 // ThemeText is the colour for most text.
 const ThemeText uint32 = 0xFFFFFFFF
 
+// ThemeTextInputSuggestion is the colour for text input suggestions.
+const ThemeTextInputSuggestion = 0xFF80FF80
+
+// ThemeTextInputHint is the colour for text hints
+const ThemeTextInputHint = 0xFF808080
+
 // ThemeSubText is for 'detail' text that doesn't matter that much.
 const ThemeSubText uint32 = 0xFFC0C0C0
 
@@ -25,6 +31,9 @@ const ThemeBackgroundTitle uint32 = 0xFF404040
 
 // ThemeBackgroundUnderlayer is the colour for backgrounds in "underground" lists.
 const ThemeBackgroundUnderlayer uint32 = 0xFF101010
+
+// ThemeBackgroundSearch is the colour for searchboxbackground
+const ThemeBackgroundSearch uint32 = 0xFF101010
 
 // ThemeBackgroundWarning is the colour for warning backgrounds.
 const ThemeBackgroundWarning uint32 = 0xFF100000

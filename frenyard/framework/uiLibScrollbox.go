@@ -262,6 +262,13 @@ func (usc *UIScrollbox) _updatePositions() {
 				Element: usc._contained,
 				Visible: true,
 			},
+			// This needs to exist so that the structure doesn't change, for focus reasons (searchboxes)
+			PanelFixedElement{
+				Element: usc._scrollbar,
+				Pos: frenyard.Vec2i{},
+				Visible: false,
+				Locked: true,
+			},
 		})
 	}
 }

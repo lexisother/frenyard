@@ -38,6 +38,9 @@ var borderButtonRaw framework.NinePatch
 var borderButtonShadow framework.NinePatch
 var borderButtonShadowFocus framework.NinePatch
 
+// Used for searchboxes
+var searchboxTheme framework.NinePatchFrame
+
 // ScrollboxExterior should be wrapped around scrollboxen.
 var ScrollboxExterior framework.NinePatchFrame
 
@@ -144,6 +147,26 @@ func deSetupBorders() {
 				ColourMod: 0xFF000000,
 			},
 		},
+	}
+	
+	// -- Searchboxes --
+	searchboxMargin := sizeScale(4)
+	searchboxTheme = framework.NinePatchFrame{
+		Layers: []framework.NinePatchFrameLayer{
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassUnderBefore,
+				NinePatch: borderGenRounded4dpShadow2dpX4Shadow,
+				Scale: borderEffectiveScale,
+				ColourMod: 0xFF000000,
+			},
+			framework.NinePatchFrameLayer{
+				Pass: framework.FramePassOverBefore,
+				NinePatch: borderGenRounded4dpMaskX4Mask,
+				Scale: borderEffectiveScale,
+				ColourMod: ThemeBackgroundSearch,
+			},
+		},
+		Padding: frenyard.Area2iMargin(searchboxMargin, searchboxMargin, searchboxMargin, searchboxMargin),
 	}
 }
 

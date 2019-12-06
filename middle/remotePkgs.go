@@ -7,7 +7,7 @@ import (
 )
 
 // FakeError should be enabled to prevent internet access by CCUpdaterUI.
-const FakeError bool = true
+const FakeError bool = false
 
 // InternetConnectionWarning is true if the last GetRemotePackages() call actually resulted in error.
 var InternetConnectionWarning bool = true

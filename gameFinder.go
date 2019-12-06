@@ -5,6 +5,7 @@ import (
 	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
 	"github.com/20kdc/CCUpdaterUI/middle"
 	"path/filepath"
+	"sort"
 )
 
 func (app *upApplication) ShowGameFinder(back framework.ButtonBehavior, vfsPath string) {
@@ -14,7 +15,7 @@ func (app *upApplication) ShowGameFinder(back framework.ButtonBehavior, vfsPath 
 		progress("Scanning to find all of the contents of in:\n" + vfsPath + "\nIf this includes CD/DVD drives or network partitions, this may take a while.")
 		vfsList = middle.GameFinderVFSList(vfsPath)
 	}, func () {
-		slots := []framework.FlexboxSlot{}
+		items := []design.ListItemDetails{}
 		
 		for _, v := range vfsList {
 			thisLocation := v.Location
@@ -42,24 +43,14 @@ func (app *upApplication) ShowGameFinder(back framework.ButtonBehavior, vfsPath 
 				ild.Subtext = v.Location
 				ild.Icon = design.DriveIconID
 			}
-			item := design.ListItem(ild)
-			slots = append(slots, framework.FlexboxSlot{
-				Element: item,
-				RespectMinimumSize: true,
-			})
+			items = append(items, ild)
 		}
-		
-		slots = append(slots, framework.FlexboxSlot{
-			Grow: 1,
-		})
 
+		sort.Sort(design.SortListItemDetails(items))
 		primary := design.LayoutDocument(design.Header{
 			Back: back,
 			Title: "Enter CrossCode's location",
-		}, framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
-			DirVertical: true,
-			Slots: slots,
-		}), true)
+		}, design.NewUISearchBoxPtr("Directory name...", items), true)
 		app.Teleport(primary)
 	})
 }

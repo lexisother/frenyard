@@ -38,17 +38,41 @@ type Window interface {
 	GetLocalDPI() float64
 	// Sets the size of the window (if possible)
 	SetSize(size Vec2i)
+	// Gets the text input, or nil for no input (useful to check when unfocusing)
+	TextInput() TextInput
+	// Sets the text input, or nil for no input
+	SetTextInput(input TextInput)
+}
+
+// TextInput represents a text input.
+type TextInput interface {
+	// Called when the text input is made active.
+	FyTOpen()
+	// Area gets the area of the TextInput.
+	FyTArea() Area2i
+	// Sets the candidate buffer.
+	FyTEditing(text string, start int, length int)
+	// Writes into the editing text buffer and clears the candidate buffer.
+	FyTInput(text string)
+	// Called when the text input is changed to any other input.
+	FyTClose()
 }
 
 /*
- * There are two kinds of event: Normal (focus-target) events and Mouse Events.
+ * There are two kinds of event: Normal events and Mouse Events.
  * Mouse Events get lots of special treatment as they bypass focus targeting, need offset logic, etc.
- * Normal Events have the same handling no matter what, so they don't even need to be considered in core.
- * There's some UI special handling for Focus/Unfocus events, but that's defined out of core anyway
+ * Normal Events have handling based on some booleans and are mostly defined in the framework.
  */
 
-// NormalEvent is the base of event types that target the focused element.
+// NormalEvent is the base of standard, non-special event types
 type NormalEvent interface {
+	// Indicates if the event is allowed to be forwarded at all (events with highly specialized behavior should keep this false)
+	// DO BE AWARE! This doesn't count for UIProxy because it's a proxy.
+	FyVForward() bool
+	// Indicates if the event is a broadcast event (route to all) as opposed to standard (route to focus target).
+	FyVBroadcast() bool
+	// Offset the event by some amount. Apply the same way as MouseEvent.
+	FyVOffset(amount Vec2i) NormalEvent
 }
 
 // MouseEventID describes a type of MouseEvent.

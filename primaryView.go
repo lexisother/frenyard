@@ -1,7 +1,6 @@
 package main
 
 import (
-	"time"
 	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
 	"github.com/20kdc/CCUpdaterUI/design"
@@ -41,6 +40,9 @@ func (app *upApplication) ShowPrimaryView() {
 			}),
 		})
 	}
+	slots = append(slots, framework.FlexboxSlot{
+		Element: framework.NewUITextboxPtr("[NYI: Search Box Here]", design.GlobalFont, design.ThemePlaceholder, 0xFFFFFFFF, frenyard.Alignment2i{X: frenyard.AlignStart}),
+	})
 	
 	// Ok, let's get all the packages in a nice row
 	localPackages := app.gameInstance.Packages()
@@ -115,27 +117,10 @@ func (app *upApplication) ShowPrimaryView() {
 			app.ResetWithGameLocation(false, middle.GameFinderVFSPathDefault)
 		},
 		BackIcon: design.GameIconID,
+		ForwardIcon: design.MenuIconID,
 		Forward: func () {
-			backupFrameTime := frenyard.TargetFrameTime
 			app.GSRightwards()
-			app.ShowWaiter("Running...", func (progress func (string)) {
-				progress("Trying to run game...")
-				time.Sleep(time.Second * 1)
-				proc, err := middle.Launch(app.gameInstance.Base())
-				if err != nil {
-					progress("Unable to launch CrossCode.\nIf on a Unix-like, try adding a 'run' script to the directory containing 'assets'.\nIf on Windows, ensure said directory contains nw.exe or CrossCode.exe for usage by the game.")
-					time.Sleep(time.Second * 5)
-				} else {
-					progress("Game running...")
-					frenyard.TargetFrameTime = 1
-					proc.Wait()
-					frenyard.TargetFrameTime = backupFrameTime
-					// give the system time to 'calm down'
-					time.Sleep(time.Second * 2)
-				}
-			}, func () {
-				// make sure in case of threading shenanigans
-				frenyard.TargetFrameTime = backupFrameTime
+			app.ShowOptionsMenu(func () {
 				app.GSLeftwards()
 				app.ShowPrimaryView()
 			})

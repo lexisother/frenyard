@@ -14,6 +14,7 @@ type fySDL2Window struct {
 	id         uint32
 	receiver   WindowReceiver
 	activeButtons uint32
+	textInput  TextInput
 }
 
 func (w *fySDL2Window) Name() string {
@@ -66,6 +67,13 @@ func (w *fySDL2Window) GetLocalDPI() float64 {
 	return float64(ddpi)
 }
 
+func (w *fySDL2Window) TextInput() TextInput {
+	return w.textInput
+}
+func (w *fySDL2Window) SetTextInput(ti TextInput) {
+	w.textInput = ti
+}
+
 type fySDL2Backend struct {
 	windows map[uint32]*fySDL2Window
 }
@@ -102,6 +110,7 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 		id,
 		receiver,
 		0,
+		nil,
 	}
 	fyGlobalBackend.windows[id] = sWindow
 	receiver.FyRStart(sWindow)
@@ -166,6 +175,10 @@ func _fySDL2MousePositionAdjuster(window *fySDL2Window, x int32, y int32) Vec2i 
 	return Vec2i{(x * realSize.X) / intX, (y * realSize.Y) / intY}
 }
 
+func _fySDL2Texteditconv(area [32]byte) string {
+	return "R"
+}
+
 func init() {
 	{
 		z := sdl2Os()
@@ -179,6 +192,7 @@ func init() {
 
 func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 	frameStart := time.Now()
+	lastTextInput := TextInput(nil)
 	for !ExitFlag {
 		for {
 			timeLeft := TargetFrameTime - time.Since(frameStart).Seconds()
@@ -209,6 +223,14 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 				break
 			}
 			switch ev := event.(type) {
+			case *sdl.TextInputEvent:
+				if lastTextInput != nil {
+					lastTextInput.FyTInput(_fySDL2Texteditconv(ev.Text))
+				}
+			case *sdl.TextEditingEvent:
+				if lastTextInput != nil {
+					lastTextInput.FyTEditing(_fySDL2Texteditconv(ev.Text), int(ev.Start), int(ev.Length))
+				}
 			case *sdl.MouseMotionEvent:
 				window := fyGlobalBackend.windows[ev.WindowID]
 				if window != nil {
@@ -260,6 +282,33 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 				ExitFlag = true
 			}
 		}
+		// Text Input Sync.
+		keyboardFocusWindow := sdl.GetKeyboardFocus()
+		if keyboardFocusWindow != nil {
+			id, err := keyboardFocusWindow.GetID()
+			if err != nil {
+				wnd2 := fyGlobalBackend.windows[id]
+				if wnd2 != nil {
+					if wnd2.textInput != lastTextInput {
+						if lastTextInput != nil {
+							lastTextInput.FyTClose()
+						}
+						if wnd2.textInput != nil {
+							wnd2.textInput.FyTOpen()
+							rect := fySDL2AreaToRect(wnd2.textInput.FyTArea())
+							sdl.SetTextInputRect(&rect)
+						}
+						if wnd2.textInput == nil {
+							sdl.StopTextInput()
+						} else if lastTextInput == nil {
+							sdl.StartTextInput()
+						}
+						lastTextInput = wnd2.textInput
+					}
+				}
+			}
+		}
+		// Ok, we're done
 		runtime.UnlockOSThread()
 		// OS thread
 	}

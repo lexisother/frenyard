@@ -26,6 +26,8 @@ const ToolIconID IconID = 6
 const BackIconID IconID = 7
 // DriveIconID is a drive.
 const DriveIconID IconID = 8
+// MenuIconID is a sandwich.
+const MenuIconID IconID = 9
 
 // Icons at 18DP
 var icons18dp frenyard.Texture

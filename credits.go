@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"strings"
 	"strconv"
+	"runtime"
 )
 
 var secretDeveloperModeCounter int = 0
@@ -16,33 +17,26 @@ var secretDeveloperModeCounter int = 0
 func (app *upApplication) ShowCredits(back framework.ButtonBehavior) {
 	listSlots := []framework.FlexboxSlot{}
 	credits, _ := base64.StdEncoding.DecodeString(creditsB64)
-	sections := strings.Split(string(credits), "~!~")
+	sections := strings.Split(string(credits), "\n~!~\n")
 	for i := 0; i < len(sections); i += 2 {
-		sectionIdx := i
-		sectionName := sections[i]
-		sectionText := sections[i + 1]
+		sectionHeaderPieces := strings.Split(sections[i], "\n")
+		sectionName := sectionHeaderPieces[0]
+		sectionSubtext := "PARSER ERROR"
+		if len(sectionHeaderPieces) == 2 {
+			sectionSubtext = sectionHeaderPieces[1]
+		}
+		sectionText := "PARSER ERROR"
+		if i != len(sections) - 1 {
+			sectionText = sections[i + 1]
+		}
 		listSlots = append(listSlots, framework.FlexboxSlot{
 			Element: design.ListItem(design.ListItemDetails{
-				Text: sections[i],
+				Text: sectionName,
+				Subtext: sectionSubtext,
 				Click: func () {
-					text := ""
-					if sectionIdx == 0 {
-						secretDeveloperModeCounter++
-						if secretDeveloperModeCounter < 4 {
-							text = "developer mode will be toggled by going here " + strconv.Itoa(4 - secretDeveloperModeCounter) + " more times\n"
-						} else {
-							app.config.DevMode = !app.config.DevMode
-							middle.WriteUpdaterConfig(app.config)
-						}
-						if !app.config.DevMode {
-							text += "developer mode is disabled"
-						} else {
-							text += "developer mode is enabled"
-						}
-					}
-					app.GSLeftwards()
-					app.MessageBox(sectionName, sectionText + text, func () {
-						app.GSRightwards()
+					app.GSRightwards()
+					app.MessageBox(sectionName, sectionText, func () {
+						app.GSLeftwards()
 						app.ShowCredits(back)
 					})
 				},
@@ -50,6 +44,31 @@ func (app *upApplication) ShowCredits(back framework.ButtonBehavior) {
 		})
 	}
 	listSlots = append(listSlots, framework.FlexboxSlot{
+		Element: design.ListItem(design.ListItemDetails{
+			Text: "Build Information",
+			Subtext: runtime.GOARCH + " " + runtime.Compiler + " " + runtime.Version(),
+			Click: func () {
+				text := ""
+				secretDeveloperModeCounter++
+				if secretDeveloperModeCounter < 4 {
+						text = "developer mode will be toggled by going here " + strconv.Itoa(4 - secretDeveloperModeCounter) + " more times\n"
+				} else {
+					app.config.DevMode = !app.config.DevMode
+					middle.WriteUpdaterConfig(app.config)
+				}
+					if !app.config.DevMode {
+					text += "developer mode is disabled"
+				} else {
+					text += "developer mode is enabled"
+				}
+				app.GSRightwards()
+				app.MessageBox("Dev", text, func () {
+					app.GSLeftwards()
+					app.ShowCredits(back)
+				})
+			},
+		}),
+	}, framework.FlexboxSlot{
 		Grow: 1,
 	})
 	

@@ -10,6 +10,23 @@ type FocusEvent struct {
 	// True if this was a focus, false if this was an unfocus.
 	Focused bool
 }
+// FyVBroadcast implements NormalEvent.FyVBroadcast
+func (fe FocusEvent) FyVBroadcast() bool {
+	return false
+}
+// FyVForward implements NormalEvent.FyVForward
+func (fe FocusEvent) FyVForward() bool {
+	return false
+}
+// FyVOffset implements NormalEvent.FyVOffset
+func (fe FocusEvent) FyVOffset(o frenyard.Vec2i) frenyard.NormalEvent {
+	return fe
+}
+
+// EnterWindowEvent is an event type specific to the UI framework that represents the element being attached to a window.
+type EnterWindowEvent struct {
+	Window frenyard.Window
+}
 
 /*
  * This is the core UIElement type without layout capabilities.
@@ -209,10 +226,20 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 
 // FyENormalEvent implements UIElement.FyENormalEvent
 func (pan *UIPanel) FyENormalEvent(ev frenyard.NormalEvent) {
-	if pan.ThisUIPanelDetails._focus != -1 {
-		elem := pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
-		if elem.Visible && !elem.Locked {
-			elem.Element.FyENormalEvent(ev)
+	if ev.FyVForward() {
+		if ev.FyVBroadcast() {
+			for _, v := range pan.ThisUIPanelDetails._content {
+				if v.Visible && !v.Locked {
+					v.Element.FyENormalEvent(ev.FyVOffset(v.Pos.Negate()))
+				}
+			}
+		} else {
+			if pan.ThisUIPanelDetails._focus != -1 {
+				elem := pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
+				if elem.Visible && !elem.Locked {
+					elem.Element.FyENormalEvent(ev)
+				}
+			}
 		}
 	}
 }

@@ -229,7 +229,7 @@ func (usc *UIScrollbox) FyEResize(size frenyard.Vec2i) {
 		baseSizeMainCross = usc._contained.FyLSizeForLimits(sizeWithoutScrollbar).ConditionalTranspose(usc._vertical)
 		sizeWithoutScrollbar = frenyard.Vec2i{baseSizeMainCross.X, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical)
 		usc._scrollLength = baseSizeMainCross.X - sizeMainCross.X
-		usc._scrollbar.MouseNotch = (float64(sizeMainCross.X) / 2) / float64(usc._scrollLength)
+		usc._scrollbar.MouseNotch = (float64(sizeMainCross.X) / 4) / float64(usc._scrollLength)
 		// can haz scrollbar?
 		usc._scrollbar.FyEResize(frenyard.Vec2i{sizeMainCross.X, usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical))
 		usc._contained.FyEResize(sizeWithoutScrollbar)

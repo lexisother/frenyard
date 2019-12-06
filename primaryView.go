@@ -15,7 +15,7 @@ func (app *upApplication) ShowPrimaryView() {
 	warnings := middle.FindWarnings(app.gameInstance)
 	if app.config.DevMode {
 		warnings = append(warnings, middle.Warning{
-			Text: "You are in developer mode! Go to the Credits (top-right button, 'Credits') to deactivate it.",
+			Text: "You are in developer mode! Go to the Build Information (top-right button, 'Credits', 'Build Information') to deactivate it.",
 			Action: middle.NullActionWarningID,
 		})
 	}

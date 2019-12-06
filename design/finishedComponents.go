@@ -7,27 +7,39 @@ import (
 )
 
 // ThemeText is the colour for most text.
-const ThemeText = 0xFFFFFFFF
+const ThemeText uint32 = 0xFFFFFFFF
 
 // ThemeSubText is for 'detail' text that doesn't matter that much.
-const ThemeSubText = 0xFFC0C0C0
+const ThemeSubText uint32 = 0xFFC0C0C0
 
 // ThemePlaceholder is the colour for placeholders.
-const ThemePlaceholder = 0xFFFF0000
+const ThemePlaceholder uint32 = 0xFFFF0000
 
 // ThemeBackground is the colour for most page content.
-const ThemeBackground = 0xFF202020
+const ThemeBackground uint32 = 0xFF202020
 // For debugging.
-//const ThemeBackground = 0xFFFFFFFF
+//const ThemeBackground uint32 = 0xFFFFFFFF
 
 // ThemeBackgroundTitle is the colour for the page title background.
-const ThemeBackgroundTitle = 0xFF404040
+const ThemeBackgroundTitle uint32 = 0xFF404040
 
 // ThemeBackgroundUnderlayer is the colour for backgrounds in "underground" lists.
-const ThemeBackgroundUnderlayer = 0xFF101010
+const ThemeBackgroundUnderlayer uint32 = 0xFF101010
 
 // ThemeBackgroundWarning is the colour for warning backgrounds.
-const ThemeBackgroundWarning = 0xFF100000
+const ThemeBackgroundWarning uint32 = 0xFF100000
+
+// ThemeOkActionButton is the colour for OK or Install buttons.
+const ThemeOkActionButton uint32 = 0xFF2040FF
+
+// ThemeUpdateActionButton is the colour for Update buttons.
+const ThemeUpdateActionButton uint32 = 0xFFD28C44
+
+// ThemeRemoveActionButton is the colour for Remove buttons.
+const ThemeRemoveActionButton uint32 = 0xFFB11E1E
+
+// ThemeImpossibleActionButton is the colour for buttons that fail, but will explain why it is impossible.
+const ThemeImpossibleActionButton uint32 = 0xFF404040
 
 // Header describes a 'title' header.
 type Header struct {
@@ -40,10 +52,10 @@ type Header struct {
 	ForwardIcon IconID
 }
 
-// ButtonOkAction creates a 'OK' button for some given text (likely 'OK')
-func ButtonOkAction(text string, behavior framework.ButtonBehavior) *framework.UIButton {
+// ButtonAction creates a 'OK' button for some given text (likely 'OK')
+func ButtonAction(colour uint32, text string, behavior framework.ButtonBehavior) *framework.UIButton {
 	textElm := framework.NewUILabelPtr(integration.NewTextTypeChunk(text, ButtonTextFont), 0xFFFFFFFF, 0, frenyard.Alignment2i{})
-	return newDeUIDesignButtonPtr(0xFF2040FF, textElm, behavior)
+	return newDeUIDesignButtonPtr(colour, textElm, behavior)
 }
 
 // ButtonWarningFixAction creates a 'fix XYZ' button
@@ -170,7 +182,7 @@ func ButtonBar(buttons []framework.UILayoutElement) framework.UILayoutElement {
 
 // LayoutMsgbox provides a 'message box' body layout.
 func LayoutMsgbox(text string, confirm func()) framework.UILayoutElement {
-	okButton := ButtonOkAction("OK", confirm)
+	okButton := ButtonAction(ThemeOkActionButton, "OK", confirm)
 
 	buttonBar := ButtonBar([]framework.UILayoutElement{okButton})
 
@@ -218,18 +230,22 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 			DirVertical: true,
 			Slots: []framework.FlexboxSlot{
 				framework.FlexboxSlot{
+					Basis: sizeScale(8),
+					RespectMinimumSize: true,
 					Grow: 1,
 				},
 				framework.FlexboxSlot{
 					Element: framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, ListItemTextFont), ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignEnd}),
 				},
 				framework.FlexboxSlot{
-					Basis: 4,
+					Basis: sizeScale(4),
 				},
 				framework.FlexboxSlot{
 					Element: framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Subtext, ListItemSubTextFont), ThemeSubText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignEnd}),
 				},
 				framework.FlexboxSlot{
+					Basis: sizeScale(8),
+					RespectMinimumSize: true,
 					Grow: 1,
 				},
 			},

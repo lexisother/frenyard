@@ -14,7 +14,14 @@ import (
 func (app *upApplication) ShowPrimaryView() {
 	slots := []framework.FlexboxSlot{}
 	
-	for _, v := range middle.FindWarnings(app.gameInstance) {
+	warnings := middle.FindWarnings(app.gameInstance)
+	if app.config.DevMode {
+		warnings = append(warnings, middle.Warning{
+			Text: "You are in developer mode! Go to the Credits (top-right button, 'Credits') to deactivate it.",
+			Action: middle.NullActionWarningID,
+		})
+	}
+	for _, v := range warnings {
 		fixAction := framework.ButtonBehavior(nil)
 		if v.Action == middle.InstallOrUpdatePackageWarningID {
 			pkgID := v.Parameter
@@ -60,7 +67,7 @@ func (app *upApplication) ShowPrimaryView() {
 			typeCheck = remote
 		}
 		
-		if typeCheck.Metadata().Type() != ccmodupdater.PackageTypeMod {
+		if (!app.config.DevMode) && (typeCheck.Metadata().Type() != ccmodupdater.PackageTypeMod) {
 			continue
 		}
 		

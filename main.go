@@ -21,21 +21,30 @@ type upApplication struct {
 func (app *upApplication) GSLeftwards() {
 	app.teleportSettings.Reverse = true
 	app.teleportSettings.Vertical = false
+	app.teleportSettings.Length = 1
 }
 // GSRightwards sets the teleportation affinity to RIGHT.
 func (app *upApplication) GSRightwards() {
 	app.teleportSettings.Reverse = false
 	app.teleportSettings.Vertical = false
+	app.teleportSettings.Length = 1
 }
 // GSLeftwards sets the teleportation affinity to UP.
 func (app *upApplication) GSUpwards() {
 	app.teleportSettings.Reverse = true
 	app.teleportSettings.Vertical = true
+	app.teleportSettings.Length = 1
 }
 // GSRightwards sets the teleportation affinity to DOWN.
 func (app *upApplication) GSDownwards() {
 	app.teleportSettings.Reverse = false
 	app.teleportSettings.Vertical = true
+	app.teleportSettings.Length = 1
+}
+// GSInstant sets the teleportation affinity to INSTANT.
+func (app *upApplication) GSInstant() {
+	// direction doesn't matter
+	app.teleportSettings.Length = 0
 }
 // Teleport starts a transition with the cached affinity settings.
 func (app *upApplication) Teleport(target framework.UILayoutElement) {
@@ -61,7 +70,6 @@ func main() {
 		window: wnd,
 		upQueued: make(chan func(), 16),
 		teleportSettings: framework.SlideTransition{
-			Length: 1.0,
 		},
 	})
 	app.ShowGameFinderPreface()

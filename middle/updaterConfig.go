@@ -10,6 +10,7 @@ import (
 // UpdaterConfig is the configuration structure for the application.
 type UpdaterConfig struct {
 	GamePath string `json:"gamePath"`
+	DevMode bool `json:"devMode"`
 }
 
 func getUpdaterConfigPath() string {
@@ -39,7 +40,10 @@ func ReadUpdaterConfig() UpdaterConfig {
 
 // WriteUpdaterConfig saves a configuration as the current configuration.
 func WriteUpdaterConfig(cfg UpdaterConfig) {
-	cfgFile, err := os.OpenFile(getUpdaterConfigPath(), os.O_WRONLY | os.O_CREATE, os.ModePerm)
+	cfgPath := getUpdaterConfigPath()
+	// success/failure doesn't matter if the OpenFile works
+	os.MkdirAll(filepath.Dir(cfgPath), os.ModePerm)
+	cfgFile, err := os.OpenFile(cfgPath, os.O_WRONLY | os.O_CREATE, os.ModePerm)
 	if err != nil {
 		fmt.Printf("Failed to save updater config: %s\n", err.Error())
 		return

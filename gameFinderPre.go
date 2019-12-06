@@ -107,7 +107,7 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameL
 			},
 			framework.FlexboxSlot{
 				Element: design.ButtonBar([]framework.UILayoutElement{
-					design.ButtonOkAction("LOCATE MANUALLY", func () {
+					design.ButtonAction(design.ThemeOkActionButton, "LOCATE MANUALLY", func () {
 						app.GSDownwards()
 						app.ShowGameFinder(func () {
 							app.GSUpwards()
@@ -119,6 +119,14 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameL
 		},
 	})
 	primary := design.LayoutDocument(design.Header{
+		BackIcon: design.WarningIconID,
+		Back: func () {
+			app.GSLeftwards()
+			app.ShowCredits(func () {
+				app.GSRightwards()
+				app.ShowGameFinderPrefaceInternal(locations)
+			})
+		},
 		Title: "Welcome",
 	}, content, true)
 	app.Teleport(primary)

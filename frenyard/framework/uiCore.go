@@ -10,24 +10,35 @@ type FocusEvent struct {
 	// True if this was a focus, false if this was an unfocus.
 	Focused bool
 }
-// FyVBroadcast implements NormalEvent.FyVBroadcast
-func (fe FocusEvent) FyVBroadcast() bool {
-	return false
-}
-// FyVForward implements NormalEvent.FyVForward
-func (fe FocusEvent) FyVForward() bool {
-	return false
+// FyVRoute implements NormalEvent.FyVRoute
+func (fe FocusEvent) FyVRoute() frenyard.NormalEventRoute {
+	return frenyard.NormalEventRouteStop
 }
 // FyVOffset implements NormalEvent.FyVOffset
 func (fe FocusEvent) FyVOffset(o frenyard.Vec2i) frenyard.NormalEvent {
 	return fe
 }
 
+/*
+ * EXPLAINATION: EnterWindowEvent is sent when the root element is attached to the binding.
+ * It's set to NormalEventRouteStructuralBroadcast. It is intended to go EVERYWHERE.
+ * It is rebroadcast by panels when their contents change.
+ * As panels and proxies are the only elements involved in event routing, this essentially means it is guaranteed to reach every element.
+ */
+
 // EnterWindowEvent is an event type specific to the UI framework that represents the element being attached to a window.
 type EnterWindowEvent struct {
 	Window frenyard.Window
 }
 
+// FyVRoute implements NormalEvent.FyVRoute
+func (fe EnterWindowEvent) FyVRoute() frenyard.NormalEventRoute {
+	return frenyard.NormalEventRouteStructuralBroadcast
+}
+// FyVOffset implements NormalEvent.FyVOffset
+func (fe EnterWindowEvent) FyVOffset(o frenyard.Vec2i) frenyard.NormalEvent {
+	return fe
+}
 /*
  * This is the core UIElement type without layout capabilities.
  * Simply put, if it's being drawn, it's this type.
@@ -110,6 +121,7 @@ func CreateBoundWindow(title string, vsync bool, clearColour uint32, e UIElement
 // FyRStart implements WindowReceiver.FyRStart
 func (web *fyWindowElementBinding) FyRStart(w frenyard.Window) {
 	web.window = w
+	web.element.FyENormalEvent(EnterWindowEvent{w})
 	web.element.FyENormalEvent(FocusEvent{true})
 }
 
@@ -170,6 +182,8 @@ type UIPanelDetails struct {
 	_focus int
 	// Content (As far as I can tell there is no way to change the length of a slice without replacing it.)
 	_content []PanelFixedElement
+	// Cached window
+	_window frenyard.Window
 }
 
 // NewPanel creates a UIPanel.
@@ -181,12 +195,22 @@ func NewPanel(size frenyard.Vec2i) UIPanel {
 			0,
 			-1,
 			make([]PanelFixedElement, 0),
+			nil,
 		},
 	}
 }
 
 // SetContent sets the contents of the panel.
 func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
+	// Before we touch anything, broadcast EnterWindowEvent. Panels that were already in the same window will drop this.
+	if pan._window != nil {
+		for _, v := range content {
+			v.Element.FyENormalEvent(EnterWindowEvent{
+				pan._window,
+			})
+		}
+	}
+	
 	// Is this actually a change we need to worry about?
 	// DO BE WARNED: THIS IS A LOAD-BEARING OPTIMIZATION. DISABLE IT AND BUTTONS DON'T WORK PROPERLY
 	// Reason: Clicking a button changes the button content which causes a layout rebuild.
@@ -226,19 +250,26 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 
 // FyENormalEvent implements UIElement.FyENormalEvent
 func (pan *UIPanel) FyENormalEvent(ev frenyard.NormalEvent) {
-	if ev.FyVForward() {
-		if ev.FyVBroadcast() {
-			for _, v := range pan.ThisUIPanelDetails._content {
-				if v.Visible && !v.Locked {
-					v.Element.FyENormalEvent(ev.FyVOffset(v.Pos.Negate()))
-				}
+	switch xev := ev.(type) {
+		case EnterWindowEvent:
+			if pan.ThisUIPanelDetails._window == xev.Window {
+				// Drop the event, it's redundant
+				return
 			}
-		} else {
-			if pan.ThisUIPanelDetails._focus != -1 {
-				elem := pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
-				if elem.Visible && !elem.Locked {
-					elem.Element.FyENormalEvent(ev)
-				}
+			pan.ThisUIPanelDetails._window = xev.Window
+	}
+	route := ev.FyVRoute()
+	if (route == frenyard.NormalEventRouteBroadcast) || (route == frenyard.NormalEventRouteStructuralBroadcast) {
+		for _, v := range pan.ThisUIPanelDetails._content {
+			if (route == frenyard.NormalEventRouteStructuralBroadcast) || (v.Visible && !v.Locked) {
+				v.Element.FyENormalEvent(ev.FyVOffset(v.Pos.Negate()))
+			}
+		}
+	} else {
+		if pan.ThisUIPanelDetails._focus != -1 {
+			elem := pan.ThisUIPanelDetails._content[pan.ThisUIPanelDetails._focus]
+			if elem.Visible && !elem.Locked {
+				elem.Element.FyENormalEvent(ev)
 			}
 		}
 	}

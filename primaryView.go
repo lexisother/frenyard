@@ -41,7 +41,7 @@ func (app *upApplication) ShowPrimaryView() {
 		})
 	}
 	slots = append(slots, framework.FlexboxSlot{
-		Element: framework.NewUITextboxPtr("[NYI: Search Box Here]", design.GlobalFont, design.ThemePlaceholder, 0xFFFFFFFF, frenyard.Alignment2i{X: frenyard.AlignStart}),
+		Element: framework.NewUITextboxPtr("", "search (NYI)", design.GlobalFont, 0xFFFFFFFF, 0xC0FFFFFF, 0x80FFFFFF, 0xFF000000, frenyard.Alignment2i{X: frenyard.AlignStart}),
 	})
 	
 	// Ok, let's get all the packages in a nice row

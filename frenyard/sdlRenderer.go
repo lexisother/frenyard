@@ -121,6 +121,13 @@ func (r *sdl2Renderer) Translate(val Vec2i) {
 	}
 	r.translate = r.translate.Add(val)
 }
+func (r *sdl2Renderer) Translation() Vec2i {
+	{
+		z := sdl2Os()
+		defer z.End()
+	}
+	return r.translate
+}
 func (r *sdl2Renderer) Size() Vec2i {
 	{
 		z := sdl2Os()

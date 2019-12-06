@@ -176,7 +176,13 @@ func _fySDL2MousePositionAdjuster(window *fySDL2Window, x int32, y int32) Vec2i 
 }
 
 func _fySDL2Texteditconv(area [32]byte) string {
-	return "R"
+	var limit int
+	for limit = 0; limit < 32; limit++ {
+		if area[limit] == 0 {
+			break
+		}
+	}
+	return string(area[:limit])
 }
 
 func init() {
@@ -230,6 +236,16 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 			case *sdl.TextEditingEvent:
 				if lastTextInput != nil {
 					lastTextInput.FyTEditing(_fySDL2Texteditconv(ev.Text), int(ev.Start), int(ev.Length))
+				}
+			case *sdl.KeyboardEvent:
+				window := fyGlobalBackend.windows[ev.WindowID]
+				if window != nil {
+					window.receiver.FyRNormalEvent(KeyEvent{
+						Pressed: ev.Type == sdl.KEYDOWN,
+						Keycode: int32(ev.Keysym.Sym),
+						Scancode: int32(ev.Keysym.Scancode),
+						Modifiers: uint16(ev.Keysym.Mod),
+					})
 				}
 			case *sdl.MouseMotionEvent:
 				window := fyGlobalBackend.windows[ev.WindowID]
@@ -286,7 +302,7 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 		keyboardFocusWindow := sdl.GetKeyboardFocus()
 		if keyboardFocusWindow != nil {
 			id, err := keyboardFocusWindow.GetID()
-			if err != nil {
+			if err == nil {
 				wnd2 := fyGlobalBackend.windows[id]
 				if wnd2 != nil {
 					if wnd2.textInput != lastTextInput {

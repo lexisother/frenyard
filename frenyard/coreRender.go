@@ -39,6 +39,8 @@ type Renderer interface {
 
 	// Translates the renderer's target. Use with defer to undo later.
 	Translate(vec Vec2i)
+	// Returns the renderer's translation.
+	Translation() Vec2i
 	// Sets the clip area, relative to the current translation.
 	SetClip(clip Area2i)
 	// Gets the clip area, relative to the current translation.

@@ -162,7 +162,7 @@ As such, it should be acknowledged that not only is it the work of the FreeType 
 
 ~!~
 golang.org/x/image/font/gofont
-the text comes from here
+the shapes of the letters you see come from here
 ~!~
 
 These fonts were created by the Bigelow & Holmes foundry specifically for the

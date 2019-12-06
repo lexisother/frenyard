@@ -64,15 +64,41 @@ type TextInput interface {
  * Normal Events have handling based on some booleans and are mostly defined in the framework.
  */
 
+// NormalEventRoute represents a target for events.
+type NormalEventRoute uint8
+const (
+	// NormalEventRouteStop Do not forward.
+	NormalEventRouteStop NormalEventRoute = iota
+	// NormalEventRouteFocus Routes to the focused element.
+	NormalEventRouteFocus
+	// NormalEventRouteBroadcast Broadcast to every element.
+	NormalEventRouteBroadcast
+	// NormalEventRouteStructuralBroadcast Broadcast to every element, even if an event-blocking firewall is active.
+	NormalEventRouteStructuralBroadcast
+)
+
 // NormalEvent is the base of standard, non-special event types
 type NormalEvent interface {
-	// Indicates if the event is allowed to be forwarded at all (events with highly specialized behavior should keep this false)
-	// DO BE AWARE! This doesn't count for UIProxy because it's a proxy.
-	FyVForward() bool
-	// Indicates if the event is a broadcast event (route to all) as opposed to standard (route to focus target).
-	FyVBroadcast() bool
+	// Indicates how to route the event.
+	FyVRoute() NormalEventRoute
 	// Offset the event by some amount. Apply the same way as MouseEvent.
 	FyVOffset(amount Vec2i) NormalEvent
+}
+
+// KeyEvent represents a key changing state. It uses the same constants as SDL2 because I never planned for key input to be in here, but then someone said "what about a search box". Nevermind that this opens a massive can of worms...
+type KeyEvent struct {
+	Pressed bool
+	Scancode int32
+	Keycode int32
+	Modifiers uint16
+}
+// FyVRoute implements NormalEvent.FyVRoute
+func (ke KeyEvent) FyVRoute() NormalEventRoute {
+	return NormalEventRouteFocus
+}
+// FyVOffset implements NormalEvent.FyVOffset
+func (ke KeyEvent) FyVOffset(amount Vec2i) NormalEvent {
+	return ke
 }
 
 // MouseEventID describes a type of MouseEvent.

@@ -114,9 +114,14 @@ func (ttc fyTextTypeChunk) FyCBounds(dot fixed.Point26_6) (fixed.Point26_6, fixe
 	}
 	text := string(ttc._text)
 	bounds, advance := drawer.BoundString(text)
-	boundSize := bounds.Max.Sub(bounds.Min)
 	// Adjust the bounds to try and prevent trouble
-	metricHeight := ttc._face.Metrics().Height
+	metrics := ttc._face.Metrics()
+	bounds = bounds.Union(fixed.Rectangle26_6{
+		Min: dot.Sub(fixed.Point26_6{X: 0, Y: metrics.Ascent}),
+		Max: dot.Add(fixed.Point26_6{X: 1, Y: metrics.Descent}),
+	})
+	boundSize := bounds.Max.Sub(bounds.Min)
+	metricHeight := metrics.Height
 	if boundSize.Y < metricHeight {
 		boundSize.Y = metricHeight
 	}

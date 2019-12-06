@@ -14,6 +14,7 @@ func Launch(base string) (*os.Process, error) {
 		"run", // Override script
 		"nw", // NW.JS SDK replacement
 		"CrossCode", // Original executable
+		"../../MacOS/nwjs", // Mac OS X executable
 		// Windows
 		"nw.exe", // NW.JS SDK replacement
 		"CrossCode.exe", // Original executable

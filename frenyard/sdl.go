@@ -91,7 +91,7 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 	} else {
 		sdl.SetHint("SDL_HINT_RENDER_VSYNC", "0")
 	}
-	window, renderer, err := sdl.CreateWindowAndRenderer(size.X, size.Y, sdl.WINDOW_RESIZABLE)
+	window, renderer, err := sdl.CreateWindowAndRenderer(size.X, size.Y, sdl.WINDOW_RESIZABLE | sdl.WINDOW_ALLOW_HIGHDPI)
 	window.SetTitle(name)
 	if err != nil {
 		return nil, err

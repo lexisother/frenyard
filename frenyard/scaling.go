@@ -59,7 +59,7 @@ func InferScale(dpiSource Window) float64 {
 	if dpiSource == nil {
 		return 1.0
 	}
-	val := dpiSource.GetLocalDPI() / 96.0
+	val := dpiSource.GetLocalDPI() / 72.0
 	// Prevent weirdness for anything that looks even remotely like a sensible DPI value
 	return ModifyScaleBinInt(val)
 }

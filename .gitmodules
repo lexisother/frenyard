@@ -1,0 +1,3 @@
+[submodule "CCUpdaterCLI"]
+	path = vendor/github.com/CCDirectLink/CCUpdaterCLI
+	url = https://github.com/20kdc/CCUpdaterCLI

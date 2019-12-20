@@ -46,7 +46,7 @@ func (app *upApplication) ShowCredits(back framework.ButtonBehavior) {
 	listSlots = append(listSlots, framework.FlexboxSlot{
 		Element: design.ListItem(design.ListItemDetails{
 			Text: "Build Information",
-			Subtext: runtime.GOARCH + " " + runtime.Compiler + " " + runtime.Version(),
+			Subtext: runtime.GOOS + " " +runtime.GOARCH + " " + runtime.Compiler + " " + runtime.Version(),
 			Click: func () {
 				text := ""
 				secretDeveloperModeCounter++

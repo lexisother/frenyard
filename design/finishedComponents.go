@@ -9,6 +9,9 @@ import (
 // ThemeText is the colour for most text.
 const ThemeText uint32 = 0xFFFFFFFF
 
+// ThemeTextWarning is the colour for warning text.
+const ThemeTextWarning uint32 = 0xFF000000
+
 // ThemeTextInputSuggestion is the colour for text input suggestions.
 const ThemeTextInputSuggestion = 0xFF80FF80
 
@@ -36,7 +39,7 @@ const ThemeBackgroundUnderlayer uint32 = 0xFF101010
 const ThemeBackgroundSearch uint32 = 0xFF101010
 
 // ThemeBackgroundWarning is the colour for warning backgrounds.
-const ThemeBackgroundWarning uint32 = 0xFF100000
+const ThemeBackgroundWarning uint32 = 0xFFFFA000
 
 // ThemeOkActionButton is the colour for OK or Install buttons.
 const ThemeOkActionButton uint32 = 0xFF2040FF
@@ -69,8 +72,8 @@ func ButtonAction(colour uint32, text string, behavior framework.ButtonBehavior)
 
 // ButtonWarningFixAction creates a 'fix XYZ' button
 func ButtonWarningFixAction(text string, behavior framework.ButtonBehavior) *framework.UIButton {
-	textElm := framework.NewUILabelPtr(integration.NewTextTypeChunk(text, ButtonTextFont), 0xFFFFFFFF, 0, frenyard.Alignment2i{})
-	return newDeUIDesignButtonPtr(0x40E8D254, textElm, behavior)
+	textElm := framework.NewUILabelPtr(integration.NewTextTypeChunk(text, ButtonTextFont), 0xFF000000, 0, frenyard.Alignment2i{})
+	return newDeUIDesignButtonPtr(0xFFEF6C00, textElm, behavior)
 }
 
 // ButtonIcon creates an 'icon button'.
@@ -331,7 +334,7 @@ func InformationPanel(details InformationPanelDetails) framework.UILayoutElement
 	hMargin := sizeScale(4)
 	
 	var body framework.UILayoutElement
-	body = framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, GlobalFont), ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
+	body = framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, GlobalFont), ThemeTextWarning, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
 
 	primaryHorizontalSlots := []framework.FlexboxSlot{
 		framework.FlexboxSlot{
@@ -339,7 +342,7 @@ func InformationPanel(details InformationPanelDetails) framework.UILayoutElement
 				DirVertical: true,
 				Slots: []framework.FlexboxSlot{
 					framework.FlexboxSlot{
-						Element: NewIconPtr(0xFFFFFFFF, icon, 18),
+						Element: NewIconPtr(ThemeTextWarning, icon, 18),
 						RespectMinimumSize: true,
 					},
 					framework.FlexboxSlot{

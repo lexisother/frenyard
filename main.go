@@ -17,29 +17,31 @@ type upApplication struct {
 	teleportSettings framework.SlideTransition
 }
 
+const upTeleportLen float64 = 0.25
+
 // GSLeftwards sets the teleportation affinity to LEFT.
 func (app *upApplication) GSLeftwards() {
 	app.teleportSettings.Reverse = true
 	app.teleportSettings.Vertical = false
-	app.teleportSettings.Length = 1
+	app.teleportSettings.Length = upTeleportLen
 }
 // GSRightwards sets the teleportation affinity to RIGHT.
 func (app *upApplication) GSRightwards() {
 	app.teleportSettings.Reverse = false
 	app.teleportSettings.Vertical = false
-	app.teleportSettings.Length = 1
+	app.teleportSettings.Length = upTeleportLen
 }
 // GSLeftwards sets the teleportation affinity to UP.
 func (app *upApplication) GSUpwards() {
 	app.teleportSettings.Reverse = true
 	app.teleportSettings.Vertical = true
-	app.teleportSettings.Length = 1
+	app.teleportSettings.Length = upTeleportLen
 }
 // GSRightwards sets the teleportation affinity to DOWN.
 func (app *upApplication) GSDownwards() {
 	app.teleportSettings.Reverse = false
 	app.teleportSettings.Vertical = true
-	app.teleportSettings.Length = 1
+	app.teleportSettings.Length = upTeleportLen
 }
 // GSInstant sets the teleportation affinity to INSTANT.
 func (app *upApplication) GSInstant() {

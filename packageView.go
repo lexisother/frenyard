@@ -10,7 +10,10 @@ import (
 )
 
 // ShowPackageView shows a dialog for a package.
-func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg string) {
+// backHeavy is used if nothing actually happened.
+// backLight is used if something happened (the ShowPackageView return call has both set to the same value).
+// This allows preserving state in the PrimaryView.
+func (app *upApplication) ShowPackageView(backHeavy framework.ButtonBehavior, backLight framework.ButtonBehavior, pkg string) {
 	// Construct a package context here and use it to sanity-check some things.
 	// It also makes a nice cup-holder for the local/remote repositories.
 	txCtx := ccmodupdater.PackageTXContext{
@@ -25,9 +28,9 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 	// No latest package = no information.
 	if latestPkg == nil {
 		if middle.InternetConnectionWarning {
-			app.MessageBox("Package not available", "The package '" + pkg + "' could not be found.\n\nAs you have ended up here, the package probably had to exist in some form.\nThis error is probably because CCUpdaterUI was unable to retrieve remote packages.\n\n1. Check your internet connection\n2. Try restarting CCUpdaterUI\n3. Contact us", back)
+			app.MessageBox("Package not available", "The package '" + pkg + "' could not be found.\n\nAs you have ended up here, the package probably had to exist in some form.\nThis error is probably because CCUpdaterUI was unable to retrieve remote packages.\n\n1. Check your internet connection\n2. Try restarting CCUpdaterUI\n3. Contact us", backLight)
 		} else {
-			app.MessageBox("I just don't know what went wrong...", "The package '" + pkg + "' could not be found.\nYou should never be able to see this dialog in normal operation.", back)
+			app.MessageBox("I just don't know what went wrong...", "The package '" + pkg + "' could not be found.\nYou should never be able to see this dialog in normal operation.", backLight)
 		}
 		return
 	}
@@ -65,7 +68,7 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 			app.GSDownwards()
 			app.PerformTransaction(func () {
 				app.GSUpwards()
-				app.ShowPackageView(back, pkg)
+				app.ShowPackageView(backHeavy, backHeavy, pkg)
 			}, removeTx)
 		}))
 	}
@@ -88,7 +91,7 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 			app.GSDownwards()
 			app.PerformTransaction(func () {
 				app.GSUpwards()
-				app.ShowPackageView(back, pkg)
+				app.ShowPackageView(backHeavy, backHeavy, pkg)
 			}, installTx)
 		}))
 	}
@@ -133,6 +136,6 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 	
 	app.Teleport(design.LayoutDocument(design.Header{
 		Title: latestPkg.Metadata().HumanName(),
-		Back: back,
+		Back: backLight,
 	}, fullPanel, true))
 }

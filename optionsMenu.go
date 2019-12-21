@@ -61,6 +61,16 @@ func (app *upApplication) ShowOptionsMenu(back framework.ButtonBehavior) {
 			}),
 		},
 		{
+			Element: design.ListItem(design.ListItemDetails{
+				Text: "Show Modloader",
+				Subtext: "Show the installed modloader",
+				Click: func () {
+					app.GSRightwards()
+					app.ShowPackageView(backHere, "ccloader")
+				},
+			}),
+		},
+		{
 			Grow: 1,
 		},
 	}

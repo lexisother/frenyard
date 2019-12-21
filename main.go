@@ -10,6 +10,8 @@ import (
 
 type upApplication struct {
 	gameInstance *ccmodupdater.GameInstance
+	// Reset this to nil whenever anything that affects the Primary View changes
+	cachedPrimaryView framework.UILayoutElement
 	config middle.UpdaterConfig
 	mainContainer *framework.UISlideTransitionContainer
 	window frenyard.Window

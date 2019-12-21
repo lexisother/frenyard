@@ -53,10 +53,11 @@ func (app *upApplication) ShowCredits(back framework.ButtonBehavior) {
 				if secretDeveloperModeCounter < 4 {
 						text = "developer mode will be toggled by going here " + strconv.Itoa(4 - secretDeveloperModeCounter) + " more times\n"
 				} else {
+					app.cachedPrimaryView = nil
 					app.config.DevMode = !app.config.DevMode
 					middle.WriteUpdaterConfig(app.config)
 				}
-					if !app.config.DevMode {
+				if !app.config.DevMode {
 					text += "developer mode is disabled"
 				} else {
 					text += "developer mode is enabled"

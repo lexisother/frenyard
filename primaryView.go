@@ -11,8 +11,10 @@ import (
 // ShowPrimaryView shows the "Primary View" (the mod list right now)
 func (app *upApplication) ShowPrimaryView() {
 	
-	// This is used to preserve the state when nothing has changed (for example, when browsing).
-	var thePage framework.UILayoutElement
+	if app.cachedPrimaryView != nil {
+		app.Teleport(app.cachedPrimaryView)
+		return
+	}
 	
 	slots := []framework.FlexboxSlot{}
 	
@@ -32,9 +34,6 @@ func (app *upApplication) ShowPrimaryView() {
 				app.ShowPackageView(func () {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
-				}, func () {
-					app.GSLeftwards()
-					app.Teleport(thePage)
 				}, pkgID)
 			}
 		}
@@ -98,9 +97,6 @@ func (app *upApplication) ShowPrimaryView() {
 				app.ShowPackageView(func () {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
-				}, func () {
-					app.GSLeftwards()
-					app.Teleport(thePage)
 				}, pkgIDLocal)
 			},
 		})
@@ -112,14 +108,11 @@ func (app *upApplication) ShowPrimaryView() {
 		Grow: 1,
 	})
 
-	// Keep copies of whatever the options menu can change.
-	// If we're returned to with something changed, refresh.
-	// Otherwise try to reuse the element; it's better-performant and preserves state.
-	thePresentStateOfDevMode := app.config.DevMode
-
-	thePage = design.LayoutDocument(design.Header{
+	// This cached element is used to boost performance when possible.
+	app.cachedPrimaryView = design.LayoutDocument(design.Header{
 		Title: "Mods",
 		Back: func () {
+			app.cachedPrimaryView = nil
 			app.GSLeftwards()
 			app.ResetWithGameLocation(false, middle.GameFinderVFSPathDefault)
 		},
@@ -129,16 +122,12 @@ func (app *upApplication) ShowPrimaryView() {
 			app.GSRightwards()
 			app.ShowOptionsMenu(func () {
 				app.GSLeftwards()
-				if thePresentStateOfDevMode != app.config.DevMode {
-					app.ShowPrimaryView()
-				} else {
-					app.Teleport(thePage)
-				}
+				app.ShowPrimaryView()
 			})
 		},
 	}, framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 		DirVertical: true,
 		Slots: slots,
 	}), true)
-	app.Teleport(thePage)
+	app.Teleport(app.cachedPrimaryView)
 }

@@ -18,8 +18,12 @@ elif [ "$GOOS" = windows ]; then
  # two additional gotchas we have to deal with:
  #  + a manual adjustment for GetDoubleClickTime
  #  + -x -v to ensure you can see what happens
+
+ # by tcamps ; I'd add a comment to the file itself, but that risks breaking the weirdness in there
+ i686-w64-mingw32-windres windows.rc ../windows.syso
  cd ..
  CGO_ENABLED=1 CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 go build -v -tags static -ldflags "-s -w"
+ rm windows.syso
  cd build
  echo "If an issue occurred with GetDoubleClickTime:"
  echo " + Get the MinGW devlibs from https://www.libsdl.org/download-2.0.php"

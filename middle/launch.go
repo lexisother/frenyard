@@ -2,6 +2,7 @@ package middle
 
 import (
 	"os"
+	"os/exec"
 	"fmt"
 	"path/filepath"
 )
@@ -29,4 +30,20 @@ func Launch(base string) (*os.Process, error) {
 		}
 	}
 	return nil, fmt.Errorf("all methods failed")
+}
+
+// OpenURL opens a URL. It *MAY* be susceptible to bad URLs depending on OS.
+func OpenURL(url string) error {
+	executables := []string{
+		"xdg-open", // anything XDG-compliant (BSDs & Linux)
+		"start", // Windows
+		"open", // Mac OS X
+	}
+	for _, executable := range executables {
+		cmd := exec.Command(executable, url)
+		if cmd.Run() == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("all methods failed")
 }

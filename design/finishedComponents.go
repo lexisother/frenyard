@@ -53,6 +53,9 @@ const ThemeRemoveActionButton uint32 = 0xFFB11E1E
 // ThemeImpossibleActionButton is the colour for buttons that fail, but will explain why it is impossible.
 const ThemeImpossibleActionButton uint32 = 0xFF404040
 
+// ThemePageActionButton is the colour for buttons that show details.
+const ThemePageActionButton uint32 = 0xFF205020
+
 // Header describes a 'title' header.
 type Header struct {
 	Back framework.ButtonBehavior

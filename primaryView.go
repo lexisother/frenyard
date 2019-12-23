@@ -6,6 +6,7 @@ import (
 	"github.com/20kdc/CCUpdaterUI/middle"
 	"github.com/CCDirectLink/CCUpdaterCLI"
 	"sort"
+	"os"
 )
 
 // ShowPrimaryView shows the "Primary View" (the mod list right now)
@@ -35,6 +36,12 @@ func (app *upApplication) ShowPrimaryView() {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
 				}, pkgID)
+			}
+		} else if v.Action == middle.URLAndCloseWarningID {
+			url := v.Parameter
+			fixAction = func () {
+				middle.OpenURL(url)
+				os.Exit(0)
 			}
 		}
 		slots = append(slots, framework.FlexboxSlot{

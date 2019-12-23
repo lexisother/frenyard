@@ -45,11 +45,25 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 	} else {
 		showInstallButton = true
 	}
+
 	chunks := []integration.TypeChunk{
 		integration.NewColouredTextTypeChunk(latestPkg.Metadata().HumanName(), design.GlobalFont, design.ThemeText),
 		integration.NewColouredTextTypeChunk(annotations, design.ListItemSubTextFont, design.ThemeSubText),
 	}
+
+	descriptionText := latestPkg.Metadata().Description() + "\n"
+
 	buttons := []framework.UILayoutElement{}
+
+	homepage := latestPkg.Metadata()["homepage"]
+	switch homepageString := homepage.(type) {
+		case string:
+			buttons = append(buttons, design.ButtonAction(design.ThemePageActionButton, "HOMEPAGE", func () {
+				middle.OpenURL(homepageString)
+			}))
+			descriptionText += "\nHomepage: " + homepageString
+	}
+
 	if (localPkg != nil) && pkg != "Simplify" {
 		removeTx := ccmodupdater.PackageTX{
 			pkg: ccmodupdater.PackageTXOperationRemove,
@@ -120,7 +134,7 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 				Basis: design.SizeMarginAroundEverything,
 			},
 			framework.FlexboxSlot{
-				Element: framework.NewUILabelPtr(integration.NewTextTypeChunk(latestPkg.Metadata().Description(), design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart}),
+				Element: framework.NewUILabelPtr(integration.NewTextTypeChunk(descriptionText, design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignStart}),
 				Shrink: 1,
 			},
 			framework.FlexboxSlot{

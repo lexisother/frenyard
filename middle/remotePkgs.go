@@ -16,6 +16,7 @@ var InternetConnectionWarning bool = true
 func GetRemotePackages() map[string]ccmodupdater.RemotePackage {
 	InternetConnectionWarning = true
 	if !FakeError {
+		updateAlertHook()
 		remote, err := remote.GetRemotePackages()
 		if err == nil {
 			InternetConnectionWarning = false

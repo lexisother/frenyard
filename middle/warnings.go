@@ -3,7 +3,23 @@ package middle
 import (
 	"github.com/CCDirectLink/CCUpdaterCLI"
 	"github.com/Masterminds/semver"
+	"net/http"
+	"io/ioutil"
 )
+
+// autoupdate alert stuff ; update this for new version names!!!
+var localUIVersionID string = "lea\n"
+var remoteUIVersionID string = "lea\n"
+
+func updateAlertHook() {
+	res, err := http.Get("https://20kdc.duckdns.org/ccmodloader/version")
+	if err == nil {
+		data, err := ioutil.ReadAll(res.Body)
+		if err == nil {
+			remoteUIVersionID = string(data)
+		}
+	}
+}
 
 // WarningID represents a kind of warning action.
 type WarningID int
@@ -13,6 +29,8 @@ const (
 	NullActionWarningID WarningID = iota
 	// InstallOrUpdatePackageWarningID warnings can be solved by installing/updating the package Parameter.
 	InstallOrUpdatePackageWarningID
+	// URLAndCloseWarningID warnings can be solved manually by the user given navigation to a URL. The application closes.
+	URLAndCloseWarningID
 )
 
 // Warning represents a warning to show the user on the primary view.
@@ -28,6 +46,13 @@ func FindWarnings(game *ccmodupdater.GameInstance) []Warning {
 	if InternetConnectionWarning {
 		warnings = append(warnings, Warning{
 			Text: "CCUpdaterUI wasn't able to retrieve the mod metadata; downloading mods is not possible.",
+		})
+	}
+	if localUIVersionID != remoteUIVersionID {
+		warnings = append(warnings, Warning{
+			Text: "CCUpdaterUI is out of date! Please update it.",
+			Action: URLAndCloseWarningID,
+			Parameter: "https://20kdc.duckdns.org/ccmodloader/update-thunk.html",
 		})
 	}
 	crosscode := game.Packages()["crosscode"]

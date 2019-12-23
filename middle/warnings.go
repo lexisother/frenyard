@@ -10,8 +10,14 @@ import (
 // autoupdate alert stuff ; update this for new version names!!!
 var localUIVersionID string = "lea\n"
 var remoteUIVersionID string = "lea\n"
+var hasAlreadyCheckedRemoteUIVersionID bool = false
 
 func updateAlertHook() {
+	if !hasAlreadyCheckedRemoteUIVersionID {
+		hasAlreadyCheckedRemoteUIVersionID = true
+	} else {
+		return
+	}
 	res, err := http.Get("https://20kdc.duckdns.org/ccmodloader/version")
 	if err == nil {
 		data, err := ioutil.ReadAll(res.Body)

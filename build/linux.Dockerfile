@@ -18,6 +18,7 @@ RUN go get github.com/veandco/go-sdl2/sdl ; go build github.com/veandco/go-sdl2/
 RUN go get github.com/Masterminds/semver ; go build github.com/Masterminds/semver
 RUN go get github.com/golang/freetype ; go build github.com/golang/freetype
 RUN go get golang.org/x/image/font/gofont/goregular ; go get golang.org/x/image/font/gofont/gobold
+RUN go get github.com/20kdc/go-vkv
 # Final build step: get packages & build packages
 # NOTE: Output from the 'CUT HERE' set is eligible to be moved upwards
 ENTRYPOINT go get -v . ; echo "CUT HERE" ; go build -v -tags static -ldflags "-s -w"

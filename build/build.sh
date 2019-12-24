@@ -22,7 +22,7 @@ elif [ "$GOOS" = windows ]; then
  # by tcamps ; I'd add a comment to the file itself, but that risks breaking the weirdness in there
  i686-w64-mingw32-windres windows.rc ../windows.syso
  cd ..
- CGO_ENABLED=1 CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 go build -v -tags static -ldflags "-s -w"
+ CGO_ENABLED=1 CC=i686-w64-mingw32-gcc GOOS=windows GOARCH=386 go build -v -tags static -ldflags "-s -w -H=windowsgui"
  rm windows.syso
  cd build
  echo "If an issue occurred with GetDoubleClickTime:"

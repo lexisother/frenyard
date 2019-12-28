@@ -8,8 +8,8 @@ import (
 )
 
 // autoupdate alert stuff ; update this for new version names!!!
-var localUIVersionID string = "lea\n"
-var remoteUIVersionID string = "lea\n"
+var localUIVersionID string = "emilie\n"
+var remoteUIVersionID string = "emilie\n"
 var hasAlreadyCheckedRemoteUIVersionID bool = false
 
 func updateAlertHook() {

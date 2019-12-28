@@ -34,16 +34,18 @@ func Launch(base string) (*os.Process, error) {
 
 // OpenURL opens a URL. It *MAY* be susceptible to bad URLs depending on OS.
 func OpenURL(url string) error {
-	executables := []string{
-		"xdg-open", // anything XDG-compliant (BSDs & Linux)
-		"start", // Windows
-		"open", // Mac OS X
+	cmd := exec.Command("xdg-open", url) // Linux
+	if cmd.Run() == nil {
+		return nil
 	}
-	for _, executable := range executables {
-		cmd := exec.Command(executable, url)
-		if cmd.Run() == nil {
-			return nil
-		}
+	cmd = exec.Command("cmd", "/c", "start", url) // Windows (thanks 2767mr)
+	if cmd.Run() == nil {
+		return nil
+	}
+	cmd = exec.Command("open", url) // Mac OS X
+	if cmd.Run() == nil {
+		return nil
 	}
 	return fmt.Errorf("all methods failed")
 }
+

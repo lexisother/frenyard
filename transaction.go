@@ -40,6 +40,9 @@ func (app *upApplication) PerformTransaction(back framework.ButtonBehavior, tx c
 				log += "\nInstalling " + pkg + "..."
 				progress(log)
 			}
+		}, func (text string) {
+			log += "\n" + text
+			progress(log)
 		})
 		if err != nil {
 			log += "\n-- Error --\n" + err.Error()

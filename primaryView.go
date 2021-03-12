@@ -94,6 +94,10 @@ func (app *upApplication) ShowPrimaryView() {
 		} else if remote != nil {
 			status = latest.Metadata().Version().Original() + " available"
 		}
+		description := latest.Metadata().Description()
+		if description != "" {
+			status = description + "\n" + status
+		}
 		pkgIDLocal := pkgID
 		packageList = append(packageList, design.ListItemDetails{
 			Icon: middle.PackageIcon(latest),

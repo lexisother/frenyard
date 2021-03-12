@@ -8,6 +8,8 @@ import (
 
 // IconID represents a specific icon.
 type IconID int32
+// BlankIconID should be used when the spacing for an icon must be present but the icon itself mustn't.
+const BlankIconID IconID = -1
 // NullIconID should be used when no icon should be placed at all.
 const NullIconID IconID = 0
 // RunIconID is a right-facing triangle.
@@ -28,6 +30,10 @@ const BackIconID IconID = 7
 const DriveIconID IconID = 8
 // MenuIconID is a sandwich.
 const MenuIconID IconID = 9
+// UpdatableIconID is an exclamation symbol (non-warning attention)
+const UpdatableIconID IconID = 10
+// InstalledIconID is a checkmark (success, correct, present)
+const InstalledIconID IconID = 11
 
 // Icons at 18DP
 var icons18dp frenyard.Texture

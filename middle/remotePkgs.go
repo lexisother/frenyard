@@ -49,3 +49,20 @@ func PackageIcon(pkg ccmodupdater.Package) design.IconID {
 	}
 	return design.DirectoryIconID
 }
+
+// PackagePVIcon returns the relevant icon ID for the Primary View given the state of the package locally and remotely.
+func PackagePVIcon(local ccmodupdater.Package, remote ccmodupdater.Package) design.IconID {
+	if local != nil {
+		if remote != nil {
+			if remote.Metadata().Version().GreaterThan(local.Metadata().Version()) {
+				return design.UpdatableIconID
+			}
+		}
+		typ := local.Metadata().Type()
+		if typ == ccmodupdater.PackageTypeMod {
+			return design.InstalledIconID
+		}
+		return PackageIcon(local)
+	}
+	return design.BlankIconID
+}

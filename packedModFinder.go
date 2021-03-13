@@ -49,8 +49,8 @@ func (app *upApplication) ShowPackedModFinder(back framework.ButtonBehavior, suc
 		sort.Sort(design.SortListItemDetails(items))
 		primary := design.LayoutDocument(design.Header{
 			Back: back,
-			Title: "Enter CrossCode's location",
-		}, design.NewUISearchBoxPtr("Directory name...", items), true)
+			Title: "Enter mod location",
+		}, design.NewUISearchBoxPtr("Search...", items), true)
 		app.Teleport(primary)
 	})
 }

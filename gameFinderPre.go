@@ -47,6 +47,7 @@ func (app *upApplication) ShowGameFinderPreface() {
 		if app.gameInstance == nil {
 			app.ShowGameFinderPrefaceInternal(gameLocations)
 		} else {
+			app.cachedPrimaryView = nil
 			app.ShowPrimaryView()
 		}
 	})
@@ -112,7 +113,7 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameL
 						app.ShowGameFinder(func () {
 							app.GSUpwards()
 							app.ShowGameFinderPrefaceInternal(locations)
-						}, middle.GameFinderVFSPathDefault)
+						}, middle.BrowserVFSPathDefault)
 					}),
 				}),
 			},

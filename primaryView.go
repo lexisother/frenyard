@@ -6,8 +6,94 @@ import (
 	"github.com/20kdc/CCUpdaterUI/middle"
 	"github.com/CCDirectLink/CCUpdaterCLI"
 	"sort"
+	"strings"
 	"os"
 )
+
+type primaryViewPackageListSortable struct {
+	names []string
+	localPackages map[string]ccmodupdater.LocalPackage
+	remotePackages map[string]ccmodupdater.RemotePackage
+	packageLocalLatest map[string]bool
+	humanNamesLowered map[string]string
+}
+
+func (slid primaryViewPackageListSortable) Len() int {
+	return len(slid.names)
+}
+func (slid primaryViewPackageListSortable) Swap(i int, j int) {
+	a := slid.names[i]
+	slid.names[i] = slid.names[j]
+	slid.names[j] = a
+}
+func (slid primaryViewPackageListSortable) Less(i int, j int) bool {
+	iPkgName := slid.names[i]
+	jPkgName := slid.names[j]
+	// check 1: packages we have locally always go first
+	iLoPkg := slid.localPackages[iPkgName]
+	jLoPkg := slid.localPackages[jPkgName]
+	if iLoPkg != nil && jLoPkg == nil {
+		return true
+	} else if jLoPkg != nil && iLoPkg == nil {
+		return false
+	}
+	// check 2: packages where local is latest go last
+	iLatest := slid.packageLocalLatest[iPkgName]
+	jLatest := slid.packageLocalLatest[jPkgName]
+	if iLatest && !jLatest {
+		return false
+	} else if jLatest && !iLatest {
+		return true
+	}
+	res := strings.Compare(slid.humanNamesLowered[iPkgName], slid.humanNamesLowered[jPkgName])
+	return res < 0
+}
+
+// getPrimaryViewPackageListSortable gets all the data about packages to show, sorts it, etc.
+func (app *upApplication) getPrimaryViewPackageListSortable() primaryViewPackageListSortable {
+	// The actual input
+	localPackages := app.gameInstance.Packages()
+	remotePackages := middle.GetRemotePackages()
+	// Set (intermediate step used so that if a package is common between local and remote, it gets iterated once)
+	packageSet := make(map[string]bool)
+	for k := range localPackages {
+		packageSet[k] = true
+	}
+	for k := range remotePackages {
+		packageSet[k] = true
+	}
+	// Expand into what's necessary for the sortable
+	names := []string{}
+	packageLocalLatest := make(map[string]bool)
+	humanNamesLowered := make(map[string]string)
+	for k, _ := range packageSet {
+		// in
+		local := localPackages[k]
+		remote := remotePackages[k]
+		// work out stuff
+		latest := middle.GetLatestOf(local, remote)
+		localLatest := false
+		if local != nil {
+			localLatest = !latest.Metadata().Version().GreaterThan(local.Metadata().Version())
+		}
+		humanNameLowered := strings.ToLower(latest.Metadata().HumanName())
+		// out
+		names = append(names, k)
+		packageLocalLatest[k] = localLatest
+		humanNamesLowered[k] = humanNameLowered
+	}
+	// The actual struct
+	sortable := primaryViewPackageListSortable {
+		names: names,
+		localPackages: localPackages,
+		remotePackages: remotePackages,
+		packageLocalLatest: packageLocalLatest,
+		humanNamesLowered: humanNamesLowered,
+	}
+	// Finally, sort & return
+	sort.Sort(sortable)
+	return sortable
+}
 
 // ShowPrimaryView shows the "Primary View" (the mod list right now)
 func (app *upApplication) ShowPrimaryView() {
@@ -16,6 +102,9 @@ func (app *upApplication) ShowPrimaryView() {
 		app.Teleport(app.cachedPrimaryView)
 		return
 	}
+
+	// Yes, I know this means this is gotten twice - ShowPackageView now needs it, and it's cached anyway
+	remotePackages := middle.GetRemotePackages()
 	
 	slots := []framework.FlexboxSlot{}
 	
@@ -35,7 +124,7 @@ func (app *upApplication) ShowPrimaryView() {
 				app.ShowPackageView(func () {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
-				}, pkgID)
+				}, pkgID, remotePackages)
 			}
 		} else if v.Action == middle.URLAndCloseWarningID {
 			url := v.Parameter
@@ -54,20 +143,12 @@ func (app *upApplication) ShowPrimaryView() {
 	}
 	
 	// Ok, let's get all the packages in a nice row
-	localPackages := app.gameInstance.Packages()
-	remotePackages := middle.GetRemotePackages()
-	packageSet := make(map[string]bool)
-	packageList := []design.ListItemDetails{}
-	for k := range localPackages {
-		packageSet[k] = true
-	}
-	for k := range remotePackages {
-		packageSet[k] = true
-	}
+	packageList := app.getPrimaryViewPackageListSortable()
+	packageListItems := []design.ListItemDetails{}
 	// Actually build the UI now!
-	for pkgID := range packageSet {
-		local := localPackages[pkgID]
-		remote := remotePackages[pkgID]
+	for _, pkgID := range packageList.names {
+		local := packageList.localPackages[pkgID]
+		remote := packageList.remotePackages[pkgID]
 		latest := middle.GetLatestOf(local, remote)
 		var typeCheck ccmodupdater.Package = local
 		if typeCheck == nil {
@@ -94,9 +175,13 @@ func (app *upApplication) ShowPrimaryView() {
 		} else if remote != nil {
 			status = latest.Metadata().Version().Original() + " available"
 		}
+		description := latest.Metadata().Description()
+		if description != "" {
+			status = description + "\n" + status
+		}
 		pkgIDLocal := pkgID
-		packageList = append(packageList, design.ListItemDetails{
-			Icon: middle.PackageIcon(latest),
+		packageListItems = append(packageListItems, design.ListItemDetails{
+			Icon: middle.PackagePVIcon(local, remote),
 			Text: latest.Metadata().HumanName(),
 			Subtext: status,
 			Click: func () {
@@ -104,14 +189,13 @@ func (app *upApplication) ShowPrimaryView() {
 				app.ShowPackageView(func () {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
-				}, pkgIDLocal)
+				}, pkgIDLocal, remotePackages)
 			},
 		})
 	}
 
-	sort.Sort(design.SortListItemDetails(packageList))
 	slots = append(slots, framework.FlexboxSlot{
-		Element: design.NewUISearchBoxPtr("Search...", packageList),
+		Element: design.NewUISearchBoxPtr("Search...", packageListItems),
 		Grow: 1,
 	})
 
@@ -121,7 +205,8 @@ func (app *upApplication) ShowPrimaryView() {
 		Back: func () {
 			app.cachedPrimaryView = nil
 			app.GSLeftwards()
-			app.ResetWithGameLocation(false, middle.GameFinderVFSPathDefault)
+			// The idea here is that BrowserVFSPathDefault is never a valid path.
+			app.ResetWithGameLocation(false, middle.BrowserVFSPathDefault)
 		},
 		BackIcon: design.GameIconID,
 		ForwardIcon: design.MenuIconID,

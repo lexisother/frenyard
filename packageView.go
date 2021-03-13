@@ -10,12 +10,12 @@ import (
 )
 
 // ShowPackageView shows a dialog for a package.
-func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg string) {
+func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg string, remotePackages map[string]ccmodupdater.RemotePackage) {
 	// Construct a package context here and use it to sanity-check some things.
 	// It also makes a nice cup-holder for the local/remote repositories.
 	txCtx := ccmodupdater.PackageTXContext{
 		LocalPackages: app.gameInstance.Packages(),
-		RemotePackages: middle.GetRemotePackages(),
+		RemotePackages: remotePackages,
 	}
 	// Get local, remote and latest packages for reference.
 	localPkg := txCtx.LocalPackages[pkg]
@@ -77,11 +77,10 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 		}
 		buttons = append(buttons, design.ButtonAction(removeTheme, buttonText, func () {
 			app.GSDownwards()
-			app.PerformTransaction(func () {
-				app.cachedPrimaryView = nil
+			app.PerformTransaction(func (success bool) {
 				app.GSUpwards()
-				app.ShowPackageView(back, pkg)
-			}, removeTx)
+				app.ShowPackageView(back, pkg, remotePackages)
+			}, removeTx, remotePackages)
 		}))
 	}
 	if showInstallButton {
@@ -101,11 +100,10 @@ func (app *upApplication) ShowPackageView(back framework.ButtonBehavior, pkg str
 		}
 		buttons = append(buttons, design.ButtonAction(buttonColour, buttonText, func () {
 			app.GSDownwards()
-			app.PerformTransaction(func () {
-				app.cachedPrimaryView = nil
+			app.PerformTransaction(func (success bool) {
 				app.GSUpwards()
-				app.ShowPackageView(back, pkg)
-			}, installTx)
+				app.ShowPackageView(back, pkg, remotePackages)
+			}, installTx, remotePackages)
 		}))
 	}
 	

@@ -8,11 +8,20 @@ import (
 )
 
 // autoupdate alert stuff ; update this for new version names!!!
-var localUIVersionID string = "emilie\n"
-var remoteUIVersionID string = "emilie\n"
+// version schedule:
+// past: "lea\n" "emilie\n"
+// present: "" (disable)
+// future: ???
+// note that the "\n" is important if this is a real ID
+const localUIVersionID string = ""
+var remoteUIVersionID string = localUIVersionID
 var hasAlreadyCheckedRemoteUIVersionID bool = false
 
 func updateAlertHook() {
+	if localUIVersionID == "" {
+		// version checks are disabled
+		return
+	}
 	if !hasAlreadyCheckedRemoteUIVersionID {
 		hasAlreadyCheckedRemoteUIVersionID = true
 	} else {

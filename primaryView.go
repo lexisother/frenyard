@@ -102,6 +102,9 @@ func (app *upApplication) ShowPrimaryView() {
 		app.Teleport(app.cachedPrimaryView)
 		return
 	}
+
+	// Yes, I know this means this is gotten twice - ShowPackageView now needs it, and it's cached anyway
+	remotePackages := middle.GetRemotePackages()
 	
 	slots := []framework.FlexboxSlot{}
 	
@@ -121,7 +124,7 @@ func (app *upApplication) ShowPrimaryView() {
 				app.ShowPackageView(func () {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
-				}, pkgID)
+				}, pkgID, remotePackages)
 			}
 		} else if v.Action == middle.URLAndCloseWarningID {
 			url := v.Parameter
@@ -186,7 +189,7 @@ func (app *upApplication) ShowPrimaryView() {
 				app.ShowPackageView(func () {
 					app.GSLeftwards()
 					app.ShowPrimaryView()
-				}, pkgIDLocal)
+				}, pkgIDLocal, remotePackages)
 			},
 		})
 	}

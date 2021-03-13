@@ -47,6 +47,7 @@ func (app *upApplication) ShowGameFinderPreface() {
 		if app.gameInstance == nil {
 			app.ShowGameFinderPrefaceInternal(gameLocations)
 		} else {
+			app.cachedPrimaryView = nil
 			app.ShowPrimaryView()
 		}
 	})

@@ -4,23 +4,22 @@ import (
 	"os"
 	"time"
 	"github.com/CCDirectLink/CCUpdaterCLI"
-	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
-	"github.com/20kdc/CCUpdaterUI/middle"
 )
 
 // PerformTransaction performs a transaction, showing UI for it as well.
-func (app *upApplication) PerformTransaction(back framework.ButtonBehavior, tx ccmodupdater.PackageTX) {
+func (app *upApplication) PerformTransaction(back func (success bool), tx ccmodupdater.PackageTX, remotePackages map[string]ccmodupdater.RemotePackage) {
+	backFail := func () { back(false) }
 	ctx := ccmodupdater.PackageTXContext{
 		LocalPackages: app.gameInstance.Packages(),
-		RemotePackages: middle.GetRemotePackages(),
+		RemotePackages: remotePackages,
 	}
 	solutions, err := ctx.Solve(tx)
 	if err != nil {
-		app.MessageBox("Error", err.Error(), back)
+		app.MessageBox("Error", err.Error(), backFail)
 		return
 	}
 	if len(solutions) != 1 {
-		app.MessageBox("Issue", "Multiple solutions were given to a dependency problem.\nThis shouldn't occur in the present iteration.\nPlease install dependencies yourself to constrain the system's choices.", back)
+		app.MessageBox("Issue", "Multiple solutions were given to a dependency problem.\nThis shouldn't occur in the present iteration.\nPlease install dependencies yourself to constrain the system's choices.", backFail)
 		return
 	}
 	// It begins...
@@ -57,6 +56,9 @@ func (app *upApplication) PerformTransaction(back framework.ButtonBehavior, tx c
 		}
 		cfgFile.Close()
 		app.GSInstant()
-		app.MessageBox("Report", log, back)
+		app.cachedPrimaryView = nil
+		app.MessageBox("Report", log, func () {
+			back(err == nil)
+		})
 	});
 }

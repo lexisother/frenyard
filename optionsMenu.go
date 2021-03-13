@@ -52,6 +52,18 @@ func (app *upApplication) ShowOptionsMenu(back framework.ButtonBehavior) {
 		},
 		{
 			Element: design.ListItem(design.ListItemDetails{
+				Text: "Install .ccmod",
+				Subtext: "Installs a .ccmod file",
+				Click: func () {
+					app.GSRightwards()
+					app.ShowPackedModFinder(backHere, func (path string) {
+						app.ShowInitPackedModManager(backHere, path)
+					}, middle.BrowserVFSPathDefault)
+				},
+			}),
+		},
+		{
+			Element: design.ListItem(design.ListItemDetails{
 				Text: "Credits",
 				Subtext: "See the various components that make up CCUpdaterUI",
 				Click: func () {
@@ -66,7 +78,7 @@ func (app *upApplication) ShowOptionsMenu(back framework.ButtonBehavior) {
 				Subtext: "Show the installed modloader",
 				Click: func () {
 					app.GSRightwards()
-					app.ShowPackageView(backHere, "ccloader")
+					app.ShowPackageView(backHere, "ccloader", middle.GetRemotePackages())
 				},
 			}),
 		},

@@ -79,3 +79,25 @@ func BrowserVFSList(vfsPath string) []BrowserLocation {
 	// List
 	return vfsEntries
 }
+
+// Appends the Downloads directory
+func BrowserVFSAppendDownloads(existing []BrowserLocation) []BrowserLocation {
+	home := os.Getenv("HOME")
+	uprof := os.Getenv("USERPROFILE")
+	locations := []string{
+		home + "/Downloads",
+		uprof + "/Downloads",
+	}
+	for _, v := range locations {
+		_, err := ioutil.ReadDir(v)
+		if err == nil {
+			existing = append(existing, BrowserLocation {
+				Drive: "Downloads",
+				Location: v,
+				Dir: true,
+			})
+			break
+		}
+	}
+	return existing
+}

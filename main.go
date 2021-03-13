@@ -11,6 +11,8 @@ import (
 type upApplication struct {
 	gameInstance *ccmodupdater.GameInstance
 	// Reset this to nil whenever anything that affects the Primary View changes
+	// In practice this only means when something performs any form of package alteration
+	// And in practice that only occurs in transaction.go (actual changes), credits.go (devmode), and gameFinderPre.go (gameInstance changed)
 	cachedPrimaryView framework.UILayoutElement
 	config middle.UpdaterConfig
 	mainContainer *framework.UISlideTransitionContainer

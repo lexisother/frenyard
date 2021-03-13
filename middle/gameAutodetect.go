@@ -103,16 +103,19 @@ func detectPossibleGameLocations() []string {
 
 // CheckGameLocation converts a path into a GameLocation, making sure to set Valid & Version correctly in the process.
 func CheckGameLocation(dir string) GameLocation {
-	gameInstance := ccmodupdater.NewGameInstance(dir)
-	plugins, err := local.AllLocalPackagePlugins(gameInstance)
-	if err == nil {
-		gameInstance.LocalPlugins = plugins
-		ccDetails, hasCC := gameInstance.Packages()["crosscode"]
-		if hasCC {
-			return GameLocation{
-				Valid: true,
-				Location: dir,
-				Version: ccDetails.Metadata().Version().Original(),
+	// Only try if the location is actually real.
+	if BrowserVFSLocationReal(dir) {
+		gameInstance := ccmodupdater.NewGameInstance(dir)
+		plugins, err := local.AllLocalPackagePlugins(gameInstance)
+		if err == nil {
+			gameInstance.LocalPlugins = plugins
+			ccDetails, hasCC := gameInstance.Packages()["crosscode"]
+			if hasCC {
+				return GameLocation{
+					Valid: true,
+					Location: dir,
+					Version: ccDetails.Metadata().Version().Original(),
+				}
 			}
 		}
 	}

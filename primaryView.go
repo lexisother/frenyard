@@ -202,7 +202,8 @@ func (app *upApplication) ShowPrimaryView() {
 		Back: func () {
 			app.cachedPrimaryView = nil
 			app.GSLeftwards()
-			app.ResetWithGameLocation(false, middle.GameFinderVFSPathDefault)
+			// The idea here is that BrowserVFSPathDefault is never a valid path.
+			app.ResetWithGameLocation(false, middle.BrowserVFSPathDefault)
 		},
 		BackIcon: design.GameIconID,
 		ForwardIcon: design.MenuIconID,

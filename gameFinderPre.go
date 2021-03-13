@@ -112,7 +112,7 @@ func (app *upApplication) ShowGameFinderPrefaceInternal(locations []middle.GameL
 						app.ShowGameFinder(func () {
 							app.GSUpwards()
 							app.ShowGameFinderPrefaceInternal(locations)
-						}, middle.GameFinderVFSPathDefault)
+						}, middle.BrowserVFSPathDefault)
 					}),
 				}),
 			},

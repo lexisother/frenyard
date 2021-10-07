@@ -2,7 +2,7 @@ package framework
 
 import (
 	"fmt"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/yellowsink/frenyard"
 )
 
 // FocusEvent is an event type specific to the UI framework that represents focusing/unfocusing the receiving element.
@@ -10,10 +10,12 @@ type FocusEvent struct {
 	// True if this was a focus, false if this was an unfocus.
 	Focused bool
 }
+
 // FyVRoute implements NormalEvent.FyVRoute
 func (fe FocusEvent) FyVRoute() frenyard.NormalEventRoute {
 	return frenyard.NormalEventRouteStop
 }
+
 // FyVOffset implements NormalEvent.FyVOffset
 func (fe FocusEvent) FyVOffset(o frenyard.Vec2i) frenyard.NormalEvent {
 	return fe
@@ -35,10 +37,12 @@ type EnterWindowEvent struct {
 func (fe EnterWindowEvent) FyVRoute() frenyard.NormalEventRoute {
 	return frenyard.NormalEventRouteStructuralBroadcast
 }
+
 // FyVOffset implements NormalEvent.FyVOffset
 func (fe EnterWindowEvent) FyVOffset(o frenyard.Vec2i) frenyard.NormalEvent {
 	return fe
 }
+
 /*
  * This is the core UIElement type without layout capabilities.
  * Simply put, if it's being drawn, it's this type.
@@ -157,7 +161,7 @@ type PanelFixedElement struct {
 	// Setting this to false is useful if you want an element to still tick but want to remove the drawing overhead.
 	Visible bool
 	// Setting this to true 'locks' the element. The element still participates in hit-tests but fails to focus and events are NOT forwarded.
-	Locked bool
+	Locked  bool
 	Element UIElement
 }
 
@@ -210,7 +214,7 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 			})
 		}
 	}
-	
+
 	// Is this actually a change we need to worry about?
 	// DO BE WARNED: THIS IS A LOAD-BEARING OPTIMIZATION. DISABLE IT AND BUTTONS DON'T WORK PROPERLY
 	// Reason: Clicking a button changes the button content which causes a layout rebuild.
@@ -251,12 +255,12 @@ func (pan *UIPanelDetails) SetContent(content []PanelFixedElement) {
 // FyENormalEvent implements UIElement.FyENormalEvent
 func (pan *UIPanel) FyENormalEvent(ev frenyard.NormalEvent) {
 	switch xev := ev.(type) {
-		case EnterWindowEvent:
-			if pan.ThisUIPanelDetails._window == xev.Window {
-				// Drop the event, it's redundant
-				return
-			}
-			pan.ThisUIPanelDetails._window = xev.Window
+	case EnterWindowEvent:
+		if pan.ThisUIPanelDetails._window == xev.Window {
+			// Drop the event, it's redundant
+			return
+		}
+		pan.ThisUIPanelDetails._window = xev.Window
 	}
 	route := ev.FyVRoute()
 	if (route == frenyard.NormalEventRouteBroadcast) || (route == frenyard.NormalEventRouteStructuralBroadcast) {
@@ -285,7 +289,7 @@ func (pan *UIPanel) _fyUIPanelForwardMouseEvent(target PanelFixedElement, ev fre
 func (pan *UIPanel) FyEMouseEvent(ev frenyard.MouseEvent) {
 	// Useful for debugging if any of the warnings come up
 	// if ev.ID != MouseEventMove { fmt.Printf("ui_core.go/Panel (%p)/FyEMouseEvent %v %v (%v, %v)\n", pan, ev.ID, ev.Button, ev.Pos.X, ev.Pos.Y) }
-	
+
 	invalid := false
 	hittest := -1
 	buttonMask := (uint16)(0)
@@ -316,7 +320,7 @@ func (pan *UIPanel) FyEMouseEvent(ev frenyard.MouseEvent) {
 		}
 		invalid = true
 	case frenyard.MouseEventUp:
-		if pan.ThisUIPanelDetails._buttonsDown & buttonMask == 0 {
+		if pan.ThisUIPanelDetails._buttonsDown&buttonMask == 0 {
 			fmt.Printf("ui_core.go/Panel (%p)/FyEMouseEvent warning: Button removal on non-existent button %v\n", pan, ev.Button)
 			invalid = true
 		} else {

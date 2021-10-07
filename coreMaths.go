@@ -210,7 +210,9 @@ func Area2iFromVecs(pos Vec2i, size Vec2i) Area2i {
 func Area2iOfSize(a Vec2i) Area2i { return Area2i{Area1iOfSize(a.X), Area1iOfSize(a.Y)} }
 
 // Area2iMargin is a quick idiom for a margin of a given size.
-func Area2iMargin(l int32, u int32, r int32, d int32) Area2i { return Area2i{Area1iMargin(l, r), Area1iMargin(u, d)} }
+func Area2iMargin(l int32, u int32, r int32, d int32) Area2i {
+	return Area2i{Area1iMargin(l, r), Area1iMargin(u, d)}
+}
 
 // Empty returns Size <= 0
 func (a Area2i) Empty() bool {
@@ -342,11 +344,11 @@ func EasingQuadraticIn(point float64) float64 {
 }
 
 // EasingInOut currys a function. Given an ease-in function, returns an ease in-out function.
-func EasingInOut(easeIn func (float64) float64) func(float64) float64 {
-	return func (point float64) float64 {
+func EasingInOut(easeIn func(float64) float64) func(float64) float64 {
+	return func(point float64) float64 {
 		if point < 0.5 {
-			return easeIn(point * 2.0) / 2.0
+			return easeIn(point*2.0) / 2.0
 		}
-		return 1.0 - (easeIn(2.0 - (point * 2.0)) / 2.0)
+		return 1.0 - (easeIn(2.0-(point*2.0)) / 2.0)
 	}
 }

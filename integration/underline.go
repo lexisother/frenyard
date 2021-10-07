@@ -8,7 +8,7 @@ import (
 
 type fyUnderlineTypeChunk struct {
 	interior TypeChunk
-	colour uint32
+	colour   uint32
 }
 
 // NewUnderlineTypeChunk underlines a TypeChunk.
@@ -51,6 +51,6 @@ func (ul fyUnderlineTypeChunk) FyCDraw(img draw.Image, dot fixed.Point26_6) fixe
 	result := ul.interior.FyCDraw(img, dot)
 	line := dot.Y.Ceil()
 	lineHeight := 1
-	draw.Draw(img, image.Rect(dot.X.Floor(), line, result.X.Ceil(), line + lineHeight), image.NewUniform(ConvertUint32ToGoImageColour(ul.colour)), image.Point{}, draw.Over)
+	draw.Draw(img, image.Rect(dot.X.Floor(), line, result.X.Ceil(), line+lineHeight), image.NewUniform(ConvertUint32ToGoImageColour(ul.colour)), image.Point{}, draw.Over)
 	return result
 }

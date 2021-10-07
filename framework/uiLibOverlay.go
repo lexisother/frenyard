@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/yellowsink/frenyard"
 )
 
 /*
@@ -15,10 +15,13 @@ type FramePass uint8
 
 // FramePassUnderBefore is Under, before the interior has been drawn.
 const FramePassUnderBefore FramePass = 0
+
 // FramePassUnderAfter is Under, after the interior has been drawn.
 const FramePassUnderAfter FramePass = 1
+
 // FramePassOverBefore is Over, before the interior has been drawn.
 const FramePassOverBefore FramePass = 2
+
 // FramePassOverAfter is Over, after the interior has been drawn.
 const FramePassOverAfter FramePass = 3
 

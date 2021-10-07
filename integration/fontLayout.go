@@ -1,9 +1,9 @@
 package integration
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"image"
+	"github.com/yellowsink/frenyard"
 	"golang.org/x/image/math/fixed"
+	"image"
 )
 
 // "The Annoyance" is stupid things like characters going behind their own start points.
@@ -109,10 +109,10 @@ func fyTextLayouterBreakerNormal(text TypeChunk, xLimit int32, wordwrap bool) Te
 			} else {
 				// Character break. Much simpler, doesn't even require interrupting the stream.
 				// If the character actually failed here we'd be doomed anyway, so place it now, too.
-				if lineBufferStart == textCursor - 1 && text.FyCComponentBreakStatus(lineBufferStart) == TypeChunkComponentBreakStatusSpace {
+				if lineBufferStart == textCursor-1 && text.FyCComponentBreakStatus(lineBufferStart) == TypeChunkComponentBreakStatusSpace {
 					// The line buffer just contains a space.
 					// Draw this char and then CR immediately since it's clear there's pretty much no room.
-					committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(textCursor, textCursor + 1))
+					committedBuffer.Lines = append(committedBuffer.Lines, text.FyCSection(textCursor, textCursor+1))
 					textCursor++
 					lineBufferStart = textCursor
 					carriageReturn = true

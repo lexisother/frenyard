@@ -9,7 +9,7 @@ var fySDL2CRTCRegistry *crtcRegistry = newCRTCRegistryPtr()
 
 // sdl2RendererCore is the crtcContext.
 type sdl2RendererCore struct {
-	base    *sdl.Renderer
+	base *sdl.Renderer
 }
 
 func (r *sdl2RendererCore) osDelete() {
@@ -53,10 +53,10 @@ func (r *sdl2Renderer) osFySDL2DrawColour(colour uint32) {
 }
 func (r *sdl2Renderer) osFyExtractSDL2Texture(tex Texture) *sdl.Texture {
 	switch sheetActual := tex.(type) {
-		case *crtcTextureExternal:
-			// Explicit cast so you can see what's going on with the contexts
-			sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
-			return sheetLocal.base
+	case *crtcTextureExternal:
+		// Explicit cast so you can see what's going on with the contexts
+		sheetLocal := sheetActual.osGetLocalTexture(crtcContext(r.base)).(*fySDL2LocalTexture)
+		return sheetLocal.base
 	}
 	panic("Unknown texture type forwarded into engine core.")
 }
@@ -67,7 +67,7 @@ func (r *sdl2Renderer) DrawRect(drc DrawRectCommand) {
 	}
 	sRect := fySDL2AreaToRect(drc.TexSprite)
 	tRect := fySDL2AreaToRect(drc.Target.Translate(r.translate))
-	
+
 	blendMode := sdl.BlendMode(sdl.BLENDMODE_BLEND)
 	if drc.Mode == DrawModeNoBlending {
 		blendMode = sdl.BlendMode(sdl.BLENDMODE_NONE)
@@ -76,7 +76,7 @@ func (r *sdl2Renderer) DrawRect(drc DrawRectCommand) {
 	} else if drc.Mode == DrawModeModulate {
 		blendMode = sdl.BlendMode(sdl.BLENDMODE_MOD)
 	}
-	
+
 	if drc.Tex != nil {
 		// If the image has zero size, it doesn't exist. Anyway, osGetLocalTexture will crash
 		size := drc.Tex.Size()
@@ -153,7 +153,7 @@ func (r *sdl2Renderer) Reset(colour uint32) {
 	r.base.base.Clear()
 }
 
-func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func (), reserved bool) Texture {
+func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func(), reserved bool) Texture {
 	{
 		z := sdl2Os()
 		defer z.End()
@@ -161,7 +161,7 @@ func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func (), reserved bool
 	if reserved {
 		panic("reserved must be kept false for future expansion")
 	}
-	
+
 	if size.X <= 0 || size.Y <= 0 {
 		// Empty texture
 		return GlobalBackend.CreateTexture(Vec2i{}, []uint32{})
@@ -178,7 +178,7 @@ func (r *sdl2Renderer) RenderToTexture(size Vec2i, drawer func (), reserved bool
 	r.translate = Vec2i{}
 	r.SetClip(Area2iOfSize(size))
 	r.base.base.SetRenderTarget(tex)
-	
+
 	drawer()
 
 	r.base.base.SetRenderTarget(oldRT)

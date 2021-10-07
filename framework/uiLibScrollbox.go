@@ -2,13 +2,13 @@ package framework
 
 import (
 	"fmt"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/yellowsink/frenyard"
 )
 
 /*
  * BEFORE CONTINUING: If you're here because of an "issue" where the scrollbox never activates the scrollbar,
  *  keep in mind that you need to let your layout crush the scrollbox for the scrollbox to actually do anything.
- * 
+ *
  * HTML notes for reference:
  * The Flexbox design is so utterly amazing that to prevent it from just outright ignoring size constraints in favour of minimum sizes, you have to actually just outright. Try it in your browser if you don't believe me:
  * <html><head></head><body style="display: flex;"><div>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div><div>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB</div><div>CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC</div></body></html>
@@ -17,7 +17,7 @@ import (
  *  but the browser *refuses* to character-wrap unless given "overflow-wrap: break-word;" too.
  * Frenyard is somewhat less broken, and will by default implement this `min-width: 0;` technique.
  *  but labels actually character-wrap by default if they need to.
- * 
+ *
  * Anyways!
  * Judging by the official Material Design website, it seems like it leaves OS scrollboxes alone.
  * This is as good an excuse as any to use the "NinePatch this and use our own judgement" technology...
@@ -43,19 +43,19 @@ type UIScrollbar struct {
 	UIElementComponent
 	UILayoutElementComponent
 	LayoutElementNoSubelementsComponent
-	_theme ScrollbarTheme
-	Value ScrollbarValue
+	_theme     ScrollbarTheme
+	Value      ScrollbarValue
 	MouseNotch float64
-	_vertical bool
-	_grabbed bool
+	_vertical  bool
+	_grabbed   bool
 }
 
 // NewUIScrollbarPtr creates a new scrollbar with the given theme and direction.
 func NewUIScrollbarPtr(theme ScrollbarTheme, vertical bool, value ScrollbarValue) *UIScrollbar {
 	uis := &UIScrollbar{
-		_theme: theme,
-		_vertical: vertical,
-		Value: value,
+		_theme:     theme,
+		_vertical:  vertical,
+		Value:      value,
 		MouseNotch: 0.1,
 	}
 	InitUILayoutElementComponent(uis)
@@ -84,9 +84,9 @@ func (uis *UIScrollbar) FyEDraw(r frenyard.Renderer, under bool) {
 	insideArea, movementSize, movementArea := uis._calcMetrics()
 	// Ok, here comes the "fun part"...
 	if uis._vertical {
-		movementArea.Y.Pos = insideArea.Y.Pos + int32(float64(insideArea.Y.Size - movementArea.Y.Size) * uis.Value.FySValue())
+		movementArea.Y.Pos = insideArea.Y.Pos + int32(float64(insideArea.Y.Size-movementArea.Y.Size)*uis.Value.FySValue())
 	} else {
-		movementArea.X.Pos = insideArea.X.Pos + int32(float64(insideArea.X.Size - movementArea.X.Size) * uis.Value.FySValue())
+		movementArea.X.Pos = insideArea.X.Pos + int32(float64(insideArea.X.Size-movementArea.X.Size)*uis.Value.FySValue())
 	}
 	r.Translate(movementArea.Pos())
 	if under {
@@ -131,7 +131,7 @@ func (uis *UIScrollbar) FyEMouseEvent(me frenyard.MouseEvent) {
 			insideAreaMain = insideArea.Y
 		}
 		pointerMain := me.Pos.ConditionalTranspose(uis._vertical).X
-		uis.Value.FySSetValue(float64(pointerMain - insideAreaMain.Pos) / float64(insideAreaMain.Size))
+		uis.Value.FySSetValue(float64(pointerMain-insideAreaMain.Pos) / float64(insideAreaMain.Size))
 	}
 }
 
@@ -152,20 +152,20 @@ type UIScrollbox struct {
 	UILayoutElementComponent
 	// The requirements for the scrollbar. Cached for simplicity's sake.
 	_scrollbarMainCross frenyard.Vec2i
-	_contained UILayoutElement
-	_scrollbar *UIScrollbar
+	_contained          UILayoutElement
+	_scrollbar          *UIScrollbar
 	// >0 means scrollbar is active
 	_scrollLength int32
-	_value float64
-	_vertical bool
+	_value        float64
+	_vertical     bool
 }
 
 // NewUIScrollboxPtr creates a scrollbox.
 func NewUIScrollboxPtr(theme ScrollbarTheme, content UILayoutElement, vertical bool) UILayoutElement {
 	usc := &UIScrollbox{
-		UIPanel: NewPanel(content.FyESize()),
+		UIPanel:    NewPanel(content.FyESize()),
 		_contained: content,
-		_vertical: vertical,
+		_vertical:  vertical,
 	}
 	usc.ThisUIPanelDetails.Clipping = true
 	usc._scrollbar = NewUIScrollbarPtr(theme, vertical, usc)
@@ -247,12 +247,12 @@ func (usc *UIScrollbox) _updatePositions() {
 		usc.ThisUIPanelDetails.SetContent([]PanelFixedElement{
 			PanelFixedElement{
 				Element: usc._contained,
-				Pos: frenyard.Vec2i{scrollPos, 0}.ConditionalTranspose(usc._vertical),
+				Pos:     frenyard.Vec2i{scrollPos, 0}.ConditionalTranspose(usc._vertical),
 				Visible: true,
 			},
 			PanelFixedElement{
 				Element: usc._scrollbar,
-				Pos: frenyard.Vec2i{0, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical),
+				Pos:     frenyard.Vec2i{0, sizeMainCross.Y - usc._scrollbarMainCross.Y}.ConditionalTranspose(usc._vertical),
 				Visible: true,
 			},
 		})
@@ -265,9 +265,9 @@ func (usc *UIScrollbox) _updatePositions() {
 			// This needs to exist so that the structure doesn't change, for focus reasons (searchboxes)
 			PanelFixedElement{
 				Element: usc._scrollbar,
-				Pos: frenyard.Vec2i{},
+				Pos:     frenyard.Vec2i{},
 				Visible: false,
-				Locked: true,
+				Locked:  true,
 			},
 		})
 	}

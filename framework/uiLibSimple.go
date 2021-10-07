@@ -1,9 +1,9 @@
 package framework
 
 import (
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/integration"
 	"golang.org/x/image/font"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 )
 
 // UIRect is a 'filler' background element.
@@ -45,10 +45,10 @@ func (cr *UIRect) FyETick(deltaTime float64) {
 func (cr *UIRect) FyEDraw(target frenyard.Renderer, under bool) {
 	if !under {
 		target.DrawRect(frenyard.DrawRectCommand{
-			Tex: cr.Tex,
-			Colour: cr.Colour,
+			Tex:       cr.Tex,
+			Colour:    cr.Colour,
 			TexSprite: cr.Sprite,
-			Target: frenyard.Area2iOfSize(cr.FyESize()).Align(cr.Sprite.Size(), frenyard.Alignment2i{}),
+			Target:    frenyard.Area2iOfSize(cr.FyESize()).Align(cr.Sprite.Size(), frenyard.Alignment2i{}),
 		})
 	}
 }
@@ -200,10 +200,10 @@ func (cr *UILabel) FyEDraw(target frenyard.Renderer, under bool) {
 		}
 		texSize := cr._texture.Size()
 		target.DrawRect(frenyard.DrawRectCommand{
-			Tex: cr._texture,
+			Tex:       cr._texture,
 			TexSprite: frenyard.Area2iOfSize(texSize),
-			Colour: cr._colour,
-			Target: labelArea.Align(texSize, cr._alignment),
+			Colour:    cr._colour,
+			Target:    labelArea.Align(texSize, cr._alignment),
 		})
 	}
 }

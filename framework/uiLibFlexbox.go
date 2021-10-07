@@ -2,10 +2,9 @@ package framework
 
 import (
 	"fmt"
+	"github.com/yellowsink/frenyard"
 	"sort"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
 )
-
 
 // Implements a highly limited subset of flexbox to be extended to full support as-needed.
 
@@ -24,7 +23,7 @@ type FlexboxContainer struct {
 	WrapMode    FlexboxWrapMode
 	// Ignored when used by the line solver; it uses fyFlexboxSlotlike instead
 	Slots []FlexboxSlot
-	
+
 	// This is NOT part of the public API. It is provided for debugging use only.
 	// Do not even mention this field in releases.
 	Debug bool

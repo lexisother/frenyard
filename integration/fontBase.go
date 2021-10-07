@@ -1,8 +1,8 @@
 package integration
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"github.com/golang/freetype/truetype"
+	"github.com/yellowsink/frenyard"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 	"image"
@@ -14,8 +14,10 @@ type TypeChunkComponentBreakStatus uint8
 
 // TypeChunkComponentBreakStatusNone represents no break at all.
 const TypeChunkComponentBreakStatusNone TypeChunkComponentBreakStatus = 0
+
 // TypeChunkComponentBreakStatusSpace is an optional break
 const TypeChunkComponentBreakStatusSpace TypeChunkComponentBreakStatus = 1
+
 // TypeChunkComponentBreakStatusNewline is an obligatory break, real component may act erroneously
 const TypeChunkComponentBreakStatusNewline TypeChunkComponentBreakStatus = 2
 
@@ -38,8 +40,8 @@ type TypeChunk interface {
 }
 
 type fyTextTypeChunk struct {
-	_text []rune
-	_face font.Face
+	_text   []rune
+	_face   font.Face
 	_colour uint32
 }
 
@@ -55,6 +57,7 @@ func NewTextTypeChunk(text string, face font.Face) TypeChunk {
 		0xFFFFFFFF,
 	}
 }
+
 // NewColouredTextTypeChunk is a version of NewTextTypeChunk that supports putting coloured text inline.
 func NewColouredTextTypeChunk(text string, face font.Face, colour uint32) TypeChunk {
 	runes := []rune{}
@@ -87,7 +90,7 @@ func (ttc fyTextTypeChunk) FyCComponentBreakStatus(index int) TypeChunkComponent
 func (ttc fyTextTypeChunk) FyCComponentAdvance(index int, kerning bool) fixed.Int26_6 {
 	adv, _ := ttc._face.GlyphAdvance(ttc._text[index])
 	if index > 0 && kerning {
-		adv += ttc._face.Kern(ttc._text[index - 1], ttc._text[index])
+		adv += ttc._face.Kern(ttc._text[index-1], ttc._text[index])
 	}
 	return adv
 }
@@ -110,7 +113,7 @@ func (ttc fyTextTypeChunk) FyCHeight() int {
 func (ttc fyTextTypeChunk) FyCBounds(dot fixed.Point26_6) (fixed.Point26_6, fixed.Rectangle26_6) {
 	drawer := font.Drawer{
 		Face: ttc._face,
-		Dot: dot,
+		Dot:  dot,
 	}
 	text := string(ttc._text)
 	bounds, advance := drawer.BoundString(text)
@@ -136,9 +139,9 @@ func (ttc fyTextTypeChunk) FyCBounds(dot fixed.Point26_6) (fixed.Point26_6, fixe
 func (ttc fyTextTypeChunk) FyCDraw(img draw.Image, dot fixed.Point26_6) fixed.Point26_6 {
 	drawer := font.Drawer{
 		Face: ttc._face,
-		Dot: dot,
-		Src: image.White,
-		Dst: img,
+		Dot:  dot,
+		Src:  image.White,
+		Dst:  img,
 	}
 	if ttc._colour != 0xFFFFFFFF {
 		drawer.Src = image.NewUniform(ConvertUint32ToGoImageColour(ttc._colour))
@@ -251,8 +254,6 @@ func (ctc fyCompoundTypeChunk) FyCDraw(img draw.Image, dot fixed.Point26_6) fixe
 	}
 	return dot
 }
-
-
 
 // FontRectangleConverter converts a fixed.Rectangle26_6 into pixels (rounding outwards)
 func FontRectangleConverter(bounds fixed.Rectangle26_6) frenyard.Area2i {

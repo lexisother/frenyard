@@ -1,20 +1,20 @@
 package frenyard
 
 import (
+	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"runtime"
 	"time"
-	"fmt"
 )
 
 type fySDL2Window struct {
 	sdl2Renderer
-	cacheMouse Vec2i
-	window     *sdl.Window
-	id         uint32
-	receiver   WindowReceiver
+	cacheMouse    Vec2i
+	window        *sdl.Window
+	id            uint32
+	receiver      WindowReceiver
 	activeButtons uint32
-	textInput  TextInput
+	textInput     TextInput
 }
 
 func (w *fySDL2Window) Name() string {
@@ -91,7 +91,7 @@ func (r *fySDL2Backend) CreateWindow(name string, size Vec2i, vsync bool, receiv
 	} else {
 		sdl.SetHint("SDL_HINT_RENDER_VSYNC", "0")
 	}
-	window, renderer, err := sdl.CreateWindowAndRenderer(size.X, size.Y, sdl.WINDOW_RESIZABLE | sdl.WINDOW_ALLOW_HIGHDPI)
+	window, renderer, err := sdl.CreateWindowAndRenderer(size.X, size.Y, sdl.WINDOW_RESIZABLE|sdl.WINDOW_ALLOW_HIGHDPI)
 	window.SetTitle(name)
 	if err != nil {
 		return nil, err
@@ -155,6 +155,7 @@ func _fySDL2MouseButton(button uint8) MouseButton {
 	}
 	return MouseButtonNone
 }
+
 // Do be aware that I got this the wrong way around at first (scrolling's weird)
 func _fySDL2MouseWheelAdjuster(application WindowReceiver, cacheMouse Vec2i, apply int32, plus MouseButton, minus MouseButton) {
 	for apply < 0 {
@@ -241,9 +242,9 @@ func (*fySDL2Backend) Run(ticker func(frameTime float64)) error {
 				window := fyGlobalBackend.windows[ev.WindowID]
 				if window != nil {
 					window.receiver.FyRNormalEvent(KeyEvent{
-						Pressed: ev.Type == sdl.KEYDOWN,
-						Keycode: int32(ev.Keysym.Sym),
-						Scancode: int32(ev.Keysym.Scancode),
+						Pressed:   ev.Type == sdl.KEYDOWN,
+						Keycode:   int32(ev.Keysym.Sym),
+						Scancode:  int32(ev.Keysym.Scancode),
 						Modifiers: uint16(ev.Keysym.Mod),
 					})
 				}

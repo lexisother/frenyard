@@ -42,6 +42,7 @@ func ColourMix(cola uint32, colb uint32, amount float64) uint32 {
 
 // ColourTransform transforms colours. It's useful when doing image transforms from alphaless images to alpha/etc.
 type ColourTransform func(c uint32) uint32
+
 // ColourTransform2 combines two colours to make a third.
 type ColourTransform2 func(a uint32, b uint32) uint32
 
@@ -53,16 +54,16 @@ func ColourTransformBlueToStencil(c uint32) uint32 {
 // ColourTransformInvert inverts the colour channels.
 func ColourTransformInvert(c uint32) uint32 {
 	a, r, g, b := ColourToARGB(c)
-	return ColourFromARGB(a, 255 - r, 255 - g, 255 - b)
+	return ColourFromARGB(a, 255-r, 255-g, 255-b)
 }
 
 // ColourTransform2Blend implements standard blending.
 func ColourTransform2Blend(dest uint32, source uint32) uint32 {
 	dA := dest >> 24
 	sA := source >> 24
-	resColour := ColourMix(source, dest, float64(dA) / 255) & 0xFFFFFF
+	resColour := ColourMix(source, dest, float64(dA)/255) & 0xFFFFFF
 	resAlpha := ColourComponentClamp(int32(sA + dA))
-	return resColour | uint32(resAlpha) << 24
+	return resColour | uint32(resAlpha)<<24
 }
 
 // ConvertGoImageColourToUint32 converts a Go colour into an ARGB colour uint32 as losslessly as possible.

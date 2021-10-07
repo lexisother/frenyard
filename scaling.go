@@ -1,4 +1,5 @@
 package frenyard
+
 import maths "math"
 import "os"
 import "strconv"
@@ -27,7 +28,7 @@ func ScaleMargin1(scale float64, target Area1i) Area1i {
 	left = -Scale(scale, -left)
 	right = Scale(scale, right)
 	return Area1i{
-		Pos: left,
+		Pos:  left,
 		Size: right - left,
 	}
 }
@@ -55,7 +56,7 @@ func InferScale(dpiSource Window) float64 {
 	if err == nil {
 		return envScale
 	}
-	
+
 	if dpiSource == nil {
 		return 1.0
 	}

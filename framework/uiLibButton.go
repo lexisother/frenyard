@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/yellowsink/frenyard"
 )
 
 // ButtonBehavior represents a button's behavior.
@@ -11,11 +11,11 @@ type ButtonBehavior func()
 type UIButton struct {
 	UILayoutProxy
 	// "State" values
-	Focused       bool
-	Hover         bool
-	Down          bool
-	LastMousePos  frenyard.Vec2i
-	_behavior     func()
+	Focused      bool
+	Hover        bool
+	Down         bool
+	LastMousePos frenyard.Vec2i
+	_behavior    func()
 }
 
 // NewUIButtonPtr creates a new UIButton.
@@ -31,8 +31,8 @@ func NewUIButtonPtr(theme UILayoutElement, click ButtonBehavior) *UIButton {
 func (btn *UIButton) FyENormalEvent(me frenyard.NormalEvent) {
 	btn.UILayoutProxy.FyENormalEvent(me)
 	switch val := me.(type) {
-		case FocusEvent:
-			btn.Focused = val.Focused
+	case FocusEvent:
+		btn.Focused = val.Focused
 	}
 }
 

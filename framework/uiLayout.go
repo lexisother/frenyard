@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
+	"github.com/yellowsink/frenyard"
 )
 
 /*

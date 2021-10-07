@@ -1,54 +1,54 @@
 package framework
 
 import (
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/integration"
 	"golang.org/x/image/font"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 )
 
 // UITextbox is a textbox.
 type UITextbox struct {
 	UILayoutProxy
-	
+
 	// Called on rebuild (this includes, though isn't strictly limited to, changes)
 	OnRebuild func()
 	// Called after some time without anything happening
 	OnStall func()
 	// Called on enter
 	OnConfirm func()
-	
-	_open bool
+
+	_open         bool
 	_caretBlinker float64
-	_stallTimer float64
-	
+	_stallTimer   float64
+
 	_hint string
 
-	_textPre string
-	_suggesting bool
+	_textPre         string
+	_suggesting      bool
 	_textSuggestion1 string
 	_textSuggestion2 string
 	_textSuggestion3 string
-	_textPost string
+	_textPost        string
 
-	_face font.Face
-	_primaryColour uint32
+	_face             font.Face
+	_primaryColour    uint32
 	_suggestionColour uint32
-	_hintColour uint32
-	_label *UILabel
-	_translation frenyard.Vec2i
-	_window frenyard.Window
+	_hintColour       uint32
+	_label            *UILabel
+	_translation      frenyard.Vec2i
+	_window           frenyard.Window
 }
 
 // NewUITextboxPtr creates a UITextbox.
 func NewUITextboxPtr(text string, hint string, face font.Face, primaryColour uint32, suggestionColour uint32, hintColour uint32, backgroundColour uint32, align frenyard.Alignment2i) *UITextbox {
 	textbox := &UITextbox{
-		_textPre: text,
-		_hint: hint,
-		_face: face,
-		_primaryColour: primaryColour,
+		_textPre:          text,
+		_hint:             hint,
+		_face:             face,
+		_primaryColour:    primaryColour,
 		_suggestionColour: suggestionColour,
-		_hintColour: hintColour,
-		_label: NewUILabelPtr(integration.NewCompoundTypeChunk([]integration.TypeChunk{}), 0xFFFFFFFF, backgroundColour, align),
+		_hintColour:       hintColour,
+		_label:            NewUILabelPtr(integration.NewCompoundTypeChunk([]integration.TypeChunk{}), 0xFFFFFFFF, backgroundColour, align),
 	}
 	InitUILayoutProxy(textbox, textbox._label)
 	textbox.rebuild()
@@ -98,7 +98,7 @@ func (tb *UITextbox) rebuild() {
 			}))
 		} else {
 			tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
-				integration.NewColouredTextTypeChunk(tb._textPre + tb._textPost, tb._face, tb._primaryColour),
+				integration.NewColouredTextTypeChunk(tb._textPre+tb._textPost, tb._face, tb._primaryColour),
 			}))
 		}
 	} else if !tb._suggesting {
@@ -134,66 +134,66 @@ func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 // FyENormalEvent overrides UILayoutProxy.FyENormalEvent
 func (tb *UITextbox) FyENormalEvent(ne frenyard.NormalEvent) {
 	switch ev := ne.(type) {
-		case EnterWindowEvent:
-			if tb._window != nil && tb._window != ev.Window {
+	case EnterWindowEvent:
+		if tb._window != nil && tb._window != ev.Window {
+			if tb._window.TextInput() == tb {
+				tb._window.SetTextInput(nil)
+			}
+		}
+		tb._window = ev.Window
+	case FocusEvent:
+		if tb._window != nil {
+			if ev.Focused {
+				tb._window.SetTextInput(tb)
+			} else {
 				if tb._window.TextInput() == tb {
 					tb._window.SetTextInput(nil)
 				}
 			}
-			tb._window = ev.Window
-		case FocusEvent:
-			if tb._window != nil {
-				if ev.Focused {
-					tb._window.SetTextInput(tb)
-				} else {
-					if tb._window.TextInput() == tb {
-						tb._window.SetTextInput(nil)
+		}
+	case frenyard.KeyEvent:
+		if ev.Pressed && !tb._suggesting {
+			if (ev.Keycode == 13) || (ev.Keycode == 10) {
+				// confirm
+				if tb.OnConfirm != nil {
+					tb.OnConfirm()
+				}
+			} else if (ev.Keycode == 1073741898) || (ev.Keycode == 1073741919) {
+				// Home
+				tb._textPost = tb._textPre + tb._textPost
+				tb._textPre = ""
+				tb.rebuild()
+			} else if (ev.Keycode == 1073741901) || (ev.Keycode == 1073741913) {
+				// End
+				tb._textPre = tb._textPre + tb._textPost
+				tb._textPost = ""
+				tb.rebuild()
+			} else if (ev.Keycode == 1073741903) || (ev.Keycode == 127) {
+				// Right Arrow / Delete
+				moveRange := 1
+				runes := []rune(tb._textPost)
+				if len(runes) >= moveRange {
+					transfer := string(runes[:moveRange])
+					tb._textPost = string(runes[moveRange:])
+					if ev.Keycode == 1073741903 {
+						tb._textPre += transfer
 					}
+					tb.rebuild()
+				}
+			} else if (ev.Keycode == 1073741904) || (ev.Keycode == 8) {
+				// Left Arrow / Backspace
+				moveRange := 1
+				runes := []rune(tb._textPre)
+				if len(runes) >= moveRange {
+					transfer := string(runes[len(runes)-moveRange:])
+					tb._textPre = string(runes[:len(runes)-moveRange])
+					if ev.Keycode == 1073741904 {
+						tb._textPost = transfer + tb._textPost
+					}
+					tb.rebuild()
 				}
 			}
-		case frenyard.KeyEvent:
-			if ev.Pressed && !tb._suggesting {
-				if (ev.Keycode == 13) || (ev.Keycode == 10) {
-					// confirm
-					if tb.OnConfirm != nil {
-						tb.OnConfirm()
-					}
-				} else if (ev.Keycode == 1073741898) || (ev.Keycode == 1073741919) {
-					// Home
-					tb._textPost = tb._textPre + tb._textPost
-					tb._textPre = ""
-					tb.rebuild()
-				} else if (ev.Keycode == 1073741901) || (ev.Keycode == 1073741913) {
-					// End
-					tb._textPre = tb._textPre + tb._textPost
-					tb._textPost = ""
-					tb.rebuild()
-				} else if (ev.Keycode == 1073741903) || (ev.Keycode == 127) {
-					// Right Arrow / Delete
-					moveRange := 1
-					runes := []rune(tb._textPost)
-					if len(runes) >= moveRange {
-						transfer := string(runes[:moveRange])
-						tb._textPost = string(runes[moveRange:])
-						if ev.Keycode == 1073741903 {
-							tb._textPre += transfer
-						}
-						tb.rebuild()
-					}
-				} else if (ev.Keycode == 1073741904) || (ev.Keycode == 8) {
-					// Left Arrow / Backspace
-					moveRange := 1
-					runes := []rune(tb._textPre)
-					if len(runes) >= moveRange {
-						transfer := string(runes[len(runes) - moveRange:])
-						tb._textPre = string(runes[:len(runes) - moveRange])
-						if ev.Keycode == 1073741904 {
-							tb._textPost = transfer + tb._textPost
-						}
-						tb.rebuild()
-					}
-				}
-			}
+		}
 	}
 	tb.UILayoutProxy.FyENormalEvent(ne)
 }
@@ -207,6 +207,7 @@ func (tb *UITextbox) FyTOpen() {
 	tb._suggesting = false
 	tb.rebuild()
 }
+
 // FyTClose implements TextInput.FyTClose
 func (tb *UITextbox) FyTClose() {
 	tb._open = false
@@ -216,6 +217,7 @@ func (tb *UITextbox) FyTClose() {
 	tb._suggesting = false
 	tb.rebuild()
 }
+
 // FyTEditing implements TextInput.FyTEditing
 func (tb *UITextbox) FyTEditing(text string, start int, length int) {
 	// Ok, so as it turns out, it's entirely possible for start/length to do stupid things.
@@ -227,6 +229,7 @@ func (tb *UITextbox) FyTEditing(text string, start int, length int) {
 	tb._suggesting = text != ""
 	tb.rebuild()
 }
+
 // FyTInput implements TextInput.FyTInput
 func (tb *UITextbox) FyTInput(text string) {
 	tb._textPre += text

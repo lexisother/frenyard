@@ -126,8 +126,8 @@ func fyCRTCTextureFinalizer(ext *crtcTextureExternal) {
 func (cr *crtcRegistry) osCreateTexture(data crtcTextureData) Texture {
 	internal := &crtcTextureInternal{
 		Registry: cr,
-		Data: data,
-		Size: data.Size(),
+		Data:     data,
+		Size:     data.Size(),
 	}
 	external := &crtcTextureExternal{internal}
 	runtime.SetFinalizer(external, fyCRTCTextureFinalizer)

@@ -66,6 +66,7 @@ type TextInput interface {
 
 // NormalEventRoute represents a target for events.
 type NormalEventRoute uint8
+
 const (
 	// NormalEventRouteStop Do not forward.
 	NormalEventRouteStop NormalEventRoute = iota
@@ -87,15 +88,17 @@ type NormalEvent interface {
 
 // KeyEvent represents a key changing state. It uses the same constants as SDL2 because I never planned for key input to be in here, but then someone said "what about a search box". Nevermind that this opens a massive can of worms...
 type KeyEvent struct {
-	Pressed bool
-	Scancode int32
-	Keycode int32
+	Pressed   bool
+	Scancode  int32
+	Keycode   int32
 	Modifiers uint16
 }
+
 // FyVRoute implements NormalEvent.FyVRoute
 func (ke KeyEvent) FyVRoute() NormalEventRoute {
 	return NormalEventRouteFocus
 }
+
 // FyVOffset implements NormalEvent.FyVOffset
 func (ke KeyEvent) FyVOffset(amount Vec2i) NormalEvent {
 	return ke

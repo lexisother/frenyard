@@ -1,12 +1,12 @@
 package framework
 
-import "github.com/20kdc/CCUpdaterUI/frenyard"
+import "github.com/yellowsink/frenyard"
 
 // SlideTransition represents a specific transition queued for a UISlideTransitionContainer.
 type SlideTransition struct {
-	Element UILayoutElement
-	Length float64
-	Reverse bool
+	Element  UILayoutElement
+	Length   float64
+	Reverse  bool
 	Vertical bool
 }
 
@@ -30,10 +30,10 @@ func NewUISlideTransitionContainerPtr(initContent UILayoutElement) *UISlideTrans
 		UIPanel: NewPanel(frenyard.Vec2i{}),
 		_transition: SlideTransition{
 			Element: initContent,
-			Length: 1.0,
+			Length:  1.0,
 		},
 		_transitionQueue: []SlideTransition{},
-		_transitionTime: 1.0,
+		_transitionTime:  1.0,
 	}
 	InitUILayoutElementComponent(container)
 	if initContent != nil {
@@ -106,16 +106,16 @@ func (ufc *UISlideTransitionContainer) _fyUpdatePositions() {
 		mul *= -1
 	}
 	feA := PanelFixedElement{
-		Pos: frenyard.Vec2i{(-point) * mul, 0}.ConditionalTranspose(ufc._transition.Vertical),
+		Pos:     frenyard.Vec2i{(-point) * mul, 0}.ConditionalTranspose(ufc._transition.Vertical),
 		Element: ufc._last,
-		Locked: true,
+		Locked:  true,
 		Visible: true,
 	}
 	feB := PanelFixedElement{
-		Pos: frenyard.Vec2i{(areaSize - point) * mul, 0}.ConditionalTranspose(ufc._transition.Vertical),
+		Pos:     frenyard.Vec2i{(areaSize - point) * mul, 0}.ConditionalTranspose(ufc._transition.Vertical),
 		Element: ufc._transition.Element,
 		Visible: true,
-		Locked: ufc._last != nil,
+		Locked:  ufc._last != nil,
 	}
 	var slice []PanelFixedElement
 	if ufc._transition.Element != nil {

@@ -7,10 +7,13 @@ type DrawMode uint8
 
 // DrawModeNormal is a normal blended draw mode; typically "what you want". `vec4(mix(dst.rgb, src.rgb, src.a), src.a + (dstA * (1 - src.a)))`
 const DrawModeNormal = 0
+
 // DrawModeNoBlending disables blending. `src`
 const DrawModeNoBlending = 1
+
 // DrawModeAdd is an "additive" blend mode. `vec4(dst.rgb + src.rgb, dst.a)`
 const DrawModeAdd = 2
+
 // DrawModeModulate is a "modulate" blend mode. `vec4(dst.rgb * src.rgb, dst.a)`
 const DrawModeModulate = 3
 
@@ -52,11 +55,11 @@ type Renderer interface {
 	Size() Vec2i
 	// Clears & resets clip/translate/etc. You should do this at the start of  frame.
 	Reset(colour uint32)
-	
+
 	// Calls drawer() while rendering to a texture. All other operations occur within this texture for that duration. Can be stacked; the latest RenderToTexture applies.
 	// 'reserved' does nothing but must be left false.
 	// The resulting texture from this renderer may only be used on this renderer.
-	RenderToTexture(size Vec2i, drawer func (), reserved bool) Texture
+	RenderToTexture(size Vec2i, drawer func(), reserved bool) Texture
 }
 
 // Texture interface. This is automatically deleted on finalization.

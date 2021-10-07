@@ -1,5 +1,6 @@
 package framework
-import "github.com/20kdc/CCUpdaterUI/frenyard"
+
+import "github.com/yellowsink/frenyard"
 
 // A NinePatch is a resizable rectangular border and background to fit a given container.
 type NinePatch struct {
@@ -35,22 +36,31 @@ func (np NinePatch) Draw(r frenyard.Renderer, where frenyard.Area2i, scale float
 	drawAreas := frenyard.SplitArea2iGrid3x3(whereOuter, whereInner)
 	drawBase.Tex = np.Tex
 
-	drawBase.TexSprite = spriteAreas.A; drawBase.Target = drawAreas.A
+	drawBase.TexSprite = spriteAreas.A
+	drawBase.Target = drawAreas.A
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.B; drawBase.Target = drawAreas.B
+	drawBase.TexSprite = spriteAreas.B
+	drawBase.Target = drawAreas.B
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.C; drawBase.Target = drawAreas.C
+	drawBase.TexSprite = spriteAreas.C
+	drawBase.Target = drawAreas.C
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.D; drawBase.Target = drawAreas.D
+	drawBase.TexSprite = spriteAreas.D
+	drawBase.Target = drawAreas.D
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.E; drawBase.Target = drawAreas.E
+	drawBase.TexSprite = spriteAreas.E
+	drawBase.Target = drawAreas.E
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.F; drawBase.Target = drawAreas.F
+	drawBase.TexSprite = spriteAreas.F
+	drawBase.Target = drawAreas.F
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.G; drawBase.Target = drawAreas.G
+	drawBase.TexSprite = spriteAreas.G
+	drawBase.Target = drawAreas.G
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.H; drawBase.Target = drawAreas.H
+	drawBase.TexSprite = spriteAreas.H
+	drawBase.Target = drawAreas.H
 	r.DrawRect(drawBase)
-	drawBase.TexSprite = spriteAreas.I; drawBase.Target = drawAreas.I
+	drawBase.TexSprite = spriteAreas.I
+	drawBase.Target = drawAreas.I
 	r.DrawRect(drawBase)
 }

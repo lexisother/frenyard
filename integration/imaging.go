@@ -1,8 +1,8 @@
 package integration
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
 	"encoding/base64"
+	"github.com/yellowsink/frenyard"
 	"image"
 	"image/png"
 	"strings"
@@ -17,7 +17,7 @@ func GoImageToTexture(img image.Image, ct []ColourTransform) frenyard.Texture {
 	index := 0
 	for y := 0; y < sizePreTranslate.Y; y++ {
 		for x := 0; x < sizePreTranslate.X; x++ {
-			res := ConvertGoImageColourToUint32(img.At(x + min.X, y + min.Y))
+			res := ConvertGoImageColourToUint32(img.At(x+min.X, y+min.Y))
 			for _, v := range ct {
 				res = v(res)
 			}
@@ -46,22 +46,22 @@ func CreateHardcodedPNGImage(pngb64 string) image.Image {
 // ScaleImageToHalfSize scales an image to half-size using a trivial "average covered pixels" algorithm that handles a lot of situations well assuming content that's aligned to the implicit "2x2 grid".
 func ScaleImageToHalfSize(source image.Image) image.Image {
 	sourceBounds := source.Bounds()
-	destBounds := image.Rect(sourceBounds.Min.X / 2, sourceBounds.Min.Y / 2, sourceBounds.Max.X / 2, sourceBounds.Max.Y / 2)
+	destBounds := image.Rect(sourceBounds.Min.X/2, sourceBounds.Min.Y/2, sourceBounds.Max.X/2, sourceBounds.Max.Y/2)
 	dest := image.NewNRGBA(destBounds)
 	for y := sourceBounds.Min.Y; y < sourceBounds.Max.Y; y += 2 {
 		for x := sourceBounds.Min.X; x < sourceBounds.Max.X; x += 2 {
 			a := ConvertGoImageColourToUint32(source.At(x, y))
-			b := ConvertGoImageColourToUint32(source.At(x, y + 1))
-			c := ConvertGoImageColourToUint32(source.At(x + 1, y))
-			d := ConvertGoImageColourToUint32(source.At(x + 1, y + 1))
+			b := ConvertGoImageColourToUint32(source.At(x, y+1))
+			c := ConvertGoImageColourToUint32(source.At(x+1, y))
+			d := ConvertGoImageColourToUint32(source.At(x+1, y+1))
 			result := ColourMix(ColourMix(a, b, 0.5), ColourMix(c, d, 0.5), 0.5)
-			dest.SetNRGBA(x / 2, y / 2, ConvertUint32ToGoImageColour(result))
+			dest.SetNRGBA(x/2, y/2, ConvertUint32ToGoImageColour(result))
 		}
 	}
 	return dest
 }
 
-// CreateHardcodedPNGTexture gets a frenyard.Texture from a base64 string.
+// CreateHardcodedPNGTexture gets a main.Texture from a base64 string.
 func CreateHardcodedPNGTexture(pngb64 string, ct []ColourTransform) frenyard.Texture {
 	return GoImageToTexture(CreateHardcodedPNGImage(pngb64), ct)
 }

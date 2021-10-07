@@ -1,8 +1,8 @@
 package design
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/integration"
 )
 
 var circleTexReductionsMask []frenyard.Texture
@@ -17,7 +17,7 @@ func deSetupCircle() {
 			integration.ColourTransformBlueToStencil,
 		})
 		circleTexReductionsRaw[k] = integration.GoImageToTexture(img, []integration.ColourTransform{})
-		if k != len(circleTexReductionsMask) - 1 {
+		if k != len(circleTexReductionsMask)-1 {
 			img = integration.ScaleImageToHalfSize(img)
 		}
 	}
@@ -37,5 +37,5 @@ func deEncodeCircleCmd(textureSet []frenyard.Texture, position frenyard.Vec2i, s
 	baseCmd.TexSprite = frenyard.Area2iOfSize(baseCmd.Tex.Size())
 	baseCmd.Target = frenyard.Area2iFromVecs(position, frenyard.Vec2i{}).Align(frenyard.Vec2i{X: size, Y: size}, frenyard.Alignment2i{})
 	return baseCmd
-	
+
 }

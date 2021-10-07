@@ -1,24 +1,24 @@
 package design
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/framework"
+	"github.com/yellowsink/frenyard/integration"
 )
 
 /*
  * Before continuing, further details on how this module specifically works must be provided.
- * 
+ *
  * Firstly, it is to be understood that SDL2 Renderer DOES NOT support mipmapping.
  * It may supposedly support linear upscaling but in practice I have not found this to be working.
- * 
+ *
  * Furthermore, it'd be nice to be able to upscale the assets in future.
  * As such.
- * 
+ *
  * Ninepatches for this module are typically drawn by usage of a browser showing a special HTML page.
  * This is because a lot of elements from MD, which we're mimicking for continuity with the website, are designed assuming CSS box-shadow support.
  * Which we do not have.
- * 
+ *
  * The informal standard I've made up for this uses a "reference size" of a 32x32 image, with the component within a 16x16 centred square.
  * The units here are expected to match browser "px" units in a 1:1 px-to-real-pixel environment.
  * These are also known as "dp" in Material Design specifications.
@@ -46,35 +46,36 @@ var ScrollboxExterior framework.NinePatchFrame
 
 // ScrollbarThemeH is the ScrollbarTheme for horizontal scrollbars.
 var ScrollbarThemeH framework.ScrollbarTheme
+
 // ScrollbarThemeV is the ScrollbarTheme for vertical scrollbars.
 var ScrollbarThemeV framework.ScrollbarTheme
 
 func deSetupBorders() {
 	// This must all be kept in sync!
-	
+
 	borderImageScale = 4
 	generationImage := integration.CreateHardcodedPNGImage(generationX4B64)
 	borderEffectiveScale = DesignScale / float64(borderImageScale)
-	
+
 	for borderImageScale > 1 && borderEffectiveScale <= 0.5 {
 		borderEffectiveScale *= 2
 		borderImageScale /= 2
-		
+
 		generationImage = integration.ScaleImageToHalfSize(generationImage)
 	}
 
 	borderGenTextureMask = integration.GoImageToTexture(generationImage, []integration.ColourTransform{integration.ColourTransformBlueToStencil})
 	borderGenTextureShadow = integration.GoImageToTexture(generationImage, []integration.ColourTransform{integration.ColourTransformInvert, integration.ColourTransformBlueToStencil, integration.ColourTransformInvert})
 	borderGenTextureRaw = integration.GoImageToTexture(generationImage, []integration.ColourTransform{})
-	
+
 	deBorderGenInit()
-	
+
 	// -- Standard ninepatches --
 	borderButton = borderGenRounded4dpMaskX4Mask
 	borderButtonRaw = borderGenRounded4dpMaskX4Raw
 	borderButtonShadow = borderGenRounded4dpShadow2dpX4Shadow
 	borderButtonShadowFocus = borderGenRounded4dpShadow4dpX4Shadow
-	
+
 	// -- Scrollbar Theme --
 	sbBaseInframe := sizeScale(2)
 	sbBase := sizeScale(4)
@@ -83,27 +84,27 @@ func deSetupBorders() {
 	ScrollbarThemeH.Base = framework.NinePatchFrame{
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenSquareHeadshadow2dpX4Shadow,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF101010,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenSquareMaskX4Mask,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF181818,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenSquareMaskX4Mask.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF101010,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenSquareHeadshadowInset1dpX4Shadow.Inset(frenyard.Area2iMargin(sbBaseInframe, sbBaseInframe, sbBaseInframe, sbBaseInframe)),
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFFFFFFFF,
 			},
 		},
@@ -112,57 +113,57 @@ func deSetupBorders() {
 	movementFrameH := framework.NinePatchFrame{
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenRounded4dpHeadshadow1dpX4Shadow,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF606060,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenRounded4dpMaskX4Mask,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF606060,
 			},
 		},
-		Padding:  frenyard.Area2iMargin(sbMovementLong, sbMovement, sbMovementLong, sbMovement),
+		Padding: frenyard.Area2iMargin(sbMovementLong, sbMovement, sbMovementLong, sbMovement),
 	}
 	ScrollbarThemeH.Movement = movementFrameH
 	ScrollbarThemeV = ScrollbarThemeH
 	movementFrameV := movementFrameH
 	movementFrameV.Padding = frenyard.Area2i{X: movementFrameH.Padding.Y, Y: movementFrameH.Padding.X}
 	ScrollbarThemeV.Movement = movementFrameV
-	
+
 	ScrollboxExterior = framework.NinePatchFrame{
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassUnderBefore,
+				Pass:      framework.FramePassUnderBefore,
 				NinePatch: borderGenSquareMaskX4Mask,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: ThemeBackgroundUnderlayer,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverAfter,
+				Pass:      framework.FramePassOverAfter,
 				NinePatch: borderGenSquareHeadshadowInset2dpX4Shadow,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF000000,
 			},
 		},
 	}
-	
+
 	// -- Searchboxes --
 	searchboxMargin := sizeScale(4)
 	searchboxTheme = framework.NinePatchFrame{
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassUnderBefore,
+				Pass:      framework.FramePassUnderBefore,
 				NinePatch: borderGenRounded4dpShadow2dpX4Shadow,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: 0xFF000000,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenRounded4dpMaskX4Mask,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: ThemeBackgroundSearch,
 			},
 		},
@@ -190,15 +191,15 @@ func BorderTitle(colour uint32) framework.Frame {
 	return framework.NinePatchFrame{
 		Layers: []framework.NinePatchFrameLayer{
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenSquareHeadshadow2dpX4Shadow,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: colour,
 			},
 			framework.NinePatchFrameLayer{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				NinePatch: borderGenSquareMaskX4Mask,
-				Scale: borderEffectiveScale,
+				Scale:     borderEffectiveScale,
 				ColourMod: colour,
 			},
 		},

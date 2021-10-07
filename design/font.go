@@ -1,9 +1,9 @@
 package design
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 	"github.com/golang/freetype"
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/integration"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
@@ -20,6 +20,7 @@ var ButtonTextFont font.Face
 
 // ListItemTextFont for main list item text
 var ListItemTextFont font.Face
+
 // ListItemSubTextFont for undertext
 var ListItemSubTextFont font.Face
 
@@ -35,7 +36,7 @@ func deSetupFonts() {
 	PageTitleFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 24)))
 	GlobalFont = integration.CreateTTFFont(font, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 16)))
 	ButtonTextFont = integration.CreateTTFFont(fontB, integration.DPIPixels, float64(frenyard.Scale(DesignScale, 14)))
-	
+
 	// 16dp
 	ListItemTextFont = GlobalFont
 	// 14dp

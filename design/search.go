@@ -1,9 +1,9 @@
 package design
 
 import (
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/framework"
 	"strings"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
 )
 
 // SortListItemDetails is a sort.Interface implementation for use on ListItemDetails slices.
@@ -27,7 +27,7 @@ func NewUISearchBoxPtr(hint string, area []ListItemDetails) framework.UILayoutEl
 	lastRegenSearchTerm := ""
 	searchBox := framework.NewUITextboxPtr("", hint, GlobalFont, ThemeText, ThemeTextInputSuggestion, ThemeTextInputHint, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
 	searchBoxContainer := framework.NewUIOverlayContainerPtr(searchboxTheme, []framework.UILayoutElement{searchBox})
-	regenContent := func () framework.FlexboxContainer {
+	regenContent := func() framework.FlexboxContainer {
 		lastRegenSearchTerm = searchBox.Text()
 		slots := []framework.FlexboxSlot{}
 		for _, v := range area {
@@ -42,11 +42,11 @@ func NewUISearchBoxPtr(hint string, area []ListItemDetails) framework.UILayoutEl
 		})
 		return framework.FlexboxContainer{
 			DirVertical: true,
-			Slots: slots,
+			Slots:       slots,
 		}
 	}
 	vboxFlex := framework.NewUIFlexboxContainerPtr(regenContent())
-	searchBox.OnConfirm = func () {
+	searchBox.OnConfirm = func() {
 		// The reason why we wait for stall is because this reduces the lag.
 		if lastRegenSearchTerm != searchBox.Text() {
 			vboxFlex.SetContent(regenContent())
@@ -61,7 +61,7 @@ func NewUISearchBoxPtr(hint string, area []ListItemDetails) framework.UILayoutEl
 			},
 			framework.FlexboxSlot{
 				Element: vboxFlex,
-				Grow: 1,
+				Grow:    1,
 			},
 		},
 	})

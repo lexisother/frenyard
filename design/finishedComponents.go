@@ -1,9 +1,9 @@
 package design
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/framework"
+	"github.com/yellowsink/frenyard/integration"
 )
 
 // ThemeText is the colour for most text.
@@ -26,6 +26,7 @@ const ThemePlaceholder uint32 = 0xFFFF0000
 
 // ThemeBackground is the colour for most page content.
 const ThemeBackground uint32 = 0xFF202020
+
 // For debugging.
 //const ThemeBackground uint32 = 0xFFFFFFFF
 
@@ -61,8 +62,8 @@ type Header struct {
 	Back framework.ButtonBehavior
 	// If null, this is changed to BackIconID
 	BackIcon IconID
-	Title string
-	Forward framework.ButtonBehavior
+	Title    string
+	Forward  framework.ButtonBehavior
 	// If null, this is changed to RunIconID
 	ForwardIcon IconID
 }
@@ -92,7 +93,7 @@ func headerConstruct(header Header) framework.UILayoutElement {
 		header.ForwardIcon = RunIconID
 	}
 	label := framework.NewUILabelPtr(integration.NewTextTypeChunk(header.Title, PageTitleFont), ThemeText, 0, frenyard.Alignment2i{})
-	
+
 	slots := []framework.FlexboxSlot{}
 	if header.Back != nil {
 		slots = append(slots,
@@ -100,7 +101,7 @@ func headerConstruct(header Header) framework.UILayoutElement {
 				Basis: sizeScale(16),
 			},
 			framework.FlexboxSlot{
-				Element: ButtonIcon(header.BackIcon, 18, header.Back),
+				Element:            ButtonIcon(header.BackIcon, 18, header.Back),
 				RespectMinimumSize: true,
 			},
 			framework.FlexboxSlot{
@@ -115,10 +116,10 @@ func headerConstruct(header Header) framework.UILayoutElement {
 		)
 	}
 	slots = append(slots, framework.FlexboxSlot{
-		Element: label,
-		Grow: 1,
-		Shrink: 1,
-		Order: 0,
+		Element:            label,
+		Grow:               1,
+		Shrink:             1,
+		Order:              0,
 		RespectMinimumSize: true,
 	})
 	if header.Forward != nil {
@@ -127,7 +128,7 @@ func headerConstruct(header Header) framework.UILayoutElement {
 				Basis: sizeScale(16),
 			},
 			framework.FlexboxSlot{
-				Element: ButtonIcon(header.ForwardIcon, 18, header.Forward),
+				Element:            ButtonIcon(header.ForwardIcon, 18, header.Forward),
 				RespectMinimumSize: true,
 			},
 			framework.FlexboxSlot{
@@ -143,7 +144,7 @@ func headerConstruct(header Header) framework.UILayoutElement {
 	}
 	return framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 		DirVertical: false,
-		Slots: slots,
+		Slots:       slots,
 	})
 }
 
@@ -153,12 +154,12 @@ func LayoutDocument(header Header, body framework.UILayoutElement, scrollable bo
 	titleWrapper := framework.NewUIOverlayContainerPtr(BorderTitle(ThemeBackgroundTitle), []framework.UILayoutElement{
 		titleContent,
 	})
-	
+
 	body = framework.NewUIMarginContainerPtr(body, MarginBody())
 	if scrollable {
 		body = framework.NewUIScrollboxPtr(ScrollbarThemeV, body, true)
 	}
-	
+
 	titleAndThenBody := framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 		DirVertical: true,
 		Slots: []framework.FlexboxSlot{
@@ -169,8 +170,8 @@ func LayoutDocument(header Header, body framework.UILayoutElement, scrollable bo
 				Order:   1,
 			},
 			{
-				Element: titleWrapper,
-				Order: 0,
+				Element:            titleWrapper,
+				Order:              0,
 				RespectMinimumSize: true,
 			},
 		},
@@ -183,11 +184,11 @@ func ButtonBar(buttons []framework.UILayoutElement) framework.UILayoutElement {
 	slots := []framework.FlexboxSlot{{Grow: 1}}
 	for _, v := range buttons {
 		slots = append(slots, framework.FlexboxSlot{
-			Basis: sizeScale(32),
+			Basis:  sizeScale(32),
 			Shrink: 1,
 		}, framework.FlexboxSlot{
 			Element: v,
-			Shrink: 1,
+			Shrink:  1,
 		})
 	}
 	return framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
@@ -229,7 +230,7 @@ type ListItemDetails struct {
 	Text string
 	// If you want this to occupy space (changing format) despite being empty, make it a space.
 	Subtext string
-	Click framework.ButtonBehavior
+	Click   framework.ButtonBehavior
 }
 
 // ListItem sets up a list item.
@@ -245,9 +246,9 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 			DirVertical: true,
 			Slots: []framework.FlexboxSlot{
 				framework.FlexboxSlot{
-					Basis: sizeScale(8),
+					Basis:              sizeScale(8),
 					RespectMinimumSize: true,
-					Grow: 1,
+					Grow:               1,
 				},
 				framework.FlexboxSlot{
 					Element: framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, ListItemTextFont), ThemeText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignEnd}),
@@ -259,9 +260,9 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 					Element: framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Subtext, ListItemSubTextFont), ThemeSubText, 0, frenyard.Alignment2i{X: frenyard.AlignStart, Y: frenyard.AlignEnd}),
 				},
 				framework.FlexboxSlot{
-					Basis: sizeScale(8),
+					Basis:              sizeScale(8),
 					RespectMinimumSize: true,
-					Grow: 1,
+					Grow:               1,
 				},
 			},
 		})
@@ -275,7 +276,7 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 		},
 		framework.FlexboxSlot{
 			Element: labelVertical,
-			Shrink: 1,
+			Shrink:  1,
 		},
 		framework.FlexboxSlot{
 			Basis: sizeScale(16),
@@ -296,7 +297,7 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 			},
 			framework.FlexboxSlot{
 				Element: labelVertical,
-				Shrink: 1,
+				Shrink:  1,
 			},
 			framework.FlexboxSlot{
 				Basis: sizeScale(16),
@@ -311,8 +312,8 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 		DirVertical: true,
 		Slots: []framework.FlexboxSlot{
 			framework.FlexboxSlot{
-				Element: horizontalLayout,
-				MinBasis: sizeScale(resSizeDP),
+				Element:            horizontalLayout,
+				MinBasis:           sizeScale(resSizeDP),
 				RespectMinimumSize: true,
 			},
 		},
@@ -325,9 +326,9 @@ func ListItem(details ListItemDetails) framework.UILayoutElement {
 
 // InformationPanelDetails tags a block of content with an icon
 type InformationPanelDetails struct {
-	Text string
+	Text       string
 	ActionText string
-	Action framework.ButtonBehavior
+	Action     framework.ButtonBehavior
 }
 
 // InformationPanel applies InformationPanelDetails
@@ -335,7 +336,7 @@ func InformationPanel(details InformationPanelDetails) framework.UILayoutElement
 	icon := WarningIconID
 	margin := sizeScale(8)
 	hMargin := sizeScale(4)
-	
+
 	var body framework.UILayoutElement
 	body = framework.NewUILabelPtr(integration.NewTextTypeChunk(details.Text, GlobalFont), ThemeTextWarning, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
 
@@ -345,7 +346,7 @@ func InformationPanel(details InformationPanelDetails) framework.UILayoutElement
 				DirVertical: true,
 				Slots: []framework.FlexboxSlot{
 					framework.FlexboxSlot{
-						Element: NewIconPtr(ThemeTextWarning, icon, 18),
+						Element:            NewIconPtr(ThemeTextWarning, icon, 18),
 						RespectMinimumSize: true,
 					},
 					framework.FlexboxSlot{
@@ -359,20 +360,20 @@ func InformationPanel(details InformationPanelDetails) framework.UILayoutElement
 			Basis: margin,
 		},
 		framework.FlexboxSlot{
-			Element: body,
+			Element:            body,
 			RespectMinimumSize: true,
-			Grow: 1,
-			Shrink: 1,
+			Grow:               1,
+			Shrink:             1,
 		},
 	}
-	
+
 	if details.Action != nil {
 		primaryHorizontalSlots = append(primaryHorizontalSlots,
 			framework.FlexboxSlot{
 				Basis: margin,
 			},
 			framework.FlexboxSlot{
-				Element: ButtonWarningFixAction(details.ActionText, details.Action),
+				Element:            ButtonWarningFixAction(details.ActionText, details.Action),
 				RespectMinimumSize: true,
 			},
 		)
@@ -380,13 +381,13 @@ func InformationPanel(details InformationPanelDetails) framework.UILayoutElement
 	return framework.NewUIOverlayContainerPtr(framework.NinePatchFrame{
 		Layers: []framework.NinePatchFrameLayer{
 			{
-				Pass: framework.FramePassOverBefore,
+				Pass:      framework.FramePassOverBefore,
 				ColourMod: ThemeBackgroundWarning,
-				NinePatch: borderGenRounded4dpMaskX4Mask.Inset(frenyard.Area2iMargin(0, 0, 0, hMargin * 2)),
-				Scale: borderEffectiveScale,
+				NinePatch: borderGenRounded4dpMaskX4Mask.Inset(frenyard.Area2iMargin(0, 0, 0, hMargin*2)),
+				Scale:     borderEffectiveScale,
 			},
 		},
 		Clipping: true,
-		Padding: frenyard.Area2iMargin(margin, margin, margin, margin + (hMargin * 2)),
+		Padding:  frenyard.Area2iMargin(margin, margin, margin, margin+(hMargin*2)),
 	}, []framework.UILayoutElement{framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{DirVertical: false, Slots: primaryHorizontalSlots})})
 }

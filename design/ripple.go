@@ -1,13 +1,14 @@
 package design
 
 import (
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/framework"
+	"github.com/yellowsink/frenyard/integration"
 	"runtime"
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
 )
 
 var rippleTex frenyard.Texture
+
 func deSetupRipple() {
 	rippleTex = integration.CreateHardcodedPNGTexture(rippleB64, []integration.ColourTransform{
 		integration.ColourTransformBlueToStencil,
@@ -17,14 +18,14 @@ func deSetupRipple() {
 // deRippleFrame implements the ripple effect as a frame.
 // As ripples contain state, RippleFrame is stateful (cannot be shared between users), and requires ticking.
 type deRippleFrame struct {
-	Button *framework.UIButton
-	MaskRaw framework.NinePatch
-	Scale float64
-	lastDown bool
-	hasRipple bool
+	Button             *framework.UIButton
+	MaskRaw            framework.NinePatch
+	Scale              float64
+	lastDown           bool
+	hasRipple          bool
 	downExpansionTimer float64
-	hoverState float64
-	ripplePosLock frenyard.Vec2i
+	hoverState         float64
+	ripplePosLock      frenyard.Vec2i
 }
 
 // FyFTick implements Frame.FyFTick (though can also be used outside of it)
@@ -71,34 +72,34 @@ func (de *deRippleFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass 
 		drawColour := uint32(0x40FFFFFF)
 		hoverColour := integration.ColourMix(0x00FFFFFF, 0x08FFFFFF, de.hoverState)
 		if de.downExpansionTimer > 1 {
-			drawColour = integration.ColourMix(drawColour, 0x00FFFFFF, de.downExpansionTimer - 1)
+			drawColour = integration.ColourMix(drawColour, 0x00FFFFFF, de.downExpansionTimer-1)
 		}
 		if de.hasRipple {
-			tex := r.RenderToTexture(size, func () {
+			tex := r.RenderToTexture(size, func() {
 				r.Reset(0xFF000000)
 				r.DrawRect(frenyard.DrawRectCommand{
-					Tex: rippleTex,
+					Tex:       rippleTex,
 					TexSprite: frenyard.Area2iOfSize(rippleTex.Size()),
-					Target: frenyard.Area2iFromVecs(ripplePosition, frenyard.Vec2i{}).Align(frenyard.Vec2i{X: rippleSize, Y: rippleSize}, frenyard.Alignment2i{}),
-					Colour: 0xFFFFFFFF,
+					Target:    frenyard.Area2iFromVecs(ripplePosition, frenyard.Vec2i{}).Align(frenyard.Vec2i{X: rippleSize, Y: rippleSize}, frenyard.Alignment2i{}),
+					Colour:    0xFFFFFFFF,
 				})
 				de.MaskRaw.Draw(r, areaSize, de.Scale, frenyard.DrawRectCommand{
-					Mode: frenyard.DrawModeModulate,
+					Mode:   frenyard.DrawModeModulate,
 					Colour: 0xFFFFFFFF,
 				})
 			}, false)
 			r.DrawRect(frenyard.DrawRectCommand{
-				Tex: tex,
+				Tex:       tex,
 				TexSprite: areaSize,
-				Target: areaSize,
-				Colour: drawColour,
-				Mode: frenyard.DrawModeAdd,
+				Target:    areaSize,
+				Colour:    drawColour,
+				Mode:      frenyard.DrawModeAdd,
 			})
 			tex = nil
 			runtime.GC()
 		}
 		de.MaskRaw.Draw(r, areaSize, de.Scale, frenyard.DrawRectCommand{
-			Mode: frenyard.DrawModeAdd,
+			Mode:   frenyard.DrawModeAdd,
 			Colour: hoverColour,
 		})
 	}
@@ -108,6 +109,7 @@ func (de *deRippleFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i, pass 
 func (de *deRippleFrame) FyFPadding() frenyard.Area2i {
 	return frenyard.Area2i{}
 }
+
 // FyFClipping implements Frame.FyFClipping
 func (de *deRippleFrame) FyFClipping() bool {
 	return false
@@ -117,7 +119,7 @@ func (de *deRippleFrame) FyFClipping() bool {
 func deRippleInstall(assembledItem framework.UILayoutElement, mask framework.NinePatch, scale float64, click framework.ButtonBehavior) framework.UILayoutElement {
 	rippleFrame := &deRippleFrame{
 		MaskRaw: mask,
-		Scale: scale,
+		Scale:   scale,
 	}
 	assembledItem = framework.NewUIOverlayContainerPtr(rippleFrame, []framework.UILayoutElement{
 		assembledItem,

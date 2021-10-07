@@ -1,17 +1,18 @@
 package design
 
 import (
-	"github.com/20kdc/CCUpdaterUI/frenyard"
-	"github.com/20kdc/CCUpdaterUI/frenyard/framework"
-	"github.com/20kdc/CCUpdaterUI/frenyard/integration"
+	"github.com/yellowsink/frenyard"
+	"github.com/yellowsink/frenyard/framework"
+	"github.com/yellowsink/frenyard/integration"
 )
+
 //import "fmt"
 
 type deDesignButtonFrame struct {
 	focusState float64
-	button *framework.UIButton
-	ripple deRippleFrame
-	primary uint32
+	button     *framework.UIButton
+	ripple     deRippleFrame
+	primary    uint32
 }
 
 // FyFTick implements Frame.FyFTick
@@ -56,6 +57,7 @@ func (de *deDesignButtonFrame) FyFPadding() frenyard.Area2i {
 	addedBorderY := sizeScale(4)
 	return frenyard.Area2iFromVecs(frenyard.Vec2i{X: -addedBorderX, Y: -addedBorderY}, frenyard.Vec2i{X: addedBorderX * 2, Y: addedBorderY * 2})
 }
+
 // FyFClipping implements Frame.FyFClipping
 func (de *deDesignButtonFrame) FyFClipping() bool {
 	return true
@@ -73,19 +75,19 @@ func newDeUIDesignButtonPtr(primary uint32, content framework.UILayoutElement, b
 	overlay := framework.NewUIOverlayContainerPtr(des, []framework.UILayoutElement{framework.ConvertElementToLayout(&minSizePanel), content})
 	des.button = framework.NewUIButtonPtr(overlay, behavior)
 	des.ripple = deRippleFrame{
-		Button: des.button,
+		Button:  des.button,
 		MaskRaw: borderButtonRaw,
-		Scale: borderEffectiveScale,
+		Scale:   borderEffectiveScale,
 	}
 	return des.button
 }
 
 type deCircleButtonFrame struct {
 	focusState float64
-	sizeState float64
-	lastDown bool
-	releasing bool
-	button *framework.UIButton
+	sizeState  float64
+	lastDown   bool
+	releasing  bool
+	button     *framework.UIButton
 }
 
 // FyFTick implements Frame.FyFTick
@@ -130,7 +132,7 @@ func (de *deCircleButtonFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i,
 			X: size.X / 2,
 			Y: size.Y / 2,
 		}, circleSize, frenyard.DrawRectCommand{
-			Colour: integration.ColourMix(0x00FFFFFF, 0xFFFFFFFF, de.focusState * 0.5),
+			Colour: integration.ColourMix(0x00FFFFFF, 0xFFFFFFFF, de.focusState*0.5),
 		}))
 	}
 }
@@ -139,6 +141,7 @@ func (de *deCircleButtonFrame) FyFDraw(r frenyard.Renderer, size frenyard.Vec2i,
 func (de *deCircleButtonFrame) FyFPadding() frenyard.Area2i {
 	return frenyard.Area2i{}
 }
+
 // FyFClipping implements Frame.FyFClipping
 func (de *deCircleButtonFrame) FyFClipping() bool {
 	return false

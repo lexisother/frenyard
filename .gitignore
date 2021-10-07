@@ -1,6 +1,3 @@
-ccmodupdater.log
-build/*.zip
-CCUpdaterUI
-CCUpdaterUI.linux
-CCUpdaterUI.exe
-CCUpdaterUI.windows.exe
+.kateproject
+.code
+.idea

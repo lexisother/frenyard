@@ -1,7 +1,7 @@
 package design
 
-import "github.com/yellowsink/frenyard"
-import "github.com/yellowsink/frenyard/framework"
+import "github.com/lexisother/frenyard"
+import "github.com/lexisother/frenyard/framework"
 
 var borderGenSquareMaskX4Shadow framework.NinePatch
 var borderGenSquareMaskX4Mask framework.NinePatch

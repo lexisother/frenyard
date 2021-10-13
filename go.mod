@@ -1,4 +1,4 @@
-module github.com/yellowsink/frenyard
+module github.com/lexisother/frenyard
 
 go 1.17
 

@@ -2,7 +2,7 @@ package framework
 
 import (
 	"fmt"
-	"github.com/yellowsink/frenyard"
+	"github.com/lexisother/frenyard"
 )
 
 // UIEventDebugger is a simple test element to debug events.

@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"github.com/yellowsink/frenyard"
+	"github.com/lexisother/frenyard"
 	"golang.org/x/image/math/fixed"
 	"image"
 )

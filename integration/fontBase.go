@@ -2,7 +2,7 @@ package integration
 
 import (
 	"github.com/golang/freetype/truetype"
-	"github.com/yellowsink/frenyard"
+	"github.com/lexisother/frenyard"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 	"image"

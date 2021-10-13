@@ -2,7 +2,7 @@ package integration
 
 import (
 	"encoding/base64"
-	"github.com/yellowsink/frenyard"
+	"github.com/lexisother/frenyard"
 	"image"
 	"image/png"
 	"strings"

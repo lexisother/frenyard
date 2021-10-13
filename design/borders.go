@@ -1,9 +1,9 @@
 package design
 
 import (
-	"github.com/yellowsink/frenyard"
-	"github.com/yellowsink/frenyard/framework"
-	"github.com/yellowsink/frenyard/integration"
+	"github.com/lexisother/frenyard"
+	"github.com/lexisother/frenyard/framework"
+	"github.com/lexisother/frenyard/integration"
 )
 
 /*

@@ -2,7 +2,7 @@ package framework
 
 import (
 	"fmt"
-	"github.com/yellowsink/frenyard"
+	"github.com/lexisother/frenyard"
 )
 
 // FocusEvent is an event type specific to the UI framework that represents focusing/unfocusing the receiving element.

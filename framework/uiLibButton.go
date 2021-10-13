@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/yellowsink/frenyard"
+	"github.com/lexisother/frenyard"
 )
 
 // ButtonBehavior represents a button's behavior.

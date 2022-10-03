@@ -1,6 +1,6 @@
 package framework
 
-import "github.com/lexisother/frenyard"
+import "github.com/uwu/frenyard"
 
 // A NinePatch is a resizable rectangular border and background to fit a given container.
 type NinePatch struct {

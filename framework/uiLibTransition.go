@@ -1,6 +1,6 @@
 package framework
 
-import "github.com/lexisother/frenyard"
+import "github.com/uwu/frenyard"
 
 // SlideTransition represents a specific transition queued for a UISlideTransitionContainer.
 type SlideTransition struct {

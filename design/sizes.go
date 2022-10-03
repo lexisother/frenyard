@@ -1,6 +1,6 @@
 package design
 
-import "github.com/lexisother/frenyard"
+import "github.com/uwu/frenyard"
 
 // SizeMarginAroundEverything is a useful margin around the body, etc.
 var SizeMarginAroundEverything int32

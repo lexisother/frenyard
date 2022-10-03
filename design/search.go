@@ -1,8 +1,8 @@
 package design
 
 import (
-	"github.com/lexisother/frenyard"
-	"github.com/lexisother/frenyard/framework"
+	"github.com/uwu/frenyard"
+	"github.com/uwu/frenyard/framework"
 	"strings"
 )
 

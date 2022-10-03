@@ -2,8 +2,8 @@ package design
 
 import (
 	"github.com/golang/freetype"
-	"github.com/lexisother/frenyard"
-	"github.com/lexisother/frenyard/integration"
+	"github.com/uwu/frenyard"
+	"github.com/uwu/frenyard/integration"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"

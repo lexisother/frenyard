@@ -1,6 +1,6 @@
 package framework
 
-import "github.com/lexisother/frenyard"
+import "github.com/uwu/frenyard"
 
 // A NinePatchFrameLayer provides the visuals for a given layer of a NinePatchFrame.
 type NinePatchFrameLayer struct {

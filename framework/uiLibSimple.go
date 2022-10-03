@@ -1,8 +1,8 @@
 package framework
 
 import (
-	"github.com/lexisother/frenyard"
-	"github.com/lexisother/frenyard/integration"
+	"github.com/uwu/frenyard"
+	"github.com/uwu/frenyard/integration"
 	"golang.org/x/image/font"
 )
 

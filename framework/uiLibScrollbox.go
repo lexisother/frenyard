@@ -2,7 +2,7 @@ package framework
 
 import (
 	"fmt"
-	"github.com/lexisother/frenyard"
+	"github.com/uwu/frenyard"
 )
 
 /*

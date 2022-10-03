@@ -1,8 +1,8 @@
 package design
 
 import (
-	"github.com/lexisother/frenyard"
-	"github.com/lexisother/frenyard/integration"
+	"github.com/uwu/frenyard"
+	"github.com/uwu/frenyard/integration"
 )
 
 var circleTexReductionsMask []frenyard.Texture

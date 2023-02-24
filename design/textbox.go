@@ -5,12 +5,13 @@ import (
 	"github.com/uwu/frenyard/framework"
 )
 
-func NewUITextboxPtr(hint string, atr *string) framework.UILayoutElement {
-	lastRegenSearchTerm := ""
+func NewUITextboxPtr(hint string, str *string) framework.UILayoutElement {
+	lastInput := ""
 	searchBox := framework.NewUITextboxPtr("", hint, GlobalFont, ThemeText, ThemeTextInputSuggestion, ThemeTextInputHint, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
 	searchBoxContainer := framework.NewUIOverlayContainerPtr(searchboxTheme, []framework.UILayoutElement{searchBox})
 	regenContent := func() framework.FlexboxContainer {
-		lastRegenSearchTerm = searchBox.Text()
+		lastInput = searchBox.Text()
+		*str = lastInput
 		slots := []framework.FlexboxSlot{}
 		slots = append(slots, framework.FlexboxSlot{
 			Grow: 1,
@@ -23,7 +24,7 @@ func NewUITextboxPtr(hint string, atr *string) framework.UILayoutElement {
 	vboxFlex := framework.NewUIFlexboxContainerPtr(regenContent())
 	searchBox.OnConfirm = func() {
 		// The reason why we wait for stall is because this reduces the lag.
-		if lastRegenSearchTerm != searchBox.Text() {
+		if lastInput != searchBox.Text() {
 			vboxFlex.SetContent(regenContent())
 		}
 	}

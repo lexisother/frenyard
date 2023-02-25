@@ -4,9 +4,9 @@ import (
 	"github.com/golang/freetype"
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/integration"
-	"github.com/uwu/frenyard/integration/fonts/robotobold"
-	"github.com/uwu/frenyard/integration/fonts/robotoitalic"
-	"github.com/uwu/frenyard/integration/fonts/robotoregular"
+	"github.com/uwu/frenyard/integration/fonts/roboto/robotobold"
+	"github.com/uwu/frenyard/integration/fonts/roboto/robotoitalic"
+	"github.com/uwu/frenyard/integration/fonts/roboto/robotoregular"
 	"golang.org/x/image/font"
 )
 

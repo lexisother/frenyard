@@ -5,9 +5,15 @@ import (
 	"github.com/uwu/frenyard/framework"
 )
 
-func NewUITextboxPtr(hint string, str *string) framework.UILayoutElement {
+func NewUITextboxPtr(hint string, str *string, text ...string) framework.UILayoutElement {
+	// Handling of """default parameters"""
+	defaultText := ""
+	if len(text) > 0 {
+		defaultText = text[0]
+	}
+
 	lastInput := ""
-	searchBox := framework.NewUITextboxPtr("", hint, GlobalFont, ThemeText, ThemeTextInputSuggestion, ThemeTextInputHint, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
+	searchBox := framework.NewUITextboxPtr(defaultText, hint, GlobalFont, ThemeText, ThemeTextInputSuggestion, ThemeTextInputHint, 0, frenyard.Alignment2i{X: frenyard.AlignStart})
 	searchBoxContainer := framework.NewUIOverlayContainerPtr(searchboxTheme, []framework.UILayoutElement{searchBox})
 	regenContent := func() framework.FlexboxContainer {
 		lastInput = searchBox.Text()

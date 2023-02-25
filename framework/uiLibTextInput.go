@@ -78,13 +78,12 @@ func (tb *UITextbox) FyETick(delta float64) {
 		}
 	}
 	if tb._open {
-		oldCB := tb._caretBlinker
-		tb._caretBlinker += delta
-		if oldCB < 1 && tb._caretBlinker >= 1 {
-			tb.rebuild()
-		} else if tb._caretBlinker >= 2 {
-			tb._caretBlinker = 0
-			tb.rebuild()
+		// 3/2 because it just feels a little slow
+		// and this is an easy way to fix that up
+		tb._caretBlinker += (delta * 3/2)
+
+		if tb._caretBlinker >= 2 {
+			tb._caretBlinker -= 2
 		}
 	}
 	tb.UILayoutProxy.FyETick(delta)
@@ -92,6 +91,7 @@ func (tb *UITextbox) FyETick(delta float64) {
 
 func (tb *UITextbox) rebuild() {
 	tb._stallTimer = 0
+	tb._caretBlinker = 0
 	if !tb._open {
 		if tb._textPre == "" && tb._textPost == "" {
 			tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{

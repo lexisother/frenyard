@@ -19,7 +19,7 @@ func mkTxtBox(hint string, str *string, text []string, newline bool) framework.U
 		lastInput = fwTextbox.Text()
 		*str = lastInput
 		slots := []framework.FlexboxSlot{
-			framework.FlexboxSlot{
+			{
 				Grow: 1,
 			},
 		}

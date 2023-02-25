@@ -4,6 +4,7 @@ import (
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/integration"
 	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 // UITextbox is a textbox.
@@ -102,13 +103,8 @@ func (tb *UITextbox) rebuild() {
 			}))
 		}
 	} else if !tb._suggesting {
-		caretColour := tb._primaryColour
-		if tb._caretBlinker > 1 {
-			caretColour = 0
-		}
 		tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
 			integration.NewColouredTextTypeChunk(tb._textPre, tb._face, tb._primaryColour),
-			integration.NewColouredTextTypeChunk("_", tb._face, caretColour),
 			integration.NewColouredTextTypeChunk(tb._textPost, tb._face, tb._primaryColour),
 		}))
 	} else {
@@ -129,6 +125,28 @@ func (tb *UITextbox) rebuild() {
 func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 	tb._translation = target.Translation()
 	tb.UILayoutProxy.FyEDraw(target, under)
+
+	preChunk := integration.NewColouredTextTypeChunk(tb._textPre, tb._face, tb._primaryColour)
+	preDot, _ := preChunk.FyCBounds(fixed.Point26_6{})
+
+	caretPos := frenyard.Vec2i{
+		X: int32(preDot.X.Ceil()),
+		Y: int32(preDot.Y.Ceil()) + 2, // lil visual oset
+	}
+	caretSize := frenyard.Vec2i{
+		X: 1,
+		Y: int32(preChunk.FyCHeight()),
+	}
+
+	caretColour := tb._primaryColour
+		if tb._caretBlinker > 1 || !tb._open {
+			caretColour = 0
+		}
+
+	target.DrawRect(frenyard.DrawRectCommand{
+		Colour: caretColour,
+		Target: frenyard.Area2iFromVecs(caretPos, caretSize),
+	})
 }
 
 // FyENormalEvent overrides UILayoutProxy.FyENormalEvent

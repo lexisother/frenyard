@@ -4,9 +4,7 @@ import (
 	"github.com/golang/freetype"
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/integration"
-	"github.com/uwu/frenyard/integration/fonts/roboto/robotobold"
-	"github.com/uwu/frenyard/integration/fonts/roboto/robotoitalic"
-	"github.com/uwu/frenyard/integration/fonts/roboto/robotoregular"
+	"github.com/uwu/frenyard/integration/fonts/roboto"
 	"golang.org/x/image/font"
 )
 
@@ -29,15 +27,15 @@ var ListItemTextFont font.Face
 var ListItemSubTextFont font.Face
 
 func deSetupFonts() {
-	font, err := freetype.ParseFont(robotoregular.TTF)
+	font, err := freetype.ParseFont(roboto.RobotoRegular)
 	if err != nil {
 		panic(err)
 	}
-	fontB, err := freetype.ParseFont(robotobold.TTF)
+	fontB, err := freetype.ParseFont(roboto.RobotoBold)
 	if err != nil {
 		panic(err)
 	}
-	fontI, err := freetype.ParseFont(robotoitalic.TTF)
+	fontI, err := freetype.ParseFont(roboto.RobotoItalic)
 	if err != nil {
 		panic(err)
 	}

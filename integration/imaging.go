@@ -1,7 +1,6 @@
 package integration
 
 import (
-	"encoding/base64"
 	"github.com/uwu/frenyard"
 	"image"
 	"image/png"
@@ -29,18 +28,12 @@ func GoImageToTexture(img image.Image, ct []ColourTransform) frenyard.Texture {
 }
 
 // CreateHardcodedPNGImage gets an image.Image from a base64 string.
-func CreateHardcodedPNGImage(pngb64 string) image.Image {
-	bytes, err := base64.StdEncoding.DecodeString(pngb64)
+func CreateHardcodedPNGImage(bytes []byte) image.Image {
+	png, err := png.Decode(strings.NewReader(string(bytes)))
 	if err != nil {
-		// Hard-coded so should always work
 		panic(err)
 	}
-	decoded, err := png.Decode(strings.NewReader(string(bytes)))
-	if err != nil {
-		// Hard-coded so should always work
-		panic(err)
-	}
-	return decoded
+	return png
 }
 
 // ScaleImageToHalfSize scales an image to half-size using a trivial "average covered pixels" algorithm that handles a lot of situations well assuming content that's aligned to the implicit "2x2 grid".
@@ -62,8 +55,8 @@ func ScaleImageToHalfSize(source image.Image) image.Image {
 }
 
 // CreateHardcodedPNGTexture gets a main.Texture from a base64 string.
-func CreateHardcodedPNGTexture(pngb64 string, ct []ColourTransform) frenyard.Texture {
-	return GoImageToTexture(CreateHardcodedPNGImage(pngb64), ct)
+func CreateHardcodedPNGTexture(bytes []byte, ct []ColourTransform) frenyard.Texture {
+	return GoImageToTexture(CreateHardcodedPNGImage(bytes), ct)
 }
 
 // Run runs the colour transform on a pair of images to create a third image.

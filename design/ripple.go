@@ -10,7 +10,7 @@ import (
 var rippleTex frenyard.Texture
 
 func deSetupRipple() {
-	rippleTex = integration.CreateHardcodedPNGTexture(rippleB64, []integration.ColourTransform{
+	rippleTex = integration.CreateHardcodedPNGTexture(ripple, []integration.ColourTransform{
 		integration.ColourTransformBlueToStencil,
 	})
 }

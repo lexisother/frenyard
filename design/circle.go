@@ -11,7 +11,7 @@ var circleTexReductionsRaw []frenyard.Texture
 func deSetupCircle() {
 	circleTexReductionsMask = make([]frenyard.Texture, 7)
 	circleTexReductionsRaw = make([]frenyard.Texture, 7)
-	img := integration.CreateHardcodedPNGImage(circle192B64)
+	img := integration.CreateHardcodedPNGImage(circle192)
 	for k := range circleTexReductionsMask {
 		circleTexReductionsMask[k] = integration.GoImageToTexture(img, []integration.ColourTransform{
 			integration.ColourTransformBlueToStencil,

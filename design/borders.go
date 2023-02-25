@@ -54,7 +54,7 @@ func deSetupBorders() {
 	// This must all be kept in sync!
 
 	borderImageScale = 4
-	generationImage := integration.CreateHardcodedPNGImage(generationX4B64)
+	generationImage := integration.CreateHardcodedPNGImage(generationX4)
 	borderEffectiveScale = DesignScale / float64(borderImageScale)
 
 	for borderImageScale > 1 && borderEffectiveScale <= 0.5 {

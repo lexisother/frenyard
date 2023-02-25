@@ -64,10 +64,10 @@ var icons36dp frenyard.Texture
 var iconHeight36dp int32
 
 func deSetupIcons() {
-	icons18dpImg := integration.CreateHardcodedPNGImage(icon72B64)
+	icons18dpImg := integration.CreateHardcodedPNGImage(icon72)
 	icons36dpImg := icons18dpImg
 	iconHeight18dp = 72
-	icons24dpImg := integration.CreateHardcodedPNGImage(icon96B64)
+	icons24dpImg := integration.CreateHardcodedPNGImage(icon96)
 	iconHeight24dp = 96
 	// Pass 1: 18 and 24dp (x4)
 	iconEffectiveScale := DesignScale / 4

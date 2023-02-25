@@ -48,6 +48,9 @@ const UpdatableIconID IconID = 10
 // InstalledIconID is a checkmark (success, correct, present)
 const InstalledIconID IconID = 11
 
+// DiscordIconID is the Discord icon
+const DiscordIconID IconID = 12
+
 // Icons at 18DP
 var icons18dp frenyard.Texture
 var iconHeight18dp int32

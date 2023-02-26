@@ -4,6 +4,7 @@ import (
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/design"
 	"github.com/uwu/frenyard/framework"
+	"github.com/uwu/frenyard/integration"
 )
 
 func main() {
@@ -33,8 +34,6 @@ func main() {
 		TeleportSettings: framework.SlideTransition{},
 	})
 
-	strptr := ""
-
 	// Start an instant transition to our main screen.
 	app.Teleport(
 		// A 'document', with a title header and body.
@@ -47,11 +46,7 @@ func main() {
 				DirVertical: true,
 				Slots: []framework.FlexboxSlot{
 					{
-						Element: //framework.NewUILabelPtr(integration.NewTextTypeChunk("Hello World!", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{}),
-							design.NewUITextboxPtr("test", &strptr, "hi!"),
-					},
-					{
-						Element: design.NewUITextboxPtr("", &strptr, "hi 2!"),
+						Element: framework.NewUILabelPtr(integration.NewTextTypeChunk("Hello World!", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{}),
 					},
 				},
 			}),

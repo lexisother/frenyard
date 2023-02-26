@@ -1,8 +1,11 @@
 package framework
 
 import (
+	"fmt"
+
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/integration"
+	"github.com/veandco/go-sdl2/sdl"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -85,7 +88,7 @@ func (tb *UITextbox) FyETick(delta float64) {
 	if tb._open {
 		// 3/2 because it just feels a little slow
 		// and this is an easy way to fix that up
-		tb._caretBlinker += (delta * 3/2)
+		tb._caretBlinker += (delta * 3 / 2)
 
 		if tb._caretBlinker >= 2 {
 			tb._caretBlinker -= 2
@@ -152,9 +155,9 @@ func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 	}
 
 	caretColour := tb._primaryColour
-		if tb._caretBlinker > 1 || !tb._open {
-			caretColour = 0
-		}
+	if tb._caretBlinker > 1 || !tb._open {
+		caretColour = 0
+	}
 
 	target.DrawRect(frenyard.DrawRectCommand{
 		Colour: caretColour,
@@ -221,6 +224,15 @@ func (tb *UITextbox) FyENormalEvent(ne frenyard.NormalEvent) {
 					if ev.Keycode == 1073741904 {
 						tb._textPost = transfer + tb._textPost
 					}
+					tb.rebuild()
+				}
+			} else if (ev.Keycode == 118) && ((ev.Modifiers & frenyard.ModifierCtrl) > 0) {
+				// Ctrl-V
+				clip, err := sdl.GetClipboardText()
+				if err != nil {
+					fmt.Printf("paste threw error: %s\n", err.Error())
+				} else {
+					tb._textPre = tb._textPre + clip
 					tb.rebuild()
 				}
 			}

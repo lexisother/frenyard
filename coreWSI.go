@@ -86,6 +86,14 @@ type NormalEvent interface {
 	FyVOffset(amount Vec2i) NormalEvent
 }
 
+// SDL keycode modifiers - https://github.com/libsdl-org/SDL/blob/213fbd0/include/SDL3/SDL_keycode.h#L332-L354
+// (also see https://wiki.libsdl.org/SDL2/SDLKeycodeLookup)
+const (
+	ModifierCtrl  uint16 = 0x40 | 0x80
+	ModifierShift uint16 = 0x1 | 0x2
+	ModifierAlt   uint16 = 0x100 | 0x200
+)
+
 // KeyEvent represents a key changing state. It uses the same constants as SDL2 because I never planned for key input to be in here, but then someone said "what about a search box". Nevermind that this opens a massive can of worms...
 type KeyEvent struct {
 	Pressed   bool

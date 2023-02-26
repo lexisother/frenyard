@@ -42,6 +42,11 @@ type UITextbox struct {
 
 // NewUITextboxPtr creates a UITextbox.
 func NewUITextboxPtr(text string, hint string, face font.Face, primaryColour uint32, suggestionColour uint32, hintColour uint32, backgroundColour uint32, align frenyard.Alignment2i) *UITextbox {
+	// empty textboxes misbehave layout-wise, so don't let it become so
+	if hint == "" {
+		hint = " "
+	}
+
 	textbox := &UITextbox{
 		_textPre:          text,
 		_hint:             hint,
@@ -92,6 +97,13 @@ func (tb *UITextbox) FyETick(delta float64) {
 func (tb *UITextbox) rebuild() {
 	tb._stallTimer = 0
 	tb._caretBlinker = 0
+
+	// see comment in NewUITextboxPtr - empty textboxes misbehave
+	safeTextPre := tb._textPre
+	if safeTextPre == "" && tb._textPost == "" {
+		safeTextPre = " "
+	}
+
 	if !tb._open {
 		if tb._textPre == "" && tb._textPost == "" {
 			tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
@@ -99,17 +111,17 @@ func (tb *UITextbox) rebuild() {
 			}))
 		} else {
 			tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
-				integration.NewColouredTextTypeChunk(tb._textPre+tb._textPost, tb._face, tb._primaryColour),
+				integration.NewColouredTextTypeChunk(safeTextPre+tb._textPost, tb._face, tb._primaryColour),
 			}))
 		}
 	} else if !tb._suggesting {
 		tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
-			integration.NewColouredTextTypeChunk(tb._textPre, tb._face, tb._primaryColour),
+			integration.NewColouredTextTypeChunk(safeTextPre, tb._face, tb._primaryColour),
 			integration.NewColouredTextTypeChunk(tb._textPost, tb._face, tb._primaryColour),
 		}))
 	} else {
 		tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
-			integration.NewColouredTextTypeChunk(tb._textPre, tb._face, tb._primaryColour),
+			integration.NewColouredTextTypeChunk(safeTextPre, tb._face, tb._primaryColour),
 			integration.NewColouredTextTypeChunk(tb._textSuggestion1, tb._face, tb._suggestionColour),
 			integration.NewUnderlineTypeChunk(integration.NewColouredTextTypeChunk(tb._textSuggestion2, tb._face, tb._suggestionColour), tb._suggestionColour),
 			integration.NewColouredTextTypeChunk(tb._textSuggestion3, tb._face, tb._suggestionColour),
@@ -126,6 +138,7 @@ func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 	tb._translation = target.Translation()
 	tb.UILayoutProxy.FyEDraw(target, under)
 
+	// all between here and the end of the func is caret drawing code
 	preChunk := integration.NewColouredTextTypeChunk(tb._textPre, tb._face, tb._primaryColour)
 	preDot, _ := preChunk.FyCBounds(fixed.Point26_6{})
 

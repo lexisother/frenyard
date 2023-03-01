@@ -2,12 +2,13 @@ package framework
 
 import (
 	"fmt"
+	"golang.org/x/image/math/fixed"
+	"strings"
 
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/integration"
 	"github.com/veandco/go-sdl2/sdl"
 	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 )
 
 // UITextbox is a textbox.
@@ -20,6 +21,8 @@ type UITextbox struct {
 	OnStall func()
 	// Called on enter
 	OnConfirm func()
+
+	AdditionalCaretPosY int32
 
 	_open         bool
 	_caretBlinker float64
@@ -141,13 +144,17 @@ func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 	tb._translation = target.Translation()
 	tb.UILayoutProxy.FyEDraw(target, under)
 
+	// TODO: For the love of god improve this
+	currentLineSlice := strings.Split(tb._textPre, "\n")
+	currentLine := currentLineSlice[len(currentLineSlice)-1]
+
 	// all between here and the end of the func is caret drawing code
-	preChunk := integration.NewColouredTextTypeChunk(tb._textPre, tb._face, tb._primaryColour)
+	preChunk := integration.NewColouredTextTypeChunk(currentLine, tb._face, tb._primaryColour)
 	preDot, _ := preChunk.FyCBounds(fixed.Point26_6{})
 
 	caretPos := frenyard.Vec2i{
 		X: int32(preDot.X.Ceil()),
-		Y: int32(preDot.Y.Ceil()) + 2, // lil visual oset
+		Y: int32(preDot.Y.Ceil()) + 2 + tb.AdditionalCaretPosY, // lil visual offset
 	}
 	caretSize := frenyard.Vec2i{
 		X: 1,

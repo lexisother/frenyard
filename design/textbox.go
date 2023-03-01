@@ -34,6 +34,7 @@ func mkTxtBox(hint string, str *string, text []string, newline bool) framework.U
 		if confirm && newline {
 			// handle multiline textboxes
 			fwTextbox.FyTInput("\n")
+			fwTextbox.AdditionalCaretPosY += 15
 		}
 
 		// The reason why we wait for stall is because this reduces the lag.
@@ -63,7 +64,7 @@ func NewUITextboxPtr(hint string, str *string, init ...string) framework.UILayou
 	return mkTxtBox(hint, str, init, false)
 }
 
-// like NewUITextboxPtr except multiline
+// NewUITextareaPtr is NewUITextboxPtr, but with multiline support
 func NewUITextareaPtr(hint string, str *string, init ...string) framework.UILayoutElement {
 	return mkTxtBox(hint, str, init, true)
 }

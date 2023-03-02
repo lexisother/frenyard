@@ -34,6 +34,8 @@ func main() {
 		TeleportSettings: framework.SlideTransition{},
 	})
 
+	thought := ""
+
 	// Start an instant transition to our main screen.
 	app.Teleport(
 		// A 'document', with a title header and body.
@@ -45,6 +47,9 @@ func main() {
 			framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 				DirVertical: true,
 				Slots: []framework.FlexboxSlot{
+					{
+						Element: design.NewUITextareaPtr("Think of something...", &thought),
+					},
 					{
 						Element: framework.NewUILabelPtr(integration.NewTextTypeChunk("Hello World!", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{}),
 					},

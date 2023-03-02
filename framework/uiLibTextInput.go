@@ -2,8 +2,9 @@ package framework
 
 import (
 	"fmt"
-	"golang.org/x/image/math/fixed"
 	"strings"
+
+	"golang.org/x/image/math/fixed"
 
 	"github.com/uwu/frenyard"
 	"github.com/uwu/frenyard/integration"
@@ -21,8 +22,6 @@ type UITextbox struct {
 	OnStall func()
 	// Called on enter
 	OnConfirm func()
-
-	AdditionalCaretPosY int32
 
 	_open         bool
 	_caretBlinker float64
@@ -106,8 +105,27 @@ func (tb *UITextbox) rebuild() {
 
 	// see comment in NewUITextboxPtr - empty textboxes misbehave
 	safeTextPre := tb._textPre
+	safeTextPost := tb._textPost
 	if safeTextPre == "" && tb._textPost == "" {
 		safeTextPre = " "
+	}
+
+	// this is messy, but it works and I'd rather not spend time on it
+	// feel free to simplify it if you can
+	if len(safeTextPre) == 0 && len(safeTextPost) > 0 && safeTextPost[0] == '\n' {
+		safeTextPre = " "
+	}
+
+	if len(safeTextPre) != 0 && safeTextPre[0] == '\n' {
+		safeTextPre = " \n" + safeTextPre[1:]
+	}
+
+	if (len(safeTextPre) != 0 && safeTextPre[len(safeTextPre)-1] == '\n') && (len(safeTextPost) == 0 || safeTextPost[0] == '\n') {
+		safeTextPost = " " + safeTextPost
+	}
+
+	if len(safeTextPost) != 0 && safeTextPost[len(safeTextPost)-1] == '\n' {
+		safeTextPost = safeTextPost + " "
 	}
 
 	if !tb._open {
@@ -117,13 +135,13 @@ func (tb *UITextbox) rebuild() {
 			}))
 		} else {
 			tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
-				integration.NewColouredTextTypeChunk(safeTextPre+tb._textPost, tb._face, tb._primaryColour),
+				integration.NewColouredTextTypeChunk(safeTextPre+safeTextPost, tb._face, tb._primaryColour),
 			}))
 		}
 	} else if !tb._suggesting {
 		tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
 			integration.NewColouredTextTypeChunk(safeTextPre, tb._face, tb._primaryColour),
-			integration.NewColouredTextTypeChunk(tb._textPost, tb._face, tb._primaryColour),
+			integration.NewColouredTextTypeChunk(safeTextPost, tb._face, tb._primaryColour),
 		}))
 	} else {
 		tb._label.SetText(integration.NewCompoundTypeChunk([]integration.TypeChunk{
@@ -131,7 +149,7 @@ func (tb *UITextbox) rebuild() {
 			integration.NewColouredTextTypeChunk(tb._textSuggestion1, tb._face, tb._suggestionColour),
 			integration.NewUnderlineTypeChunk(integration.NewColouredTextTypeChunk(tb._textSuggestion2, tb._face, tb._suggestionColour), tb._suggestionColour),
 			integration.NewColouredTextTypeChunk(tb._textSuggestion3, tb._face, tb._suggestionColour),
-			integration.NewColouredTextTypeChunk(tb._textPost, tb._face, tb._primaryColour),
+			integration.NewColouredTextTypeChunk(safeTextPost, tb._face, tb._primaryColour),
 		}))
 	}
 	if tb.OnRebuild != nil {
@@ -146,7 +164,8 @@ func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 
 	// TODO: For the love of god improve this
 	currentLineSlice := strings.Split(tb._textPre, "\n")
-	currentLine := currentLineSlice[len(currentLineSlice)-1]
+	currentLineNum := len(currentLineSlice) - 1
+	currentLine := currentLineSlice[currentLineNum]
 
 	// all between here and the end of the func is caret drawing code
 	preChunk := integration.NewColouredTextTypeChunk(currentLine, tb._face, tb._primaryColour)
@@ -154,7 +173,7 @@ func (tb *UITextbox) FyEDraw(target frenyard.Renderer, under bool) {
 
 	caretPos := frenyard.Vec2i{
 		X: int32(preDot.X.Ceil()),
-		Y: int32(preDot.Y.Ceil()) + 2 + tb.AdditionalCaretPosY, // lil visual offset
+		Y: int32(preDot.Y.Ceil()+preChunk.FyCHeight()*currentLineNum) + 2, // lil visual offset
 	}
 	caretSize := frenyard.Vec2i{
 		X: 1,

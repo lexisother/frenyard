@@ -34,7 +34,6 @@ func mkTxtBox(hint string, str *string, text []string, newline bool) framework.U
 		if confirm && newline {
 			// handle multiline textboxes
 			fwTextbox.FyTInput("\n")
-			fwTextbox.AdditionalCaretPosY += 15
 		}
 
 		// The reason why we wait for stall is because this reduces the lag.

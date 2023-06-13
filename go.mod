@@ -1,4 +1,4 @@
-module github.com/uwu/frenyard
+module github.com/lexisother/frenyard
 
 go 1.17
 

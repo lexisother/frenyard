@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"github.com/uwu/frenyard"
+	"github.com/lexisother/frenyard"
 )
 
 /*

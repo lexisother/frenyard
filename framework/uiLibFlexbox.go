@@ -2,7 +2,7 @@ package framework
 
 import (
 	"fmt"
-	"github.com/uwu/frenyard"
+	"github.com/lexisother/frenyard"
 	"sort"
 )
 

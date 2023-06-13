@@ -1,14 +1,10 @@
 package framework
 
 import (
-	"fmt"
 	"strings"
-
 	"golang.org/x/image/math/fixed"
-
-	"github.com/uwu/frenyard"
-	"github.com/uwu/frenyard/integration"
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/lexisother/frenyard"
+	"github.com/lexisother/frenyard/integration"
 	"golang.org/x/image/font"
 )
 

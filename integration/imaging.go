@@ -1,7 +1,7 @@
 package integration
 
 import (
-	"github.com/uwu/frenyard"
+	"github.com/lexisother/frenyard"
 	"image"
 	"image/png"
 	"strings"

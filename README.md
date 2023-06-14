@@ -12,7 +12,7 @@ This assumes you already have a working Go environment, if not please see
 `go get` _will always pull the latest files from the master branch._
 
 ```sh
-go get github.com/uwu/frenyard
+go get github.com/lexisother/frenyard
 ```
 
 ### Usage
@@ -20,7 +20,7 @@ go get github.com/uwu/frenyard
 Import the package into your project.
 
 ```go
-import "github.com/uwu/frenyard"
+import "github.com/lexisother/frenyard"
 ```
 
 See Documentation and Examples below for more detailed information.
@@ -33,7 +33,7 @@ Because of that it may be difficult to get into using the library.
 The code is fairly well documented at this point and is currently
 the only documentation available. Go reference (below) presents that information in a nice format.
 
-- [![Go Reference](https://pkg.go.dev/badge/github.com/uwu/frenyard.svg)](https://pkg.go.dev/github.com/uwu/frenyard)
+- [![Go Reference](https://pkg.go.dev/badge/github.com/lexisother/frenyard.svg)](https://pkg.go.dev/github.com/lexisother/frenyard)
 - Hand crafted documentation coming eventually.
 
 ## Examples
@@ -41,8 +41,9 @@ the only documentation available. Go reference (below) presents that information
 Below is a list of examples and other projects using Frenyard. Please submit
 an issue if you would like your project added or removed from this list.
 
-- [Frenyard Examples](https://github.com/uwu/frenyard/tree/master/examples) - A collection of example programs written using Frenyard
+- [Frenyard Examples](https://github.com/lexisother/frenyard/tree/master/examples) - A collection of example programs written using Frenyard
 - [Cumcord Installer](https://github.com/Cumcord/Impregnate) - Installer for Cumcord, a discontinued and no-longer-functioning modification for Discord.
+- [Replugged Installer](https://github.com/replugged-org/installer) - Installer for Replugged, a functioning modification for Discord.
 - [GitFren](https://github.com/lexisother/GitFren) - A program that was supposed to be a local frontend for Gitea.
 - [CCUpdaterUI](https://github.com/dmitmel/CCUpdaterUI) - A mod manager and modloader installer for the video game CrossCode.
 

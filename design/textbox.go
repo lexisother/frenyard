@@ -1,8 +1,8 @@
 package design
 
 import (
-	"github.com/uwu/frenyard"
-	"github.com/uwu/frenyard/framework"
+	"github.com/lexisother/frenyard"
+	"github.com/lexisother/frenyard/framework"
 )
 
 func mkTxtBox(hint string, str *string, text []string, newline bool) framework.UILayoutElement {

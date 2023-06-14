@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/uwu/frenyard"
-	"github.com/uwu/frenyard/design"
-	"github.com/uwu/frenyard/framework"
-	"github.com/uwu/frenyard/integration"
+	"github.com/lexisother/frenyard"
+	"github.com/lexisother/frenyard/design"
+	"github.com/lexisother/frenyard/framework"
+	"github.com/lexisother/frenyard/integration"
 )
 
 func main() {

@@ -2,12 +2,12 @@ package framework
 
 import (
 	"fmt"
-	"strings"
-	"golang.org/x/image/math/fixed"
 	"github.com/lexisother/frenyard"
 	"github.com/lexisother/frenyard/integration"
-	"golang.org/x/image/font"
 	"github.com/veandco/go-sdl2/sdl"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
+	"strings"
 )
 
 // UITextbox is a textbox.

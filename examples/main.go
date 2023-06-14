@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/lexisother/frenyard"
 	"github.com/lexisother/frenyard/design"
+	"github.com/lexisother/frenyard/examples/src"
 	"github.com/lexisother/frenyard/framework"
-	"github.com/lexisother/frenyard/integration"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	slideContainer.FyEResize(design.SizeWindowInit)
 
 	// Initialize our window and bind it to our container element
-	wnd, err := framework.CreateBoundWindow("Frenyard Example", true, design.ThemeBackground, slideContainer)
+	wnd, err := framework.CreateBoundWindow("Frenyard UI Playground", true, design.ThemeBackground, slideContainer)
 	if err != nil {
 		panic(err)
 	}
@@ -27,44 +27,19 @@ func main() {
 	wnd.SetSize(design.SizeWindow)
 
 	// Initialize our app struct, referencable from anywhere.
-	app := (&UpApplication{
+	app := &src.UpApplication{
 		MainContainer:    slideContainer,
 		Window:           wnd,
 		UpQueued:         make(chan func(), 16),
 		TeleportSettings: framework.SlideTransition{},
-	})
+	}
 
-	thought := ""
-
-	// Start an instant transition to our main screen.
-	app.Teleport(
-		// A 'document', with a title header and body.
-		design.LayoutDocument(
-			design.Header{
-				Title: "Example App",
-			},
-			// Main flexbox container, contains all elements.
-			framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
-				DirVertical: true,
-				Slots: []framework.FlexboxSlot{
-					{
-						Element: design.NewUITextareaPtr("Think of something...", &thought),
-					},
-					{
-						Element: framework.NewUILabelPtr(integration.NewTextTypeChunk("Hello World!", design.GlobalFont), design.ThemeText, 0, frenyard.Alignment2i{}),
-					},
-				},
-			}),
-			// Sets the flexbox container to be scrollable.
-			true,
-		),
-	)
+	app.ShowPrimaryView()
 
 	// Start the backend. Stops when ExitFlag is set to true.
 	frenyard.GlobalBackend.Run(func(frameTime float64) {
 		select {
 		case fn := <-app.UpQueued:
-
 			fn()
 		default:
 		}

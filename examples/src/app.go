@@ -29,14 +29,14 @@ func (app *UpApplication) GSRightwards() {
 	app.TeleportSettings.Length = upTeleportLen
 }
 
-// GSLeftwards sets the teleportation affinity to UP.
+// GSUpwards sets the teleportation affinity to UP.
 func (app *UpApplication) GSUpwards() {
 	app.TeleportSettings.Reverse = true
 	app.TeleportSettings.Vertical = true
 	app.TeleportSettings.Length = upTeleportLen
 }
 
-// GSRightwards sets the teleportation affinity to DOWN.
+// GSDownwards sets the teleportation affinity to DOWN.
 func (app *UpApplication) GSDownwards() {
 	app.TeleportSettings.Reverse = false
 	app.TeleportSettings.Vertical = true

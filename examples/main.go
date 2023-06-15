@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/lexisother/frenyard"
 	"github.com/lexisother/frenyard/design"
+	"github.com/lexisother/frenyard/examples/screens"
 	"github.com/lexisother/frenyard/examples/src"
 	"github.com/lexisother/frenyard/framework"
 )
@@ -33,6 +34,9 @@ func main() {
 		UpQueued:         make(chan func(), 16),
 		TeleportSettings: framework.SlideTransition{},
 	}
+
+	screens.SetupOne()
+	screens.SetupTwo()
 
 	app.ShowPrimaryView()
 

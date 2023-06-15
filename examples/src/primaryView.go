@@ -16,20 +16,18 @@ func If[T any](cond bool, vtrue, vfalse T) T {
 }
 
 func ChangeScreen(holder *framework.UIFlexboxContainer, screen []framework.FlexboxSlot) {
-	holder.ThisUIPanelDetails.SetContent([]framework.PanelFixedElement{
-		{
-			Pos:     frenyard.Vec2i{},
-			Visible: true,
-			Locked:  false,
-			Element: framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
-				DirVertical: false,
-				Slots:       screen,
-			}),
-		},
+	// Postmortem: I wasted thirty to fourty minutes of my life trying to figure
+	// out why `holder.ThisUIPanelDetails.SetContent` wasn't working. For some
+	// reason I didn't realise, despite having looked at the function a million
+	// times during debugging, that `UIFlexboxContainer.SetContent` is a
+	// function.
+	holder.SetContent(framework.FlexboxContainer{
+		DirVertical: true,
+		Slots:       screen,
 	})
 }
 
-func (app *UpApplication) ShowPrimaryView(rightSide ...framework.FlexboxSlot) {
+func (app *UpApplication) ShowPrimaryView() {
 	screenHolder := framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
 		DirVertical: true,
 		Slots: []framework.FlexboxSlot{

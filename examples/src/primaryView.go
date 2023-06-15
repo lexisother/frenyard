@@ -53,11 +53,11 @@ func (app *UpApplication) ShowPrimaryView() {
 					Slots: []framework.FlexboxSlot{
 						{
 							Element: design.ListItem(design.ListItemDetails{
-								Text:    "helo screen one",
-								Subtext: "show me the first screen!!",
+								Text:    "Buttons",
+								Subtext: "A simple display of button types",
 								Click: func() {
-									screens.SetupOne()
-									ChangeScreen(screenHolder, screens.ScreenOne)
+									screens.SetupButtons()
+									ChangeScreen(screenHolder, screens.ScreenButtons)
 								},
 							}),
 						},

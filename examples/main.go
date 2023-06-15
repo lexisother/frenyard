@@ -35,7 +35,7 @@ func main() {
 		TeleportSettings: framework.SlideTransition{},
 	}
 
-	screens.SetupOne()
+	screens.SetupButtons()
 	screens.SetupTwo()
 
 	app.ShowPrimaryView()

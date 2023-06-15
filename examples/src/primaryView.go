@@ -15,21 +15,35 @@ func If[T any](cond bool, vtrue, vfalse T) T {
 	return vfalse
 }
 
+func ChangeScreen(holder *framework.UIFlexboxContainer, screen []framework.FlexboxSlot) {
+	holder.ThisUIPanelDetails.SetContent([]framework.PanelFixedElement{
+		{
+			Pos:     frenyard.Vec2i{},
+			Visible: true,
+			Locked:  false,
+			Element: framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
+				DirVertical: false,
+				Slots:       screen,
+			}),
+		},
+	})
+}
+
 func (app *UpApplication) ShowPrimaryView(rightSide ...framework.FlexboxSlot) {
-	// FOR FUTURE REFERENCE! I might be able to achieve some sort of rerendering mechanism by separating the UI
-	// components that matter into their own variables... Unsure if that works though.
-	// Rambles about it: <https://discord.com/channels/382339402338402315/382339402338402317/1118873796582060162>
-	//e := framework.NewUIOverlayContainerPtr(design.ScrollboxExterior, []framework.UILayoutElement{})
-	//e.ThisUIPanelDetails.SetContent([]framework.PanelFixedElement{
-	//	{
-	//		Pos:     frenyard.Vec2i{},
-	//		Visible: false,
-	//		Locked:  false,
-	//		Element: nil,
-	//	},
-	//})
-	//framework.InitUILayoutElementComponent(e)
-	//e.ThisUILayoutElementComponentDetails.ContentChanged()
+	screenHolder := framework.NewUIFlexboxContainerPtr(framework.FlexboxContainer{
+		DirVertical: true,
+		Slots: []framework.FlexboxSlot{
+			{
+				Grow: 1,
+			},
+			{
+				Element: framework.NewUILabelPtr(integration.NewTextTypeChunk("No UI component selected!", design.GlobalFont), 0xFFFFFFFF, 0, frenyard.Alignment2i{}),
+			},
+			{
+				Grow: 1,
+			},
+		},
+	})
 
 	slots := []framework.FlexboxSlot{
 		{
@@ -44,9 +58,8 @@ func (app *UpApplication) ShowPrimaryView(rightSide ...framework.FlexboxSlot) {
 								Text:    "helo screen one",
 								Subtext: "show me the first screen!!",
 								Click: func() {
-									app.GSInstant()
 									screens.SetupOne()
-									app.ShowPrimaryView(screens.ScreenOne...)
+									ChangeScreen(screenHolder, screens.ScreenOne)
 								},
 							}),
 						},
@@ -55,9 +68,8 @@ func (app *UpApplication) ShowPrimaryView(rightSide ...framework.FlexboxSlot) {
 								Text:    "haiih screen twoo",
 								Subtext: "shoowwww!!",
 								Click: func() {
-									app.GSInstant()
 									screens.SetupTwo()
-									app.ShowPrimaryView(screens.ScreenTwo...)
+									ChangeScreen(screenHolder, screens.ScreenTwo)
 								},
 							}),
 						},
@@ -66,21 +78,18 @@ func (app *UpApplication) ShowPrimaryView(rightSide ...framework.FlexboxSlot) {
 			}),
 		},
 	}
-	if rightSide == nil {
-		slots = append(slots, []framework.FlexboxSlot{
-			{
-				Grow: 1,
-			},
-			{
-				Element: framework.NewUILabelPtr(integration.NewTextTypeChunk("No UI component selected!", design.GlobalFont), 0xFFFFFFFF, 0, frenyard.Alignment2i{}),
-			},
-			{
-				Grow: 1,
-			},
-		}...)
-	} else {
-		slots = append(slots, rightSide...)
-	}
+
+	slots = append(slots, []framework.FlexboxSlot{
+		{
+			Grow: 1,
+		},
+		{
+			Element: screenHolder,
+		},
+		{
+			Grow: 1,
+		},
+	}...)
 
 	app.Teleport(design.LayoutDocument(design.Header{
 		Title: "UI Playground",

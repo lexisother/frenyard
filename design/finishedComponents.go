@@ -234,7 +234,7 @@ type ListItemDetails struct {
 }
 
 // ListItem sets up a list item.
-// https://material.io/components/lists/#specs
+// https://m2.material.io/components/lists#specs
 func ListItem(details ListItemDetails) framework.UILayoutElement {
 	var labelVertical framework.UILayoutElement
 	noIconSizeDP := int32(48)

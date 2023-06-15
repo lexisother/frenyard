@@ -26,7 +26,7 @@ import (
 // ScrollbarValue represents the value a scrollbar alters.
 type ScrollbarValue interface {
 	FySValue() float64
-	// Sets the value. It is the responsibility of the target to clamp these values; this will show attempts at overscrolling for potential feedback.
+	// FySSetValue sets the value. It is the responsibility of the target to clamp these values; this will show attempts at overscrolling for potential feedback.
 	FySSetValue(v float64)
 }
 

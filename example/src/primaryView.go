@@ -3,7 +3,7 @@ package src
 import (
 	"github.com/lexisother/frenyard"
 	"github.com/lexisother/frenyard/design"
-	"github.com/lexisother/frenyard/examples/screens"
+	"github.com/lexisother/frenyard/example/screens"
 	"github.com/lexisother/frenyard/framework"
 	"github.com/lexisother/frenyard/integration"
 )

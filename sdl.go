@@ -3,6 +3,7 @@ package frenyard
 import (
 	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
+	"os"
 	"runtime"
 	"time"
 )
@@ -64,6 +65,16 @@ func (w *fySDL2Window) GetLocalDPI() float64 {
 	if err != nil {
 		return errorDPI
 	}
+
+	experimentalFix := os.Getenv("FRENYARD_EXPR_MACOS_FIX")
+	if experimentalFix != "" {
+		bufferWidth, _ := w.window.GLGetDrawableSize()
+		logicalWidth, _ := w.window.GetSize()
+		ratio := float64(logicalWidth) / float64(bufferWidth)
+
+		return float64(ddpi) * ratio
+	}
+
 	return float64(ddpi)
 }
 

@@ -36,6 +36,19 @@ the only documentation available. Go reference (below) presents that information
 - [![Go Reference](https://pkg.go.dev/badge/github.com/lexisother/frenyard.svg)](https://pkg.go.dev/github.com/lexisother/frenyard)
 - Hand crafted documentation coming eventually.
 
+## Environment variables
+
+Frenyard looks for certain environment variables as input to some internal functions.
+
+### `FRENYARD_SCALE`
+
+A float that directly decides the scale of the window, no calculation is done.
+
+### `FRENYARD_EXPR_MACOS_FIX`
+
+Enables some experimental fixes regarding scaling bugs on macOS. Can be used in tandem with `FRENYARD_SCALE` to debug
+said scaling issues.
+
 ## Examples
 
 Below is a list of examples and other projects using Frenyard. Please submit

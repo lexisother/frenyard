@@ -1,6 +1,9 @@
 package design
 
-import "github.com/lexisother/frenyard"
+import (
+	"github.com/lexisother/frenyard"
+	"os"
+)
 
 // SizeMarginAroundEverything is a useful margin around the body, etc.
 var SizeMarginAroundEverything int32
@@ -22,7 +25,12 @@ func sizeScale(size int32) int32 {
 func deSetupSizes() {
 	SizeMarginAroundEverything = sizeScale(16)
 	SizeTextNudge = sizeScale(4)
-	SizeWindow = frenyard.ScaleVec2i(DesignScale, SizeWindowInit)
+	experimentalFix := os.Getenv("FRENYARD_EXPR_MACOS_FIX")
+	if experimentalFix != "" {
+		SizeWindow = SizeWindowInit
+	} else {
+		SizeWindow = frenyard.ScaleVec2i(DesignScale, SizeWindowInit)
+	}
 }
 
 // MarginBody is the amount to push the page body by.
